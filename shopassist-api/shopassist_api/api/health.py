@@ -3,6 +3,7 @@ Health check endpoint.
 """
 from fastapi import APIRouter
 from datetime import datetime
+from shopassist_api.core.config import settings
 
 router = APIRouter()
 
@@ -13,5 +14,7 @@ async def health_check():
     return {
         "status": "healthy",
         "timestamp": datetime.utcnow().isoformat(),
-        "service": "shop-assistant-api"
+        "service": settings.api_title,
+        "version": settings.api_version,
+        "database": f"connected to {settings.database_url}" if settings.database_url else "not configured"
     }

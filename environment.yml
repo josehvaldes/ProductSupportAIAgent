@@ -12,6 +12,7 @@ dependencies:
   - tiktoken 
   - langchain
   - openai
+  - pandas
   # Pip-only dependencies
   - pip:
     # FastAPI and web server
@@ -25,6 +26,7 @@ dependencies:
     - azure-search-documents>=11.4.0
     - azure-data-tables>=12.4.0
     - azure-storage-blob>=12.19.0
+    - azure-cosmos>=4.3.0
     # Text processing
     - semantic-text-splitter>=0.8.0
     - tokenizers>=0.15.0

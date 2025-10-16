@@ -41,7 +41,6 @@
 **Next Steps:**
 - [ ] Generate product dataset (200 products)
 - [ ] Write knowledge base documents
-- [ ] Set up Azure Key Vault for secrets
 
 **Time Invested:** 4 hours
 
@@ -51,29 +50,64 @@
 **Today's Focus:** Product dataset creation
 
 **Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+Decomposed Tasks:
+1. [X] Search and download product dataset from Kaggle (30 min)
+   - Target: Electronics/e-commerce dataset with 500+ products
+   - Must have: name, description, price, category, specs
+
+2. [X] Clean and filter dataset to 200 products (1 hour)
+   - Select: 80 electronics, 60 home & garden, 60 fashion
+   - Validate: all required fields present
+   - Standardize: price format, category names
+
+3. [X] Create data transformation script (1.5 hours)
+   - Convert to Cosmos DB document format
+   - Generate product IDs
+   - Add token counting function
+   - Implement smart chunking (>512 tokens)
+   - Track chunking statistics
+   - Save as JSON file with chunk metadata
+
+4. [X] Upload to Cosmos DB products container (1 hour)
+   - Write upload script (Python + azure-cosmos SDK)
+   - Test with 10 products first
+   - Bulk upload all 200 products
+   - Verify in Azure Portal
+
+5. [X] Create sample product queries for testing (30 min)
+   - Query by category
+   - Query by price range
+   - Get product by ID
+   - Document queries for later use
+
+*optional: posponed
+6. [ ] Draft Return Policy document (500 words)
+7. [ ] Draft FAQ document (10 Q&As)
 
 **Technical Decisions:**
+- Choose dataset domain: electronics
+- Define Data models for CosmosDB, Milvus, and Azure Search AI 
+- Choose strategies to chunk large vector text
+- User RBAC to access cosmosDB
 - 
 
 **Challenges & Solutions:**
-- 
+- dataset had more information than required. Parsing and transformation script was needed
 
 **Learnings:**
-- 
+- control-plane roles have to be added by CLI, not in Portal
 
 **Next Steps:**
 - [ ] 
 - [ ] 
 
-**Time Invested:** ___ hours
+**Time Invested:** 4 hours
 
 ---
 
 ### Day 3 - Wednesday, Oct 16, 2025
 **Today's Focus:** Knowledge base documents
+Write knowledge base documents** (this is a full day task. Decompose)
 
 **Completed:**
 - [ ] 
