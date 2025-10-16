@@ -80,16 +80,11 @@ Decomposed Tasks:
    - Get product by ID
    - Document queries for later use
 
-*optional: posponed
-6. [ ] Draft Return Policy document (500 words)
-7. [ ] Draft FAQ document (10 Q&As)
-
 **Technical Decisions:**
 - Choose dataset domain: electronics
 - Define Data models for CosmosDB, Milvus, and Azure Search AI 
 - Choose strategies to chunk large vector text
 - User RBAC to access cosmosDB
-- 
 
 **Challenges & Solutions:**
 - dataset had more information than required. Parsing and transformation script was needed
@@ -98,25 +93,59 @@ Decomposed Tasks:
 - control-plane roles have to be added by CLI, not in Portal
 
 **Next Steps:**
-- [ ] 
-- [ ] 
+- [ Write Knowledge base documents ] 
 
 **Time Invested:** 4 hours
 
 ---
 
 ### Day 3 - Wednesday, Oct 16, 2025
-**Today's Focus:** Knowledge base documents
-Write knowledge base documents** (this is a full day task. Decompose)
+**Today's Focus:** Knowledge base documents creation
 
 **Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+1. [X] Generate knowledge base documents with GPT-4 (1 hour)
+   - Return policy, shipping, warranty, FAQ
+
+2. [X] Review and customize generated content (1.5 hours)
+   - Make policies consistent
+   - Add specific details (email, phone)
+   - Ensure realistic for electronics
+
+3. [X] Format and save documents (30 min)
+   - Create markdown files
+   - Add document metadata headers
+   - Save to knowledge_base/ folder
+
+4. [X] Run through semantic splitter (30 min)
+   - Chunk each document
+   - Verify chunk quality
+   - Save chunk statistics
+
+5. [X] Create document mapping file (30 min)
+   - Map doc_id to document type
+   - Track chunk counts per document
+   - Prepare for embedding in Week 2
+
+6. [] Move python scripts logic to Azure Data Factory 
+   - Analyze need to use Adf pipelines
+   - If needed:
+     - Create ADF repository
+     - Upload products data to blob containers
+     - Review activities needed in the pipelines
+     - Implement pipeline if needed
 
 **Technical Decisions:**
-- 
+- Generated base documents with GPT-4, then customized for electronics domain
+- 5 documents created: Return Policy, Shipping, Warranty, Size Guide, FAQ
+- Total words: ~2,500
+- Semantic chunking: 12.5% overlap, avg 400 tokens/chunk
+- Total chunks: ~15-20 for knowledge base
 
+**Metrics:**
+- Knowledge base documents: 5
+- Total Q&A pairs in FAQ: 30
+- Total knowledge base chunks: X
+- Average chunk size: X tokens
 **Challenges & Solutions:**
 - 
 
