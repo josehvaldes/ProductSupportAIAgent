@@ -8,6 +8,15 @@ export interface ApiResponse<T = any> {
   status: number;
 }
 
+// Health check response type
+export interface HealthCheckResponse {
+  status: string;
+  timestamp: string;
+  service: string;
+  version: string;
+  database: string;
+}
+
 // Error handling
 export class ApiError extends Error {
   status: number;
@@ -63,6 +72,7 @@ async function apiRequest<T>(
 
 // Specific API functions for your petshop
 export const petshopApi = {
+  
   // Send a message to your agent/chatbot
   sendMessage: async (message: string): Promise<{ response: string }> => {
     return apiRequest('/chat', {
@@ -71,12 +81,16 @@ export const petshopApi = {
     });
   },
 
-  // Example: Get pet information
-  getPets: async (): Promise<any[]> => {
-    return apiRequest('/pets');
+  // Get Health Check
+  healthCheck: async (): Promise<HealthCheckResponse> => {
+    return apiRequest('/health');
   },
 
-  // Example: Add more API endpoints as needed
+  // Example: Get pet information
+  // getPets: async (): Promise<any[]> => {
+  //   return apiRequest('/pets');
+  // },
+
   // getPetById: async (id: string) => {
   //   return apiRequest(`/pets/${id}`);
   // },

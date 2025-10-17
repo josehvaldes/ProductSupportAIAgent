@@ -31,6 +31,14 @@ def transform_document_body(data:dict) -> dict:
 def upload_file_to_cosmosdb(file_path:str):
     """Upload parsed JSON data to Azure CosmosDB."""
     print(f"Uploading data from {file_path} to CosmosDB...")
+
+    if file_path is None or file_path.strip() == "":
+        print("Invalid file path provided.")
+        return
+    if os.path.exists(file_path) == False:
+        print(f"File not found: {file_path}")
+        return
+
     # Initialize the Cosmos client
     client = CosmosClient(COSMOSDB_ENDPOINT, DefaultAzureCredential())
 
@@ -48,7 +56,7 @@ def upload_file_to_cosmosdb(file_path:str):
 
     print(f"Uploading {len(data)} documents to CosmosDB container '{container_name}' in database '{database_name}'.")
     # Upload each document to the container
-    for doc in data: #data[0:1]:# Limit to first item for testing
+    for doc in data[0:2]:# Limit to 2 item for testing
         try:
             container.create_item(body=transform_document_body(doc))
             print(f"Uploaded document ID: {doc.get('id')}, Category: {doc.get('category')}, Title: {doc.get('title')[0:20]}...")
@@ -60,12 +68,7 @@ def upload_file_to_cosmosdb(file_path:str):
     
 
 if __name__ == "__main__":
-    file_path = "amazon_50.json"
+    file_path = "./product_data/amazon_50.json"
     upload_file_to_cosmosdb(file_path)
-
-    # with open(file_path, 'r', encoding='utf-8') as f:
-    #     data = json.load(f)
-    #     body = get_document_body(data[0])
-    #     print(json.dumps(body, indent=4))
 
     print("Done.")

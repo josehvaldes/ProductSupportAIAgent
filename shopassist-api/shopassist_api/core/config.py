@@ -18,10 +18,14 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-4o-mini"
     
     # Azure Configuration
-    azure_openai_api_key: Optional[str] = None
     azure_openai_endpoint: Optional[str] = None
     azure_openai_api_version: str = "2024-02-15-preview"
+
+    azure_openai_default_model: Optional[str] = None
+    azure_openai_model_deployment: Optional[str] = None
     
+
+
     # Azure AI Search
     azure_search_endpoint: Optional[str] = None
     azure_search_key: Optional[str] = None
@@ -31,6 +35,13 @@ class Settings(BaseSettings):
     azure_storage_connection_string: Optional[str] = None
     azure_storage_container: str = "product-data"
     
+    #Azure cosmosDB
+    cosmosdb_endpoint: Optional[str] = None
+    cosmosdb_database: str = "<shopassistdatabase>"
+    cosmosdb_product_container: str = "products"
+    cosmosdb_chat_container: str = "chats"
+
+
     # Database Configuration
     database_url: Optional[str] = None
     

@@ -76,6 +76,17 @@ button:focus-visible {
   min-width: 300px;
 }
 
+.test-connection-message {
+  margin-top: 8px;
+  border-top: 10px;
+  font-size: 0.8em;
+}
+
+.test-connection-button {
+  font-size: 0.7em;
+  margin-top: 8px;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

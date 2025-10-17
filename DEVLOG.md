@@ -126,7 +126,7 @@ Decomposed Tasks:
    - Track chunk counts per document
    - Prepare for embedding in Week 2
 
-6. [] Move python scripts logic to Azure Data Factory 
+6. [X] Move python scripts logic to Azure Data Factory 
    - Analyze need to use Adf pipelines
    - If needed:
      - Create ADF repository
@@ -146,11 +146,16 @@ Decomposed Tasks:
 - Total Q&A pairs in FAQ: 30
 - Total knowledge base chunks: X
 - Average chunk size: X tokens
+
 **Challenges & Solutions:**
-- 
+- Reduce costs for ADF execution.
+- Split large Data flow activities into smaller steps to reduce the workload
+- stop debug mode and shrink the cluster size.
+
 
 **Learnings:**
-- 
+- learn techniques to reduce ADF costs
+- ADF benefits as orchestraitor
 
 **Next Steps:**
 - [ ] 
@@ -164,12 +169,55 @@ Decomposed Tasks:
 **Today's Focus:** FastAPI backend structure
 
 **Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+1. [X] Set up FastAPI project structure (1 hour)
+   - Create folder structure: app/, services/, models/, api/routes/
+   - Initialize main.py with FastAPI app
+   - Check CORS middleware configuration
+   - Set up environment variables (.env file)
+   - update requirements.txt or pyproject.toml
+   - Test Frontend access to API
+
+2. [X] Create data models with Pydantic (1.5 hours)
+   - ProductModel (for Cosmos DB)
+   - ChunkModel (for Milvus/Azure AI)
+   - ChatRequestModel (user message input)
+   - ChatResponseModel (AI response output)
+   - SessionModel (conversation tracking)
+   
+3. [X] Implement Cosmos DB service (1.5 hours)
+   - Create cosmos_service.py
+   - Initialize Cosmos DB client
+   - Implement get_product_by_id()
+   - Implement search_products_by_category()
+   - Implement search_products_by_price_range()
+   - Test queries with sample data
+
+4. [X] Set up Azure OpenAI client (1 hour)
+   - Create openai_service.py
+   - Initialize Azure OpenAI client
+   - Test connection with simple completion
+   - Test embedding generation
+   - Document token usage
+   
+5. [ ] Create basic API endpoints (1 hour)
+   - POST /api/chat/message (placeholder)
+   - GET /api/products/search (working with Cosmos)
+   - GET /api/products/{product_id} (working with Cosmos)
+   - GET /api/health (health check)
+   - Test with Postman/Thunder Client
+
+6. [ ] Set up configuration and secrets management (30 min)
+   - Create config.py for settings
+   - Load secrets from environment variables
+   - Document required API keys
+   - Create .env.example template
+
 
 **Technical Decisions:**
-- 
+- Project structure: Clean architecture with services layer
+- Pydantic v2 for data validation
+- Async/await for all database operations
+- Environment-based configuration (dev/prod)
 
 **Challenges & Solutions:**
 - 
@@ -178,8 +226,9 @@ Decomposed Tasks:
 - 
 
 **Next Steps:**
-- [ ] 
-- [ ] 
+- [ ] Create React frontend structure (Day 5)
+- [ ] Connect frontend to backend API
+- [ ] Test end-to-end product retrieval flow
 
 **Time Invested:** ___ hours
 

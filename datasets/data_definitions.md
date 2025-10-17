@@ -1,3 +1,4 @@
+#data definitions and models
 
 ##Source
 {
@@ -116,3 +117,19 @@ schema = CollectionSchema(fields, description="Product chunks")
   ]
 }
 
+##chuncked knowledge base
+{
+  "source_file_name":"FAQ.mb"
+  "total_tokens":"600"
+  "total_vectors":"2"
+  "estimated_storage_mb": "1.5"
+  "chunks":[
+    "text 1",
+	"text 2"
+  ],
+  "metadata":{
+	"title": "",
+	"last_updated":2025-10-16,
+	"category":"policies"
+  }
+}
