@@ -5,7 +5,7 @@ from azure.search.documents import SearchClient
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from collections import defaultdict
 
-class openaiService:
+class openai_service:
     def __init__(self, settings):
         self.api_base = settings.azure_openai_endpoint 
         self.api_version = settings.azure_openai_api_version or "2024-02-01"
