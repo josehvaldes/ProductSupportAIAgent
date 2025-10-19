@@ -3,7 +3,7 @@ LLM Client for interfacing with language models (OpenAI, Azure OpenAI).
 """
 import openai
 from typing import Optional, Dict, Any
-from shopassist_api.core.config import settings
+from shopassist_api.application.settings.config import settings
 
 
 class LLMClient:

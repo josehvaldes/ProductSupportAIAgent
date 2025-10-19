@@ -3,8 +3,8 @@ Text embeddings functionality for semantic search and similarity.
 """
 import numpy as np
 from typing import List, Optional, Dict, Any
-from shopassist_api.ai.models.llm_client import LLMClient
-from shopassist_api.core.config import settings
+from shopassist_api.application.ai.models.llm_client import LLMClient
+from shopassist_api.application.settings.config import settings
 
 
 class EmbeddingService:

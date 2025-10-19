@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     
     # API Configuration
     api_title: str = "Shop Assistant API"
+    api_description: str = "AI-Powered Product Knowledge & Support Agent"
     api_version: str = "0.1.0"
     debug: bool = False
     

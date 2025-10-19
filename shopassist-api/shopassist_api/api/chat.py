@@ -4,7 +4,7 @@ Chat API endpoints for the Shop Assistant.
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
-from shopassist_api.ai.agents.shop_assistant import ShopAssistantAgent
+from shopassist_api.application.ai.agents.shop_assistant import ShopAssistantAgent
 
 router = APIRouter()
 

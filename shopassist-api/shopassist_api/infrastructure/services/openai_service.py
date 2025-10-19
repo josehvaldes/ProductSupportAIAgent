@@ -4,18 +4,24 @@ from openai import AzureOpenAI
 from azure.search.documents import SearchClient
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from collections import defaultdict
+from shopassist_api.application.settings.config import settings
 
 class openai_service:
-    def __init__(self, settings):
-        self.api_base = settings.azure_openai_endpoint 
-        self.api_version = settings.azure_openai_api_version or "2024-02-01"
-        self.default_embedding_model = settings.azure_openai_default_model or "text-embedding-3-small" #"gpt-3.5-turbo" #
-        self.deployment_name = settings.azure_openai_model_deployment # "text-embedding-3-small_POC"
-
+    def __init__(self):
+        self.api_base = None
+        self.api_version = None
+        self.default_embedding_model = None
+        self.deployment_name = None
+        self.client = None
         self._initialize_client()    
     
     def _initialize_client(self):
         """Initialize the OpenAI client based on configuration."""
+
+        self.api_base = settings.azure_openai_endpoint 
+        self.api_version = settings.azure_openai_api_version or "2024-02-01"
+        self.default_embedding_model = settings.azure_openai_default_model or "text-embedding-3-small" #"gpt-3.5-turbo" #
+        self.deployment_name = settings.azure_openai_model_deployment # "text-embedding-3-small_POC"
         
         token_provider = get_bearer_token_provider(DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
 

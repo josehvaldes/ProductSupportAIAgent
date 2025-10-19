@@ -1,7 +1,7 @@
 # API endpoint tests
 import unittest
-from shopassist_api.services.cosmos_service import cosmos_service
-from shopassist_api.models.product import Product
+from shopassist_api.infrastructure.services.cosmos_product_service import CosmosProductService
+from shopassist_api.domain.models.product import Product
 
 class TestServicesIntegration(unittest.TestCase):
     @classmethod
@@ -11,7 +11,7 @@ class TestServicesIntegration(unittest.TestCase):
 
     def setUp(self):
         # Setup code before each test
-        self.cosmos = cosmos_service()
+        self.cosmos = CosmosProductService()
 
     @unittest.skip("Skipping product retrieval test in integration tests")
     def test_get_product_by_id(self):

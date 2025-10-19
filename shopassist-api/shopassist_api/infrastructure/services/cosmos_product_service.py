@@ -1,11 +1,11 @@
 import traceback
-from azure.cosmos import CosmosClient, PartitionKey
-from azure.core.credentials import AzureKeyCredential
+from azure.cosmos import CosmosClient
 from azure.identity import DefaultAzureCredential
-from shopassist_api.core.config import settings
-from shopassist_api.models.product import Product
+from shopassist_api.application.settings.config import settings
+from shopassist_api.domain.models.product import Product
+from shopassist_api.application.interfaces.product_service_interface import IProductService
 
-class cosmos_service:
+class CosmosProductService(IProductService):
 
     def __init__(self):
         self.client = None
@@ -35,7 +35,7 @@ class cosmos_service:
             self.product_container = None
             self.chat_container = None
 
-    def get_product_by_id(self, product_id: str)-> Product:
+    async def get_product_by_id(self, product_id: str)-> Product:
         """Retrieve a product by its ID from CosmosDB."""
         if not self.client or not self.database_name:
             return None
@@ -59,7 +59,7 @@ class cosmos_service:
             traceback.print_exc()
             return None
 
-    def search_products_by_category(self, category: str)-> list[Product]:
+    async def search_products_by_category(self, category: str)-> list[Product]:
         """Search products by category from CosmosDB."""
         if not self.client or not self.database_name:
             return []
@@ -83,7 +83,7 @@ class cosmos_service:
             traceback.print_exc()
             return []
         
-    def search_products_by_price_range(self, min_price: float, max_price: float) -> list[Product]:
+    async def search_products_by_price_range(self, min_price: float, max_price: float) -> list[Product]:
         """Search products within a price range from CosmosDB."""
         if not self.client or not self.database_name:
             return []
@@ -104,7 +104,7 @@ class cosmos_service:
             traceback.print_exc()
             return []
 
-    def test_cosmosdb_connection(self):
+    async def health_check_connection(self):
         """Test connection to Azure CosmosDB."""
         if not self.client or not self.database_name:
             print("CosmosDB is not properly configured.")

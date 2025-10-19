@@ -2,7 +2,7 @@
 Product retrieval system for finding relevant products based on user queries.
 """
 from typing import List, Dict, Any, Optional
-from shopassist_api.core.config import settings
+from shopassist_api.application.settings.config import settings
 from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
 

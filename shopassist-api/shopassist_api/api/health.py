@@ -3,7 +3,7 @@ Health check endpoint.
 """
 from fastapi import APIRouter
 from datetime import datetime
-from shopassist_api.core.config import settings
+from shopassist_api.application.settings.config import settings
 
 router = APIRouter()
 
