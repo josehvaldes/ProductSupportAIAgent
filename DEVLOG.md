@@ -185,7 +185,7 @@ Decomposed Tasks:
    - SessionModel (conversation tracking)
    
 3. [X] Implement Cosmos DB service (1.5 hours)
-   - Create cosmos_service.py
+   - Create product_service.py
    - Initialize Cosmos DB client
    - Implement get_product_by_id()
    - Implement search_products_by_category()
@@ -199,19 +199,12 @@ Decomposed Tasks:
    - Test embedding generation
    - Document token usage
    
-5. [ ] Create basic API endpoints (1 hour)
+5. [X] Create basic API endpoints (1 hour)
    - POST /api/chat/message (placeholder)
    - GET /api/products/search (working with Cosmos)
    - GET /api/products/{product_id} (working with Cosmos)
    - GET /api/health (health check)
    - Test with Postman/Thunder Client
-
-6. [ ] Set up configuration and secrets management (30 min)
-   - Create config.py for settings
-   - Load secrets from environment variables
-   - Document required API keys
-   - Create .env.example template
-
 
 **Technical Decisions:**
 - Project structure: Clean architecture with services layer
@@ -220,17 +213,18 @@ Decomposed Tasks:
 - Environment-based configuration (dev/prod)
 
 **Challenges & Solutions:**
-- 
+- Adjust code to clean architecture in phyton apps
+- Evaluate Dependency injection and its implementation and compare it with traditional .Net implementations
 
 **Learnings:**
-- 
+- Review how to implemement dependency injection in Python and FastAPI
 
 **Next Steps:**
 - [ ] Create React frontend structure (Day 5)
 - [ ] Connect frontend to backend API
 - [ ] Test end-to-end product retrieval flow
 
-**Time Invested:** ___ hours
+**Time Invested:** 6 hours
 
 ---
 
