@@ -2,10 +2,10 @@ import traceback
 from azure.cosmos import CosmosClient
 from azure.identity import DefaultAzureCredential
 from shopassist_api.application.settings.config import settings
+from shopassist_api.application.interfaces.product_service_interface import ProductServiceInterface
 from shopassist_api.domain.models.product import Product
-from shopassist_api.application.interfaces.product_service_interface import IProductService
 
-class CosmosProductService(IProductService):
+class CosmosProductService(ProductServiceInterface):
 
     def __init__(self):
         self.client = None

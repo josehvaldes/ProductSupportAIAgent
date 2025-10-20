@@ -1,8 +1,8 @@
-
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import List, Optional
-from shopassist_api.infrastructure.services.cosmos_product_service import CosmosProductService
+from shopassist_api.application.interfaces.product_service_interface import ProductServiceInterface
+from shopassist_api.application.interfaces.di_container import get_product_service
 from shopassist_api.domain.models.product import Product
 
 router = APIRouter()
@@ -18,25 +18,15 @@ class ProductResponse(BaseModel):
 
 
 @router.get("/products/{product_id}", response_model=Product)
-async def get_product(product_id: str):
+async def get_product(
+    product_id: str,
+    product_service: ProductServiceInterface = Depends(get_product_service)
+):
     """
     Retrieve product details by product ID.
     """
     try:
-        # product_service = CosmosService()
-        # product = product_service.get_product_by_id(product_id)
-        product:Product = { "id": "test123",
-                            "title": "Test Product",
-                            "description": "A product for testing", 
-                            "category": "Testing", 
-                            "price": "19.99", 
-                            "brand": "TestBrand", 
-                            "rating": "4.5", 
-                            "review_count": "10", 
-                            "product_url": "http://example.com/product/test123", 
-                            "image_url": "http://example.com/product/test123/image.jpg",  
-                            "category_full": "Testing/Unit Tests", 
-                            "availability": "In Stock" }
+        product = await product_service.get_product_by_id(product_id)
         if not product:
             raise HTTPException(status_code=404, detail="Product not found")
         return product
@@ -44,19 +34,25 @@ async def get_product(product_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/products/search/category/{category}", response_model=List[Product])
-async def search_products_by_category(category: str):
+async def search_products_by_category(
+    category: str,
+    product_service: ProductServiceInterface = Depends(get_product_service)
+):
     """
     Search products by category.
     """
     try:
-        product_service = CosmosProductService()
-        products = product_service.search_products_by_category(category)
+        products = await product_service.search_products_by_category(category)
         return products
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error searching products by category: {str(e)}")
 
 @router.get("/products/search/price", response_model=List[Product])
-async def search_products_by_price_range(min_price: float, max_price: float):
+async def search_products_by_price_range(
+    min_price: float, 
+    max_price: float,
+    product_service: ProductServiceInterface = Depends(get_product_service)
+):
     """
     Search products within a price range.
     """
@@ -66,8 +62,7 @@ async def search_products_by_price_range(min_price: float, max_price: float):
         raise HTTPException(status_code=400, detail="Minimum price cannot be greater than maximum price")
     
     try:
-        product_service = CosmosProductService()
-        products = product_service.search_products_by_price_range(min_price, max_price)
+        products = await product_service.search_products_by_price_range(min_price, max_price)
         return products
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error searching products by price range: {str(e)}")
@@ -78,7 +73,8 @@ async def search_products_general(
     category: Optional[str] = None, 
     min_price: Optional[float] = None, 
     max_price: Optional[float] = None,
-    name: Optional[str] = None
+    name: Optional[str] = None,
+    product_service: ProductServiceInterface = Depends(get_product_service)
 ):
     """
     General product search with multiple optional filters.
@@ -88,15 +84,13 @@ async def search_products_general(
         raise HTTPException(status_code=400, detail="At least one search parameter must be provided")
     
     try:
-        product_service = CosmosProductService()
-        
         # For now, handle simple cases - can be extended for complex multi-filter searches
         if category and not any([min_price is not None, max_price is not None, name]):
-            products = product_service.search_products_by_category(category)
+            products = await product_service.search_products_by_category(category)
         elif min_price is not None and max_price is not None and not any([category, name]):
             if min_price > max_price:
                 raise HTTPException(status_code=400, detail="Minimum price cannot be greater than maximum price")
-            products = product_service.search_products_by_price_range(min_price, max_price)
+            products = await product_service.search_products_by_price_range(min_price, max_price)
         else:
             # For complex multi-filter searches, you'd implement a new service method
             raise HTTPException(status_code=501, detail="Multi-filter search not yet implemented")

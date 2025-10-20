@@ -13,7 +13,9 @@ class Settings(BaseSettings):
     api_description: str = "AI-Powered Product Knowledge & Support Agent"
     api_version: str = "0.1.0"
     debug: bool = False
-    
+
+    use_dump_service: bool = True
+
     # OpenAI Configuration
     openai_api_key: Optional[str] = None
     openai_model: str = "gpt-4o-mini"
