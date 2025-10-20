@@ -7,14 +7,13 @@ from shopassist_api.domain.models.product import Product
 
 router = APIRouter()
 
-class ProductResponse(BaseModel):
-    """Product response model."""
-    id: str
-    name: str
-    description: Optional[str] = None
-    category: Optional[str] = None
-    price: Optional[float] = None
-    stock: Optional[int] = None
+# class ProductResponse(BaseModel):
+#     """Product response model."""
+#     id: str
+#     name: str
+#     description: Optional[str] = None
+#     category: Optional[str] = None
+
 
 
 @router.get("/products/{product_id}", response_model=Product)

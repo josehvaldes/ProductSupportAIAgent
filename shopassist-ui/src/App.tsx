@@ -1,25 +1,29 @@
 import { useState } from "react";
 import {
   AppShell,
-  ScrollArea,
-  Container,
-  Stack,
+  Box,
 } from "@mantine/core";
-import { InputBox } from "./components/InputBox";
-import { ResponseBox } from "./components/ResponseBox";
 import { NavBar } from "./components/NavBar";
-import { useChat } from "./hooks/useChat";
+import { TestConnectionSection } from "./components/TestConnectionSection";
+import { ChatContainer } from "./components/ChatContainer";
+import { SearchContainer } from "./components/SearchContainer";
+
+type ActiveView = 'chat' | 'search' | 'settings' | 'help';
 
 export default function App() {
-  const [response, setResponse] = useState<string>("");
-  const { sendMessage, isLoading, error } = useChat();
+  const [activeView, setActiveView] = useState<ActiveView>('chat');
 
-  const handleSubmit = async (message: string) => {
-    const apiResponse = await sendMessage(message);
-    if (apiResponse) {
-      setResponse(apiResponse);
-    } else if (error) {
-      setResponse(`Error: ${error}`);
+  const renderMainContent = () => {
+    switch (activeView) {
+      case 'search':
+        return <SearchContainer />;
+      case 'settings':
+        return <div>Settings Container</div>;
+      case 'help':
+        return <div>Help Container</div>;
+      case 'chat':
+      default:
+        return <ChatContainer />;
     }
   };
 
@@ -32,19 +36,15 @@ export default function App() {
         collapsed: { mobile: false },
       }}
     >
-      <AppShell.Navbar p="md">
-        <NavBar />
+      <AppShell.Navbar p="md" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Box style={{ flex: 1 }}>
+          <NavBar activeView={activeView} onViewChange={setActiveView} />
+        </Box>
+        <TestConnectionSection />
       </AppShell.Navbar>
 
       <AppShell.Main>
-        <ScrollArea style={{ height: "100vh" }}>
-          <Container size="sm" mt="lg">
-            <Stack gap="md">
-              <InputBox onSubmit={handleSubmit} isLoading={isLoading} />
-              <ResponseBox text={response} isLoading={isLoading} />
-            </Stack>
-          </Container>
-        </ScrollArea>
+        {renderMainContent()}
       </AppShell.Main>
     </AppShell>
   );

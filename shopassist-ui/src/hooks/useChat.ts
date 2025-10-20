@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
-import { petshopApi, ApiError } from '../utils/api';
+import { petshopApi} from '../api/health';
 import { createLogger } from '../utils/logger';
+import { ApiError } from '../api/apiError';
 
 interface UseChatState {
   isLoading: boolean;

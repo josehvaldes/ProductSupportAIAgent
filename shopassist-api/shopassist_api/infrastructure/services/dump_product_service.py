@@ -24,7 +24,7 @@ class DumpProductService(ProductServiceInterface):
         """Retrieve a product by its ID from CosmosDB."""
 
         product:Product = { "id": product_id,
-                    "title": "Test Product",
+                    "name": "Test Product",
                     "description": "A product for testing", 
                     "category": "Testing", 
                     "price": "19.99", 
@@ -42,7 +42,7 @@ class DumpProductService(ProductServiceInterface):
         products = []
         for i in range(5):
             product:Product = { "id": f"test{i}",
-                        "title": f"Test Product {i}",
+                        "name": f"Test Product {i}",
                         "description": "A product for testing", 
                         "category": category, 
                         "price": f"{19.99 + i}", 
@@ -62,7 +62,7 @@ class DumpProductService(ProductServiceInterface):
         for i in range(5):
             price = min_price + (i * (max_price - min_price) / 4)
             product:Product = { "id": f"test{i}",
-                        "title": f"Test Product {i}",
+                        "name": f"Test Product {i}",
                         "description": "A product for testing", 
                         "category": "Testing", 
                         "price": f"{price}", 

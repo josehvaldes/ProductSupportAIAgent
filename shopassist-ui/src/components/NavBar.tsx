@@ -1,24 +1,13 @@
-import { useState } from "react";
-import { Box, Title, Text} from '@mantine/core';
-import { TestConnectionButton } from './TestConnectionButton';
-import { healthCheck } from "../hooks/healthCheck";
-import { createLogger } from '../utils/logger';
+import { Box, Title, Text, NavLink} from '@mantine/core';
 
-export function NavBar() {
+type ActiveView = 'chat' | 'search' | 'settings' | 'help';
 
-  const [response, setResponse] = useState<string>("");
-  const { sendMessage, isLoading, error } = healthCheck();
-  const log = createLogger('NavBar');
-  const handleSubmit = async () => {
-    log.info("NavBar: Send health check");
-    const apiResponse = await sendMessage();
-    if (apiResponse) {
-      setResponse(apiResponse);
-    } else if (error) {
-      setResponse(`Error: ${error}`);
-    }
-  };
+interface NavBarProps {
+  activeView: ActiveView;
+  onViewChange: (view: ActiveView) => void;
+}
 
+export function NavBar({ activeView, onViewChange }: NavBarProps) {
   return (
     <Box
       component="nav"
@@ -28,12 +17,29 @@ export function NavBar() {
       </Title>
       <Text size="sm" c="dimmed">
         Specialized Assistant
-      </Text>
-      <TestConnectionButton 
-        onSubmit={handleSubmit} 
-        isLoading={isLoading}
-        text={response}
+      </Text>      <Box mb="md" className="nav-bar-options" >
+        {/* Future navigation options can be added here */}
+        <NavLink 
+          label="Chat" 
+          active={activeView === 'chat'}
+          onClick={() => onViewChange('chat')}
         />
+        <NavLink 
+          label="Search" 
+          active={activeView === 'search'}
+          onClick={() => onViewChange('search')}
+        />
+        <NavLink 
+          label="Settings" 
+          active={activeView === 'settings'}
+          onClick={() => onViewChange('settings')}
+        />
+        <NavLink 
+          label="Help" 
+          active={activeView === 'help'}
+          onClick={() => onViewChange('help')}
+        />
+      </Box>
     </Box>
   );
 }

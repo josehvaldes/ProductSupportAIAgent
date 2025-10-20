@@ -77,14 +77,19 @@ button:focus-visible {
 }
 
 .test-connection-message {
-  margin-top: 8px;
-  border-top: 10px;
+  font-size: 0.9em;
+}
+
+.test-connection-message input {
   font-size: 0.8em;
+  background-color: #2a2a2a;
+  border: none;
+  color: #ffffff;
+  width: 100%;
 }
 
 .test-connection-button {
   font-size: 0.7em;
-  margin-top: 8px;
 }
 
 @media (prefers-color-scheme: light) {

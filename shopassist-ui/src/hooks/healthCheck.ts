@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
-import { petshopApi, ApiError, type HealthCheckResponse } from '../utils/api';
+import { petshopApi, type HealthCheckResponse } from '../api/health';
 import { createLogger } from '../utils/logger';
+import { ApiError } from '../api/apiError';
 
 interface HealthCheckState {
   isLoading: boolean;
