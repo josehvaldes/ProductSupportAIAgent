@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   AppShell,
   Box,
@@ -7,11 +6,12 @@ import { NavBar } from "./components/NavBar";
 import { TestConnectionSection } from "./components/TestConnectionSection";
 import { ChatContainer } from "./components/ChatContainer";
 import { SearchContainer } from "./components/SearchContainer";
+import { useLocalStorage } from "./hooks/useLocalStorage";
 
 type ActiveView = 'chat' | 'search' | 'settings' | 'help';
 
 export default function App() {
-  const [activeView, setActiveView] = useState<ActiveView>('chat');
+  const [activeView, setActiveView] = useLocalStorage<ActiveView>('shopassist-active-view', 'chat');
 
   const renderMainContent = () => {
     switch (activeView) {
@@ -22,10 +22,12 @@ export default function App() {
       case 'help':
         return <div>Help Container</div>;
       case 'chat':
-      default:
         return <ChatContainer />;
+      
     }
   };
+  // default:
+  //   return <ChatContainer />;
 
   return (
     <AppShell

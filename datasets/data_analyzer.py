@@ -12,7 +12,7 @@ def show_off_limits(file_path:str):
             metadata = doc.get("vector_metadata")
             if metadata.get("total_tokens", 0) > TOKEN_LIMIT:  # Print only if tokens > 500 
                 internal_count += 1
-                print(f"ID: {doc.get('id')}, Category:{doc.get("category","")}, Title: {doc.get('title')[0:50]}...")
+                print(f"ID: {doc.get('id')}, Category:{doc.get("category","")}, name: {doc.get('name')[0:50]}...")
                 print(f"  Tokens: {metadata.get('total_tokens')}, Vectors: {metadata.get('total_vectors')}, Storage (MB): {metadata.get('total_storage_mb'):.4f}")
                 print()
         print(f"Total documents with tokens > {TOKEN_LIMIT}: {internal_count}")

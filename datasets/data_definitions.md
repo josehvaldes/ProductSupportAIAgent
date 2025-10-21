@@ -3,7 +3,7 @@
 ##Source
 {
 	"id": "B008IFXQFU",
-	"title": "TP-Link USB WiFi ...",
+	"name": "TP-Link USB WiFi ...",
 	"category": "WirelessUSBAdapters",
 	"price": 10.99,
 	"rating": 4.2,
@@ -15,7 +15,7 @@
 		"Computers&Accessories",
 		"NetworkingDevices",
 	],
-	"vector_text": "combined title description here",
+	"vector_text": "combined name description here",
 	"vector_metadata": {
 		"total_tokens": 530,
 		"total_vectors": 2,
@@ -31,7 +31,7 @@
 ##CosmosDB
 {
   "id": "",
-  "title": "TP-Link USB WiFi Adapter",
+  "name": "TP-Link USB WiFi Adapter",
   "description": "USB WiFi Adapter for PC...",
   "category": "WirelessUSBAdapters",
   "price": 10.99,
@@ -86,7 +86,7 @@ schema = CollectionSchema(fields, description="Product chunks")
 {
   "id": "B008IFXQFU_chunk_0",
   "product_id": "B008IFXQFU",
-  "title": "TP-Link USB WiFi Adapter",  // ← Keep title for keyword matching
+  "name": "TP-Link USB WiFi Adapter",  // ← Keep name for keyword matching
   "text": "TP-Link USB WiFi Adapter. USB WiFi Adapter for PC...",
   "chunk_index": 0,
   "total_chunks": 2,
@@ -106,7 +106,7 @@ schema = CollectionSchema(fields, description="Product chunks")
   "fields": [
     {"name": "id", "type": "Edm.String", "key": true, "searchable": false},
     {"name": "product_id", "type": "Edm.String", "filterable": true},
-    {"name": "title", "type": "Edm.String", "searchable": true},
+    {"name": "name", "type": "Edm.String", "searchable": true},
     {"name": "text", "type": "Edm.String", "searchable": true},
     {"name": "chunk_index", "type": "Edm.Int32", "filterable": true},
     {"name": "total_chunks", "type": "Edm.Int32"},
@@ -128,7 +128,7 @@ schema = CollectionSchema(fields, description="Product chunks")
 	"text 2"
   ],
   "metadata":{
-	"title": "",
+	"name": "",
 	"last_updated":2025-10-16,
 	"category":"policies"
   }

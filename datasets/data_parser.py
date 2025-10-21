@@ -27,7 +27,7 @@ EXCHANGE_RATE_TO_USD = 0.011
 
 header_index_dict = {
         "id": 0,
-        "title": 1,
+        "name": 1,
         "category": 2,
         "price": 4,
         "rating": 6,
@@ -58,11 +58,11 @@ def get_token_data(text: str, avg_chunk_tokens=AVG_CHUNK_TOKENS):
     total_storage_mb = (total_vectors * VECTOR_SIZE_BYTES) / (1024 * 1024)
     return { "total_tokens": total_tokens, "total_vectors": total_vectors, "total_storage_mb": total_storage_mb }
 
-def suggest_brand(title: str) -> str:
-    # Simple heuristic: assume brand is the first word in the title
-    if not title:
+def suggest_brand(name: str) -> str:
+    # Simple heuristic: assume brand is the first word in the name
+    if not name:
         return ""
-    return title.split(" ")[0]
+    return name.split(" ")[0]
 
 def parse_file(path:str, sample_size:int = -1) -> list :
 
@@ -85,13 +85,13 @@ def parse_file(path:str, sample_size:int = -1) -> list :
         doc["category_full"] = category_str.split('|') if category_str else []        #last category as main category
         doc["category"] = doc["category_full"][-1] if doc["category_full"] else ""
 
-        vector_text = f"{doc.get('title', '')}. {doc.get('description', '')}"
+        vector_text = f"{doc.get('name', '')}. {doc.get('description', '')}"
         doc["vector_text"] = vector_text
         
         vector_metadata = get_token_data(doc.get("vector_text"))
         doc["vector_metadata"] = vector_metadata
 
-        doc["brand"] =  suggest_brand(doc.get("title", ""))
+        doc["brand"] =  suggest_brand(doc.get("name", ""))
 
         price = doc.get("price", "").replace("₹", "").replace(",", "").strip()
         doc["price"] = round( float(price) * EXCHANGE_RATE_TO_USD if price.replace('.','',1).isdigit() else 0.00, 2)
@@ -139,7 +139,7 @@ if __name__ == "__main__":
     for doc in data:  # Print first 2 documents for verification
         metadata = doc.get("vector_metadata")
         if metadata.get("total_tokens", 0) > 500:  # Print only if tokens > 500 for brevity
-            print(f"ID: {doc.get('id')}, Title: {doc.get('title')[0:50]}...")
+            print(f"ID: {doc.get('id')}, name: {doc.get('name')[0:50]}...")
             print(f"  Tokens: {metadata.get('total_tokens')}, Vectors: {metadata.get('total_vectors')}, Storage (MB): {metadata.get('total_storage_mb'):.4f}")
             print()
 

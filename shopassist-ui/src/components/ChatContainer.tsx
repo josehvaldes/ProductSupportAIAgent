@@ -8,6 +8,7 @@ import { ResponseBox } from "./ResponseBox";
 import { createLogger } from '../utils/logger';
 import { useChat } from "../hooks/useChat";
 import { useState } from "react";
+import { ProductGrid } from "./ProductGrid";
 
 export function ChatContainer() {
   
@@ -28,9 +29,11 @@ export function ChatContainer() {
   return (
     <ScrollArea style={{ height: "100vh" }}>
       <Container size="sm" mt="lg">
+        <p>Welcome to ShopAssist</p>
         <Stack gap="md">
           <InputBox onSubmit={onSubmit} isLoading={isLoading} />
           <ResponseBox text={response} isLoading={isLoading} />
+          <ProductGrid />
         </Stack>
       </Container>
     </ScrollArea>

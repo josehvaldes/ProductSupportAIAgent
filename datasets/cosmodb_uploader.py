@@ -12,7 +12,7 @@ def transform_document_body(data:dict) -> dict:
     """Generate a sample document body."""
     return {
         "id": data.get("id", ""),
-        "title": data.get("title", ""),
+        "name": data.get("name", ""),
         "description": data.get("description", ""),
         "category": data.get("category", ""),
         "category_full": data.get("category_full", []),
@@ -59,7 +59,7 @@ def upload_file_to_cosmosdb(file_path:str):
     for doc in data[0:2]:# Limit to 2 item for testing
         try:
             container.create_item(body=transform_document_body(doc))
-            print(f"Uploaded document ID: {doc.get('id')}, Category: {doc.get('category')}, Title: {doc.get('title')[0:20]}...")
+            print(f"Uploaded document ID: {doc.get('id')}, Category: {doc.get('category')}, Name: {doc.get('name')[0:20]}...")
         except Exception as e:
             print(f"Error uploading document ID: {doc.get('id')}, Error: {str(e)}")
             traceback.print_exc()
