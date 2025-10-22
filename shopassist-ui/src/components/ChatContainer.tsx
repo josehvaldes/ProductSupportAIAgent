@@ -9,18 +9,24 @@ import { createLogger } from '../utils/logger';
 import { useChat } from "../hooks/useChat";
 import { useState } from "react";
 import { ProductGrid } from "./ProductGrid";
+import type { Product } from "../types/Product";
 
 export function ChatContainer() {
   
   const [response, setResponse] = useState<string>("");
-  const log = createLogger('TestConnectionSection');
+  const [products, setProducts] = useState<Product[]>([]);
+  
   const { sendMessage, isLoading, error } = useChat();
+  const log = createLogger('TestConnectionSection');
 
   const onSubmit = async (message: string) => {
     log.info("TestConnectionSection: Send health check");
     const apiResponse = await sendMessage(message);
     if (apiResponse) {
-      setResponse(apiResponse);
+      setResponse(apiResponse.reply);
+      const products = apiResponse.products || [];
+      setProducts(products);
+      log.info(`Received ${products.length} product recommendations.`);
     } else if (error) {
       setResponse(`Error: ${error}`);
     }
@@ -33,7 +39,7 @@ export function ChatContainer() {
         <Stack gap="md">
           <InputBox onSubmit={onSubmit} isLoading={isLoading} />
           <ResponseBox text={response} isLoading={isLoading} />
-          <ProductGrid />
+          <ProductGrid products={products} />
         </Stack>
       </Container>
     </ScrollArea>

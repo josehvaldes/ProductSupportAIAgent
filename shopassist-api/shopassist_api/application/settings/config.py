@@ -48,6 +48,11 @@ class Settings(BaseSettings):
     # Database Configuration
     database_url: Optional[str] = None
     
+    #Logging Configuration
+    log_level: str = "INFO"
+    log_file: str = "logs/shopassist_api.log"
+    log_to_console: bool = True
+
     class Config:
         env_file = ".env"
         case_sensitive = False

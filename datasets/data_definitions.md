@@ -133,3 +133,40 @@ schema = CollectionSchema(fields, description="Product chunks")
 	"category":"policies"
   }
 }
+
+
+
+API Chat Product Model
+{
+	"message":"",
+	"chat_id":""
+	"created_time":""
+	"response":{
+		"text":"",
+		products:[
+			{**products}
+		]
+	}
+}
+
+
+{
+  "id": "",
+  "name": "TP-Link USB WiFi Adapter",
+  "description": "USB WiFi Adapter for PC...",
+  "category": "WirelessUSBAdapters",
+  "price": 10.99,
+  "brand": "TP-Link",
+  "rating": 4.2,
+  "review_count": 179691,
+  "product_url": "...",
+  "image_url": "...",
+  "category_full": ["Computers&Accessories", "NetworkingDevices"],
+  "availability": "in_stock",
+  
+  // Add this for convenience:
+  "total_chunks": 2,  // ← Useful to know how many chunks exist
+  
+  // Partition key for Cosmos DB
+  "_partitionKey": "WirelessUSBAdapters"  // ← category for efficient queries
+}

@@ -1,12 +1,5 @@
 import { apiRequest } from './apiGeneric';
 
-// API response types
-export interface ApiResponse<T = any> {
-  data: T;
-  message?: string;
-  status: number;
-}
-
 // Health check response type
 export interface HealthCheckResponse {
   status: string;

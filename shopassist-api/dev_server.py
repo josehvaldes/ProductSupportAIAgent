@@ -3,10 +3,12 @@
 Development server startup script.
 """
 import uvicorn
-from shopassist_api.main import app
+
+from shopassist_api.application.settings.config import settings
 
 def main():
     """Development server entry point."""
+    print(f"Starting ShopAssist API Development Server.")
     uvicorn.run(
         "shopassist_api.main:app",
         host="0.0.0.0",

@@ -256,7 +256,7 @@ Decomposed Tasks:
    - Create ProductGrid.tsx (will display product cards)
    - Implement responsive design (mobile-first)
 
-4. [ ] Create ProductCard component (1 hour)
+4. [X] Create ProductCard component (1 hour)
    - Design card with Mantine Card component
    - Display: image, name, price, category, rating
    - Add hover effects
@@ -264,14 +264,14 @@ Decomposed Tasks:
    - Handle missing images gracefully
    - Add "Add to Cart" button (placeholder)
 
-5. [ ] Create basic Chat UI components (1.5 hours)
+5. [X] Create basic Chat UI components (1.5 hours)
    - Create ChatMessage.tsx (user message + AI response)
    - Create ChatInput.tsx (text input + send button)
    - Create ChatBubble.tsx (styled message bubbles)
    - Add typing indicator component
    - Style with Mantine components (Textarea, Button, Paper)
 
-6. [ ] Connect frontend to backend (1 hour)
+6. [X] Connect frontend to backend (1 hour)
    - Test fetching products from API
    - Display products in ProductGrid
    - Implement loading states (Loader component)
@@ -279,6 +279,9 @@ Decomposed Tasks:
    - Add mock chat message to test UI
    - Verify CORS is working properly
 
+7. [X] Add logging to the API
+	- Implement logging in main.py
+	- Update .env
 
 **Technical Decisions:**
 - Mantine AppShell for main layout structure
@@ -286,19 +289,21 @@ Decomposed Tasks:
 - React Router for navigation (optional for MVP)
 - Component-based architecture (atomic design principles)
 - TypeScript interfaces for type safety
+- Add logging for API
 
 **Challenges & Solutions:**
-- 
+- Use React with mantine
 
 **Learnings:**
-- 
+- ReactJS hooks and state management
+- Mantine components
 
 **Next Steps:**
 - [ ] Integrate chat API endpoint (Week 2)
 - [ ] Add product filtering UI
 - [ ] Implement search bar
 
-**Time Invested:** ___ hours
+**Time Invested:** 8 hours
 
 ---
 

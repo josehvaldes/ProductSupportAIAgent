@@ -1,16 +1,18 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class Product(BaseModel):
   id:str
   name:str
   description:str
   category:str
-  price:str
-  brand:str
-  rating:str
-  review_count:str
-  product_url:str
-  image_url:str
-  category_full:str
-  availability:str
+  price:float
+  brand: str
+  rating: float
+  review_count: int
+  product_url:Optional[str]
+  image_url:Optional[str]
+  category_full:Optional[str]
+  availability:Optional[str]
+  
 
