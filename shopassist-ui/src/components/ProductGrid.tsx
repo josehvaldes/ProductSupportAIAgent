@@ -22,7 +22,7 @@ export function ProductGrid({products } :ProductGridProps) {
     <SimpleGrid cols={2} spacing="xl" verticalSpacing="xl" w={"100%"}>
 
       { (products && products.length > 0)? products.map((product) => (
-        <Card shadow="sm" padding="lg" radius="md" withBorder className="product-card" mt="md" w={300} mx="auto" key={product.id}>
+        <Card shadow="sm" padding="lg" radius="md" withBorder mt="md" w={300} mx="auto" key={product.id}>
           <Card.Section>
             <Image 
               src={product.image_url}  
@@ -54,7 +54,7 @@ export function ProductGrid({products } :ProductGridProps) {
 
       }
     </SimpleGrid>
-    <Modal className='Modalclass1'  opened={opened} 
+    <Modal opened={opened} 
         onClose={() => setOpened(false)} 
         size="sm"
         title="Product Details:"

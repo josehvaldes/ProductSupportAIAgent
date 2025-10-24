@@ -7,7 +7,6 @@ export function ChatHistory() {
         <p>Chat History </p>
         <NavLink label="Chat with Support" />
         <NavLink label="Order Inquiry" />
-        <NavLink label="Product Information" />
     </Group>
   );
 }

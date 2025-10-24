@@ -26,8 +26,6 @@ export default function App() {
       
     }
   };
-  // default:
-  //   return <ChatContainer />;
 
   return (
     <AppShell

@@ -68,6 +68,9 @@ shopassist_api/
 - `GET /api/v1/health` - Health check
 - `POST /api/v1/chat` - Chat with the AI assistant
 - `GET /api/v1/chat/history/{conversation_id}` - Get chat history
+- `GET /api/v1/product/{id}` - Get product by ID
+- `GET /api/v1/product/search/category/{category_name}` - Get products by Category
+- `GET /api/v1/product/search/price?min_price={minprice}&max_price={maxprice}` - Get products by Category
 
 ## Configuration
 

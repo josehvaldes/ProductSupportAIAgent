@@ -1,6 +1,13 @@
-##
-Execution:
+#
+
+## Execution:
 npm run dev
+
+## Configuration
+update the .env file according to your API configuration
+VITE_API_BASE_URL
+
+
 
 # React + TypeScript + Vite
 

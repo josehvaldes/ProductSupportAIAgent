@@ -341,14 +341,14 @@ Decomposed Tasks:
    - Add "Back to products" navigation
    - Test routing/navigation
 
-5. [ ] Polish UI and responsiveness (1 hour)
+5. [X] Polish UI and responsiveness (1 hour)
    - Test on mobile viewport
    - Fix any layout issues
    - Improve spacing and typography
    - Add hover effects and transitions
    - Test in different browsers
 
-6. [ ] Document API endpoints and frontend structure (1 hour)
+6. [X] Document API endpoints and frontend structure (1 hour)
    - Update README with setup instructions
    - Document environment variables needed
    - Add screenshots of current UI
@@ -360,13 +360,13 @@ Decomposed Tasks:
 - Add filtering UI before RAG pipeline (better UX foundation)
 - Use Mantine Notifications for user feedback
 - Implement skeleton loaders for better perceived performance
-- Product detail as modal vs separate page (choose based on UX preference)
+- Product detail as modal
 
 **Challenges & Solutions:**
-- 
+- building a good loking UI 
 
 **Learnings:**
-- 
+- How to use mantine components and hooks
 
 **Next Steps:**
 - [ ] Week 1 wrap-up (Day 7)
