@@ -55,20 +55,25 @@ def upload_file_to_cosmosdb(file_path:str):
         data = json.load(f)
 
     print(f"Uploading {len(data)} documents to CosmosDB container '{container_name}' in database '{database_name}'.")
-    # Upload each document to the container
-    for doc in data[0:2]:# Limit to 2 item for testing
+    random_indexes = random.sample(range(11, len(data)), min(10, len(data)))
+    print("Sample documents to be uploaded:", len(random_indexes))
+    for idx in random_indexes:
+        doc = data[idx]
         try:
             container.create_item(body=transform_document_body(doc))
             print(f"Uploaded document ID: {doc.get('id')}, Category: {doc.get('category')}, Name: {doc.get('name')[0:20]}...")
         except Exception as e:
             print(f"Error uploading document ID: {doc.get('id')}, Error: {str(e)}")
             traceback.print_exc()
+
+    # Upload each document to the container
+    # for doc in data[0:10]:# Limit to 2 item for testing
     
     print("Upload complete.")
     
 
 if __name__ == "__main__":
-    file_path = "./product_data/amazon_50.json"
+    file_path = "c:/personal/_ProductSupportAIAgent/datasets/product_data/amazon_50.json"
     upload_file_to_cosmosdb(file_path)
 
     print("Done.")

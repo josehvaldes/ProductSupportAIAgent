@@ -33,14 +33,14 @@ class DumpProductService(ProductServiceInterface):
                     "review_count": "10", 
                     "product_url": "http://example.com/product/test123", 
                     "image_url": "http://example.com/product/test123/image.jpg",  
-                    "category_full": "Testing/Unit Tests", 
+                    "category_full": ["Smartphones","Testing","Unit Tests"], 
                     "availability": "In Stock" }
         return Product(**product)
     
     async def search_products_by_category(self, category: str) -> list[Product]:
         """Search products by category."""
         products = []
-        for i in range(5):
+        for i in range(3):
             product:Product = { "id": f"test{i}",
                         "name": f"Test Product {i}",
                         "description": "A product for testing", 
@@ -51,7 +51,7 @@ class DumpProductService(ProductServiceInterface):
                         "review_count": "10", 
                         "product_url": f"http://example.com/product/test{i}", 
                         "image_url": f"http://example.com/product/test{i}/image.jpg",  
-                        "category_full": f"{category}/Unit Tests", 
+                        "category_full": ["Smartphones","Testing","Unit Tests"], 
                         "availability": "In Stock" }
             products.append(Product(**product))
         return products
@@ -59,7 +59,7 @@ class DumpProductService(ProductServiceInterface):
     async def search_products_by_price_range(self, min_price: float, max_price: float) -> list[Product]:
         """Search products within a price range."""
         products = []
-        for i in range(5):
+        for i in range(4):
             price = min_price + (i * (max_price - min_price) / 4)
             product:Product = { "id": f"test{i}",
                         "name": f"Test Product {i}",
@@ -71,7 +71,7 @@ class DumpProductService(ProductServiceInterface):
                         "review_count": "10", 
                         "product_url": f"http://example.com/product/test{i}", 
                         "image_url": f"http://example.com/product/test{i}/image.jpg",  
-                        "category_full": "Testing/Unit Tests", 
+                        "category_full":["Smartphones","Testing","Unit Tests"], 
                         "availability": "In Stock" }
             products.append(Product(**product))
         return products

@@ -30,7 +30,6 @@ export function useProducts():UseProductState {
             log.info("Sending product request to API:", id);
             // Placeholder for actual API call
             const res = await productApi.getProductById(id);
-            log.info("Received response from API: ", res);
             return res;
         } catch (err) {
             const errorMessage = err instanceof Error 

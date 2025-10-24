@@ -1,14 +1,25 @@
-import { Card, Image, Text, Badge, Button, Group } from '@mantine/core';
+import { Card, Image, Text, Badge, Button, Group, SimpleGrid, Modal, Stack } from '@mantine/core';
 import type { Product } from "../types/Product";
+import { useState } from 'react';
+import { ProductDetails } from './ProductDetails';
+import { createLogger } from '../utils/logger';
 
-interface ProductGridProps {
+export interface ProductGridProps {
   products: Array<Product>;
 }
 
 export function ProductGrid({products } :ProductGridProps) {
-
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [opened, setOpened] = useState(false);
+  const log = createLogger('TestConnectionSection');
+  const handleViewDetails = (product: Product) => {
+    log.info("ProductGrid View Details clicked for product: ", product.id);
+    setSelectedProduct(product);
+    setOpened(true);
+  };
   return (
-    <Group wrap="wrap" justify="center">
+    <>    
+    <SimpleGrid cols={2} spacing="xl" verticalSpacing="xl" w={"100%"}>
 
       { (products && products.length > 0)? products.map((product) => (
         <Card shadow="sm" padding="lg" radius="md" withBorder className="product-card" mt="md" w={300} mx="auto" key={product.id}>
@@ -21,12 +32,20 @@ export function ProductGrid({products } :ProductGridProps) {
           </Card.Section>
           <Group justify="space-between" mt="md" mb="xs">
             <Text fw={500}>{product.name}</Text>
-            <Badge color="pink">On Sale</Badge>
+            <Stack align="flex-end">
+              <Badge color="green">${product.price.toFixed(2)}</Badge>
+              <Badge color="red">{product.availability}</Badge>  
+            </Stack>
           </Group>
           <Text size="sm" c="dimmed">
-            {product.description}
+            {product.description.substring(0, 60)}...
           </Text>
-          <Button color="blue" fullWidth mt="md" radius="md" component="a" href={product.product_url} target="_blank" rel="noopener noreferrer">
+          <Button 
+            fullWidth 
+              mt="md" 
+              radius="md" 
+              onClick={() => handleViewDetails(product)}
+          >
             View Details
           </Button>
         </Card>
@@ -34,9 +53,16 @@ export function ProductGrid({products } :ProductGridProps) {
         <Text c="dimmed">No products to display.</Text>
 
       }
-    </Group>
-
+    </SimpleGrid>
+    <Modal className='Modalclass1'  opened={opened} 
+        onClose={() => setOpened(false)} 
+        size="sm"
+        title="Product Details:"
+      >
+        {selectedProduct && <ProductDetails product={selectedProduct} />}
+    </Modal>
     
-
+    </>
   );
 }
+

@@ -97,11 +97,32 @@ button:focus-visible {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 500px;
   margin: 0 auto;
 }
 .search-result-card{
   background-color: #fffcfc;
+}
+.search-textarea textarea
+{
+  height: 0px;
+}
+
+/* .price-range-slider{
+  margin: 20px 0;
+} */
+
+.product-card {
+  padding: 25px 10px ;
+
+}
+
+.Modalclass1{
+  max-width: 600px;
+}
+
+.mantine-Modal-inner{
+  left: 0%;
+  top: 15%
 }
 
 @media (prefers-color-scheme: light) {
