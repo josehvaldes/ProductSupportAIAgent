@@ -26,8 +26,8 @@ class OpenAIEmbeddingService(EmbeddingServiceInterface):
 
         self.api_base = settings.azure_openai_endpoint 
         self.api_version = settings.azure_openai_api_version or "2024-02-01"
-        self.default_embedding_model = settings.azure_openai_embedding_model or "text-embedding-3-small" #"gpt-3.5-turbo" #
-        self.deployment_name = settings.azure_openai_embedding_model_deployment # "text-embedding-3-small_POC"
+        self.default_embedding_model = settings.azure_openai_embedding_model # or "text-embedding-3-small" 
+        self.deployment_name = settings.azure_openai_embedding_model_deployment # or "text-embedding-3-small_POC"
         
         self.encoding = tiktoken.encoding_for_model("text-embedding-3-small")
 
@@ -38,7 +38,7 @@ class OpenAIEmbeddingService(EmbeddingServiceInterface):
             azure_endpoint = self.api_base,
             azure_ad_token_provider=token_provider
         )
-
+        print(f"Initialized OpenAI Embedding Service with deployment: {self.deployment_name}")
         self.client = client
 
     def count_tokens(self, text: str) -> int:
@@ -48,10 +48,13 @@ class OpenAIEmbeddingService(EmbeddingServiceInterface):
     def generate_embedding(self, input_text: str) -> list[float]:
         """Generate embedding for the given input text."""
         try:
-            response = self.client.Embedding.create(
+            print("Generating embedding for single text...")
+            response = self.client.embeddings.create(
                 input=[input_text],
                 model=self.deployment_name
             )
+            print("Response:")
+            print(response.data[0])
             embedding = response.data[0].embedding
             return embedding
         except Exception as e:
@@ -67,7 +70,7 @@ class OpenAIEmbeddingService(EmbeddingServiceInterface):
             batch = input_texts[i:i + batch_size]
 
             try:
-                response = self.client.Embedding.create(
+                response = self.client.embeddings.create(
                     input=batch,
                     model=self.deployment_name
                 )

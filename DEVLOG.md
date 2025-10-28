@@ -581,7 +581,7 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
    - Document embedding generation time
    - Update DEVLOG with metrics
 
-7. [TODO] Test embedding with Azure OpenAI text-embedding-3-small
+7. [X] Test embedding with Azure OpenAI text-embedding-3-small
    - update scripts/generate_embeddings.py to use the openai_embedding_service.py module
    - calculate costs and execution time
 
@@ -610,24 +610,90 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
 **Today's Focus:** Milvus collection setup
 
 **Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+1. [X] Deploy Milvus on Azure Container Instances (1.5 hours)
+   - Review Milvus deployment scripts from Day 1
+   - Deploy Milvus standalone container to Azure
+   - Configure networking and ports (19530, 9091)
+   - Verify Milvus is accessible from local machine
+   - Access Attu (Milvus web UI) at port 9091
+   - Document connection details (host, port)
+
+2. [X] Create Milvus collection schemas (1 hour)
+   - Create script: scripts/create_milvus_collections.py
+   - Define products_collection schema:
+     * Fields: id, product_id, text, embedding[1536], chunk_index, 
+       total_chunks, category, price, brand
+     * Primary key: id
+     * Vector index: HNSW (Hierarchical Navigable Small World)
+   - Define knowledge_base_collection schema:
+     * Fields: id, doc_id, text, embedding[1536], doc_type
+     * Primary key: id
+     * Vector index: HNSW
+   - Create collections in Milvus
+   - Verify collections exist
+
+3. [X] Create Milvus service layer (1.5 hours)
+   - Create app/services/milvus_service.py
+   - Initialize Milvus connection
+   - Implement insert_products(products: List[Dict])
+   - Implement insert_knowledge_base(chunks: List[Dict])
+   - Implement search_products(query_embedding, top_k, filters)
+   - Implement search_knowledge_base(query_embedding, top_k)
+   - Add error handling and logging
+
+4. [X] Ingest product embeddings into Milvus (1 hour)
+   - Create script: scripts/ingest_to_milvus.py
+   - Load product_embeddings.json
+   - Transform to Milvus format
+   - Batch insert (1000 records at a time)
+   - Verify insertion count
+   - Create indexes on collection
+   - Document ingestion statistics
+
+5. [X] Ingest knowledge base embeddings (30 min)
+   - Load knowledge_base_embeddings.json
+   - Transform to Milvus format
+   - Insert into knowledge_base_collection
+   - Verify insertion count
+   - Create indexes
+
+6. [X] Test vector search functionality (1 hour)
+   - Create test script: scripts/test_milvus_search.py
+   - Test product search with sample queries:
+     * "laptop for video editing"
+     * "wireless headphones"
+     * "kitchen appliances"
+   - Test knowledge base search:
+     * "what is the return policy"
+     * "shipping information"
+   - Verify top-k results are relevant
+   - Measure search latency
+   - Document search performance
+
+7. [X] Verify data integrity and create health checks (30 min)
+   - Count total vectors in each collection
+   - Verify all product_ids have chunks
+   - Check for duplicate entries
+   - Test collection statistics
+   - Create health check endpoint for Milvus
+   - Document collection metrics
 
 **Technical Decisions:**
-- 
+- Use localhost instance of Milvus for testing.
+- Enable attu service for milvus instance
 
 **Challenges & Solutions:**
-- 
+- Use a custom docker-compose.yml file instead of an external one when deploying the milvus_setup.bicep file
+  Solution: add the yml text in bicep. Postpone this change when deploying in azure
 
 **Learnings:**
-- 
+- How to add texts in bicep scripts.
 
 **Next Steps:**
 - [ ] 
 - [ ] 
 
-**Time Invested:** ___ hours
+**Time Invested:** 4 hours
 
 ---
 

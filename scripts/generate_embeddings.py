@@ -2,23 +2,30 @@ import json
 import jsonlines
 import uuid
 import sys
-sys.path.append('../shopassist-api')
-
-from pymilvus import connections, utility
-
 import argparse
+from pathlib import Path
+from dotenv import load_dotenv
 
+sys.path.append('../shopassist-api')
+# Load .env file from the correct location
+script_dir = Path(__file__).parent
+env_path = script_dir.parent / 'shopassist-api' / '.env'
+load_dotenv(dotenv_path=env_path)
+from shopassist_api.application.settings.config import settings
 
 # Generate embeddings for sample texts using Transformers model. use OpenAIEmbeddingService for OpenAI embeddings.
+from shopassist_api.application.interfaces.service_interfaces import EmbeddingServiceInterface
 from shopassist_api.infrastructure.services.transformers_embedding_service import TransformersEmbeddingService
+#from shopassist_api.infrastructure.services.openai_embedding_service import OpenAIEmbeddingService 
 
-def process_products_file(source_file: str, output_file: str, embedding_service: TransformersEmbeddingService):
+
+def process_products_file(source_file: str, output_file: str, embedding_service: EmbeddingServiceInterface):
     """Process the source file to generate embeddings and save to output file."""
     output = []
     print(f"Processing file: {source_file}")
     with open(source_file, 'r', encoding='utf-8') as f:
         data = json.load(f)
-        for record in data:  # Process first 2 records for demo
+        for record in data:  # Process each product record
 
             metadata = record.get("vector_metadata", {})
             total_vectors = 0 
@@ -40,7 +47,7 @@ def process_products_file(source_file: str, output_file: str, embedding_service:
                     "id": uuid.uuid4().hex, # Unique ID for this embedding record
                     "product_id": record.get("id", "N/A"), # Link back to product ID
                     "embedding": embedding,
-                    "chunk_text": text,
+                    "text": text,
                     "chunk_index": 0,
                     "total_chunks": total_vectors,
                     "category": record.get("category", "unknown"),
@@ -56,10 +63,10 @@ def process_products_file(source_file: str, output_file: str, embedding_service:
                     print(f"Generated {len(embeddings)} embeddings for record ID: {record.get('id', 'N/A')}.") 
                     for i in range(len(embeddings)):
                         output.append({
-                            "id": uuid.uuid4().hex,
+                            "id": uuid.uuid4().hex[:12],
                             "product_id": record.get("id", "N/A"),
-                            "embedding": embeddings[i]['embedding'],
-                            "chunk_text": embeddings[i]['text'],
+                            "text": embeddings[i]['text'],
+                            "embedding": embeddings[i]['embedding'],                            
                             "chunk_index": i,
                             "total_chunks": total_vectors,
                             "category": record.get("category", "unknown"),
@@ -71,7 +78,7 @@ def process_products_file(source_file: str, output_file: str, embedding_service:
     with jsonlines.open(output_file, mode='w') as writer:
         writer.write_all(output)
 
-def process_knowledge_base_folder(source_folder: str, output_file: str, embedding_service: TransformersEmbeddingService):
+def process_knowledge_base_folder(source_folder: str, output_file: str, embedding_service: EmbeddingServiceInterface):
     """Process all JSON files in the source folder to generate embeddings and save to output file."""
     import os
     print(f"Processing knowledge base folder: {source_folder}")
@@ -85,7 +92,8 @@ def process_knowledge_base_folder(source_folder: str, output_file: str, embeddin
                 if data is None:
                     print(f"No data found in file: {filename}, skipping.")
                     continue
-
+                
+                metadata = data.get("metadata", {})
                 chunks = data.get("chunks", [])
                 if chunks and isinstance(chunks, list):
                     embeddings = embedding_service.generate_embedding_batch(chunks, batch_size=10)
@@ -93,10 +101,12 @@ def process_knowledge_base_folder(source_folder: str, output_file: str, embeddin
                     data["embeddings"] = embeddings
                     for i in range(len(embeddings)):
                         all_kb_chunks.append({
-                                "id": i,
+                                "id": uuid.uuid4().hex[:12],
+                                "doc_id": filename.replace('.json', ''),
+                                "text": embeddings[i]['text'],
+                                "chunk_index": i,
                                 "embedding": embeddings[i]['embedding'],
-                                "knowledge_base_id": filename,
-                                "chunk_text": embeddings[i]['text']
+                                "doc_type": metadata.get("category", "unknown")
                             })
             print(f"Saving embeddings to: {output_file}")
 
@@ -105,13 +115,12 @@ def process_knowledge_base_folder(source_folder: str, output_file: str, embeddin
 
 def main(option: str):
 
-    print("Generating embeddings for sample texts...")
+    print("Generating embeddings for sample files")
+    #Use: embedding_service = OpenAIEmbeddingService() for OpenAI embeddings
+    embedding_service = TransformersEmbeddingService(model_name=settings.transformers_embedding_model)
+
     source_file = "c:/personal/_ProductSupportAIAgent/datasets/product_data/amazon_50.json"
-    output_file = "c:/personal/_ProductSupportAIAgent/datasets/product_data/amazon_50_with_transformers_embeddings.json"  
-    model_name = "sentence-transformers/multi-qa-mpnet-base-dot-v1"
-    
-    print(f"Using model: {model_name}")
-    embedding_service = TransformersEmbeddingService(model_name=model_name)
+    output_file = "c:/personal/_ProductSupportAIAgent/datasets/product_data/amazon_50_with_transformers_embeddings.jsonl"  
     
     if option in ["products", "both"]:
         print(f"Processing products from file: {source_file}")
