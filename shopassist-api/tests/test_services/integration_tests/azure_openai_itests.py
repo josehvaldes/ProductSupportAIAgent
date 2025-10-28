@@ -1,6 +1,6 @@
 # API endpoint tests
 import unittest
-from shopassist_api.infrastructure.services.openai_service import openai_service
+from shopassist_api.infrastructure.services.openai_embedding_service import openai_service
 
 class TestServicesIntegration(unittest.TestCase):
     @classmethod

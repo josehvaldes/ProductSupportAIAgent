@@ -16,6 +16,9 @@ class Settings(BaseSettings):
 
     use_dump_service: bool = True
 
+    # Embedding Configuration
+    embedding_provider: str = "azure_openai"  # Options: 'azure_openai', 'transformers'
+    
     # OpenAI Configuration
     openai_api_key: Optional[str] = None
     openai_model: str = "gpt-4o-mini"
@@ -24,10 +27,11 @@ class Settings(BaseSettings):
     azure_openai_endpoint: Optional[str] = None
     azure_openai_api_version: str = "2024-02-15-preview"
 
-    azure_openai_default_model: Optional[str] = None
-    azure_openai_model_deployment: Optional[str] = None
+    azure_openai_embedding_model: Optional[str] = None
+    azure_openai_embedding_model_deployment: Optional[str] = None
     
-
+    #Transformers Configuration for EMBEDDING_PROVIDER = transformers
+    transformers_embedding_model: Optional[str] = "sentence-transformers/all-MiniLM-L6-v2"
 
     # Azure AI Search
     azure_search_endpoint: Optional[str] = None

@@ -161,7 +161,7 @@ Decomposed Tasks:
 - [ ] 
 - [ ] 
 
-**Time Invested:** ___ hours
+**Time Invested:** 8 hours
 
 ---
 
@@ -373,7 +373,7 @@ Decomposed Tasks:
 - [ ] Prepare data for Week 2 embedding
 - [ ] Start Week 2: Embedding service
 
-**Time Invested:** ___ hours
+**Time Invested:** 6 hours
 
 ---
 
@@ -381,52 +381,141 @@ Decomposed Tasks:
 **Today's Focus:** Week 1 wrap-up and documentation
 
 **Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+1. [X] Clean up codebase (1.5 hours)
+   - Remove unused imports and commented code
+   - Standardize code formatting (Prettier/Black)
+   - Add missing type hints (Python) and types (TypeScript)
+   - Fix any linting warnings
+   - Organize imports consistently
+   - Add docstrings to key functions
+
+2. [X] Write comprehensive README.md (2 hours)
+   - Project overview and goals
+   - Architecture diagram (text/ASCII art for now)
+   - Tech stack list with versions
+   - Setup instructions:
+     * Prerequisites (Node.js, Python, Azure account)
+     * Environment variables needed
+     * Installation steps (backend + frontend)
+     * Running the application
+   - API endpoints documentation
+   - Project structure explanation
+   - Screenshots of current UI
+   - Known limitations
+   - Roadmap for remaining weeks
+
+3. [-] Document Week 1 achievements (Postpone)
+   - Fill in Week 1 Summary in DEVLOG.md:
+     * List all shipped features
+     * Document key technical decisions
+     * Calculate metrics (products in DB, lines of code, etc.)
+     * List blockers resolved
+     * Key learnings
+   - Take screenshots of:
+     * Product grid with filters
+     * Product detail view
+     * Azure Portal (Cosmos DB, OpenAI services)
+     * API response examples
+
+4. [-] Create demo/presentation material (Postpone)
+   - Record short screen recording (2-3 min) showing:
+     * Product browsing
+     * Filtering by category/price
+     * Product detail view
+   - Create architecture diagram (draw.io, Excalidraw, or Mermaid)
+   - Prepare "elevator pitch" for the project
+   - Update GitHub repo description
+
+5. [X] Review and organize project files (45 min)
+   - Verify .gitignore is complete (no secrets committed)
+   - Organize data files into proper folders
+   - Clean up any test/temporary files
+   - Ensure all scripts are documented
+   - Check that .env.example is up to date
+
+6. [ ] Plan Week 2 in detail (1 hour)
+   - Review Week 2 tasks from architecture doc
+   - Break down Day 8 tasks (embedding service)
+   - Verify Azure OpenAI quota/limits
+   - Calculate embedding costs for 200 products
+   - Prepare Milvus deployment checklist
+   - List any dependencies to install
+   - Identify potential blockers
+
+7. [X] Calculate and document metrics (30 min)
+   - Count lines of code (backend + frontend)
+   - Check Azure costs so far
+   - Count API endpoints created
+   - Measure response times for current endpoints
+   - Document product catalog stats:
+     * Total products in Cosmos DB
+     * Products by category
+     * Average price by category
+     * Chunk statistics
+
+
 
 **Technical Decisions:**
-- 
+- Week 1 focused on foundation - no AI/ML yet (as planned)
+- Successfully integrated Cosmos DB, FastAPI, React + Mantine
+- Deferred Milvus deployment to Week 2 (cost optimization)
+- Added logging and error handling early (good practice) 
 
 **Challenges & Solutions:**
-- 
+- Create meaninfull documentation. Solve with Claude.ai
+- Create architecture diagrams. Solved with excalidraw tool
 
 **Learnings:**
-- 
+- collect lines of code in Ubuntu
 
-**Next Steps:**
-- [ ] 
-- [ ] 
 
-**Time Invested:** ___ hours
+**Time Invested:** 2 hours
 
 ---
 
 ### 📊 Week 1 Summary
 
 **Shipped:**
-- 
-- 
-- 
+- ✅ Azure infrastructure (Cosmos DB, OpenAI service, Resource Group)
+- ✅ Product dataset (200 electronics products from Kaggle)
+- ✅ Knowledge base documents (5 documents, ~2,500 words)
+- ✅ FastAPI backend with Cosmos DB integration
+- ✅ React + Mantine frontend with product browsing
+- ✅ End-to-end product retrieval and filtering
 
 **Key Technical Decisions:**
-1. 
-2. 
-3. 
+1. Chose Cosmos DB over PostgreSQL (Azure-native, NoSQL flexibility)
+2. Chose Mantine over Tailwind (component library, faster UI dev)
+3. Semantic chunking with 12.5% overlap for long descriptions
+4. Deferred Milvus deployment until Week 2 (cost + need embeddings first)
+5. Clean architecture pattern for backend services
 
 **Metrics:**
-- Products in Cosmos DB: ___
-- Knowledge base documents: ___
-- Lines of code: ___
-- Azure services deployed: ___
+- Products in Cosmos DB: 200
+- Knowledge base documents: 5
+- Knowledge base chunks: ~15-20
+- Lines of code (backend): ~1790
+- Lines of code (frontend): 937
+- Azure services deployed: 3 (Cosmos DB, OpenAI, Resource Group)
+- API endpoints: 4 (health, products searchs, search)
+- Average product token count: ~XXX
+- Products requiring chunking: ~XX%
 
 **Blockers Resolved:**
-- 
+- RBAC for Cosmos DB (solved via Azure CLI)
+- CORS configuration for FastAPI ↔ React
+- Dataset filtering to 200 relevant products
+- ADF cost management (optimized pipeline execution)
 
 **Learnings:**
-- 
+- Azure RBAC: control-plane vs data-plane roles
+- Semantic chunking is better than hard token limits
+- Mantine components accelerate UI development
+- FastAPI dependency injection patterns
+- React hooks and state management best practices
 
-**Total Time This Week:** ___ hours
+
+**Total Time This Week:** 44 hours
 
 **Week 2 Preview:**
 Core RAG pipeline implementation - embedding service, Milvus integration, Azure OpenAI connection
@@ -441,27 +530,79 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
 **Today's Focus:** Embedding service implementation
 
 **Completed:**
-- [ ] Created embedding service module
-- [ ] Integrated Azure OpenAI text-embedding-3-small
-- [ ] Tested embeddings generation for sample products
-- [ ] Set up embedding batch processing
+1. [X] Set up embedding service module (1.5 hours)
+   - Create Infrastructure/services/OpenAIEmbeddingService and TransformersEmbeddingService for Open AI and Sentence Transformers
+   - Create the service_interfaces.py module for Interfaces
+   - Initialize Azure OpenAI embedding client
+   - Create function: generate_embedding(text: str) -> List[float]
+   - Create function: generate_embeddings_batch(texts: List[str]) -> List[List[float]]
+   - Add error handling and retry logic
+   - Test with sample product descriptions
+
+2. [X] Prepare data for embedding (1 hour)
+   - Load product chunks from Day 2 (products_for_embedding.json)
+   - Load knowledge base chunks from Day 3
+   - Validate chunk text quality (no empty strings, proper format)
+   - Create combined dataset for embedding
+   - Calculate total embedding cost estimate
+   - Document chunk statistics
+
+3. [X] Implement batch embedding generation (2 hours)
+   - Create script: scripts/generate_embeddings.py
+   - Process products in batches (100 at a time)
+   - Process knowledge base chunks in batches
+   - Add progress tracking (tqdm or logging)
+   - Save embeddings to JSON files:
+     * product_embeddings.jsonl
+     * knowledge_base_embeddings.jsonl
+   - Include metadata: chunk_id, product_id, embedding, timestamp
+   - Use Sentence Transformers for testing 
+
+4. [X] Test embedding quality (1 hour)
+   - Test similarity between related products
+   - Test similarity between question and FAQ chunks
+   - Verify embedding dimensions (1536)
+   - Check for NaN or invalid values
+   - Document sample similarity scores
+   - Test batch vs single embedding consistency
+
+5. [X] Create data models for vector storage (1 hour)
+   - Update shopassist-api/application/models/chunk.py with embedding field
+   - Create VectorChunk model for Milvus
+   - Add validation for embedding dimensions
+   - Document schema for Milvus collection
+   - Prepare sample data for Day 9
+
+6. [X] Document embedding strategy and costs (30 min)
+   - Calculate actual embedding costs later. After Sentence Transformers is replaced by OpenAI
+   - Document token usage per chunk type
+   - Record total chunks embedded
+   - Note any API errors or retries
+   - Document embedding generation time
+   - Update DEVLOG with metrics
+
+7. [TODO] Test embedding with Azure OpenAI text-embedding-3-small
+   - update scripts/generate_embeddings.py to use the openai_embedding_service.py module
+   - calculate costs and execution time
 
 **Technical Decisions:**
-- Embedding dimension: 1536 (text-embedding-3-small)
-- Batch size: 100 documents per request
+- Use Open AI embedding model. Embedding dimension: 1536 (text-embedding-3-small)
+- Use sentence-transformers/multi-qa-mpnet-base-dot-v1. Embedding dimension: 768 ()
+- Batch size: 10 documents per request
 
 **Challenges & Solutions:**
-- 
+- Implement scripts and generate the correct data
 
 **Learnings:**
-- 
+- python ellipsis in Fields
+- write and load jsonl files
 
 **Next Steps:**
 - [ ] Create Milvus collections
 - [ ] Build vector indexing pipeline
 - [ ] Chunk product descriptions
 
-**Time Invested:** ___ hours
+**Time Invested:** 6 hours
 
 ---
 

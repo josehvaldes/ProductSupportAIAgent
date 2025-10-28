@@ -23,3 +23,21 @@ class ProductServiceInterface(ABC):
     async def search_products_by_price_range(self, min_price: float, max_price: float) -> List[Product]:
         """Search products within a price range."""
         pass
+
+class EmbeddingServiceInterface(ABC):
+    """Abstract base class for embedding service implementations."""
+    
+    @abstractmethod
+    def count_tokens(self, text: str) -> int:
+        """Count tokens in the given text."""
+        pass
+
+    @abstractmethod
+    def generate_embedding(self, input_text: str) -> list[float]:
+        """Generate embedding for the given input text."""
+        pass
+    
+    @abstractmethod
+    def generate_embedding_batch(self, input_texts: list[str], batch_size: int = 50) -> list[dict]:
+        """Generate embeddings for a list of input texts."""
+        pass

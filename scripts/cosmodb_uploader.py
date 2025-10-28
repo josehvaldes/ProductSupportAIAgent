@@ -1,11 +1,13 @@
+import os
 import json
+import random
 from azure.cosmos import CosmosClient, PartitionKey
 from azure.core.credentials import AzureKeyCredential
 from azure.identity import DefaultAzureCredential
 import traceback
 
-COSMOSDB_ENDPOINT = "https://<accoutname>.documents.azure.com:443/"
-COSMOSDB_NAME = "<database_name>"
+COSMOSDB_ENDPOINT = "https://cdb-shopassist-ai-test-01.documents.azure.com:443/"
+COSMOSDB_NAME = "shopassist-ai"
 COSMOSDB_CONTAINER = "products"
 
 def transform_document_body(data:dict) -> dict:
@@ -22,7 +24,7 @@ def transform_document_body(data:dict) -> dict:
         "review_count": data.get("review_count", 0.0),
         "chunks": [ chunk for chunk in data.get("chunks", [])],
         "total_chunks": len(data.get("chunks", [])),
-        "availablility": "in_stock",
+        "availability": "in_stock",
         "image_url": data.get("image_url", ""),
         "product_url": data.get("product_url", ""),
         "_partitionKey": data.get("category", "unknown")

@@ -97,7 +97,7 @@ shopassist_api/
 ├── application/
 │   └── interfaces/
 │       ├── __init__.py
-│       ├── product_service_interface.py    # Interface definition
+│       ├── service_interfaces.py    # Interface definition
 │       └── di_container.py                 # DI container
 ├── infrastructure/
 │   └── services/

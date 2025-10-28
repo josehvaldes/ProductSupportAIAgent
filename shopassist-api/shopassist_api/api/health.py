@@ -2,7 +2,6 @@
 Health check endpoint.
 """
 from fastapi import APIRouter
-#import datetime
 from datetime import datetime, timezone
 from shopassist_api.application.settings.config import settings
 

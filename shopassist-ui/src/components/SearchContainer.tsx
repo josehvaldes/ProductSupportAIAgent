@@ -1,4 +1,4 @@
-import { use, useState } from "react";
+import { useState } from "react";
 import { Box, Stack, Textarea, 
     Text, Space, Button, Group, Radio, 
     Select,RangeSlider, Notification} from '@mantine/core';
@@ -29,10 +29,6 @@ export function SearchContainer(){
             {
                 setProducts([response]);
             }
-            // else
-            // {
-            //     setProducts([]);
-            // }
         }
         else if (radioInput == 2)
         {

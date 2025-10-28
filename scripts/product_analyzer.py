@@ -1,3 +1,10 @@
+"""
+Product Analyzer
+----------------
+Parses product data from a CSV file, processes it to extract relevant fields,
+and saves the structured data into a JSON file.
+The JSON result file will be used by the CosmosDB uploader (cosmodb_uploader.py) to upload data to Azure CosmosDB.
+"""
 import uuid
 import math
 import json

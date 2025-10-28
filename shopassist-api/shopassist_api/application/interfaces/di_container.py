@@ -1,10 +1,12 @@
 """
 Dependency injection container for the Shop Assistant API.
 """
-from shopassist_api.application.interfaces.product_service_interface import ProductServiceInterface
+from shopassist_api.application.interfaces.service_interfaces import ProductServiceInterface
 from shopassist_api.infrastructure.services.cosmos_product_service import CosmosProductService
 from shopassist_api.infrastructure.services.dump_product_service import DumpProductService
 from shopassist_api.application.settings.config import settings
+from shopassist_api.application.interfaces.service_interfaces import EmbeddingServiceInterface
+from shopassist_api.infrastructure.services.openai_embedding_service import OpenAIEmbeddingService
 
 class DIContainer:
     """Simple dependency injection container."""
@@ -20,6 +22,11 @@ class DIContainer:
     def setup_cosmos_services(self):
         """Configure BUMP service bindings."""
         self._services[ProductServiceInterface] = CosmosProductService
+
+    def setup_embedding_services(self):
+        """Configure embedding service bindings."""
+        if settings.embedding_provider == "azure_openai":
+            self._services[EmbeddingServiceInterface] = OpenAIEmbeddingService
 
     def _setup_services(self):
         """Configure service bindings."""

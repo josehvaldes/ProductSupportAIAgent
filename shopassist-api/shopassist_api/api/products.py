@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import List, Optional
-from shopassist_api.application.interfaces.product_service_interface import ProductServiceInterface
+from shopassist_api.application.interfaces.service_interfaces import ProductServiceInterface
 from shopassist_api.application.interfaces.di_container import get_product_service
 from shopassist_api.domain.models.product import Product
 
