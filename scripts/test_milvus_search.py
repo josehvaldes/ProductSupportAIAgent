@@ -1,5 +1,4 @@
 import sys
-import argparse
 import time
 from pathlib import Path
 from dotenv import load_dotenv
@@ -57,6 +56,8 @@ def test_search():
             print(f"      Text: {result['text'][:100]}...")
             if 'product_id' in result:
                 print(f"      Product: {result['product_id']} | {result['brand']} | ${result['price']}")
+            elif 'doc_type' in result:
+                print(f"\n      Doc Type: {result['doc_type']}")
     
     print("\n✅ Search tests complete!")
 

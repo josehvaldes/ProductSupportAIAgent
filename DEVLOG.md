@@ -701,24 +701,80 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
 **Today's Focus:** Document chunking and ingestion
 
 **Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+1. [X] Create retrieval service layer (1.5 hours)
+   - Create app/services/retrieval_service.py
+   - Implement retrieve_products(query: str, top_k: int, filters: dict)
+   - Implement retrieve_knowledge_base(query: str, top_k: int)
+   - Implement hybrid_search(query: str, use_vector: bool, use_keyword: bool)
+   - Add result deduplication logic (multiple chunks from same product)
+   - Add result ranking and scoring
+   - Test retrieval with sample queries
+
+2. [X] Implement query preprocessing (1 hour)
+   - Create app/services/query_processor.py
+   - Extract filters from natural language (price, category, brand)
+   - Query expansion (synonyms, related terms)
+   - Query classification (product vs policy)
+   - Normalize query text
+   - Test with various query formats
+
+3. [X] Build result aggregation logic (1.5 hours)
+   - Combine multiple chunks from same product
+   - Calculate relevance scores
+   - Merge vector and keyword search results
+   - Implement re-ranking algorithms
+   - Handle empty results gracefully
+   - Format results for LLM consumption
+
+4. [X] Create context builder for RAG (1 hour)
+   - Create app/services/context_builder.py
+   - Format retrieved documents into context string
+   - Add metadata (source, product ID, price)
+   - Implement context truncation (max tokens)
+   - Prioritize most relevant chunks
+   - Add citation tracking
+
+5. [X] Implement retrieval API endpoints (1 hour)
+   - Add POST /api/search/vector (vector search)
+   - Add POST /api/search/hybrid (hybrid search)
+   - Add GET /api/search/test (test various queries)
+   - Document request/response formats
+   - Add input validation
+   - Test with Postman
+
+6. [X] Test end-to-end retrieval flow (1 hour)
+   - Test product queries with filters
+   - Test policy/FAQ queries
+   - Test edge cases (no results, ambiguous queries)
+   - Measure retrieval latency
+   - Verify result relevance
+   - Document retrieval statistics
+
+7. [X] Create retrieval evaluation script (1 hour)
+   - Create scripts/evaluate_retrieval.py
+   - Define test query set (20 queries)
+   - Calculate precision@k, recall@k
+   - Measure mean reciprocal rank (MRR)
+   - Document retrieval quality metrics
+   - Identify areas for improvement
 
 **Technical Decisions:**
-- 
+- Use dependencies injection for MilvusServices.
+- Write query processors in application/services module.
+- deprecate code in application/ai module.
 
 **Challenges & Solutions:**
 - 
 
 **Learnings:**
-- 
+- Milvus API and queries.
+- Milvus metrics and distance meaning
 
 **Next Steps:**
 - [ ] 
 - [ ] 
 
-**Time Invested:** ___ hours
+**Time Invested:** 3 hours
 
 ---
 

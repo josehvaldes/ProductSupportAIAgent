@@ -57,6 +57,12 @@ class Settings(BaseSettings):
     log_file: str = "logs/shopassist_api.log"
     log_to_console: bool = True
 
+    # Milvus Configuration
+    milvus_host: str = "localhost"
+    milvus_port: str = "19530"
+    milvus_product_collection: str = "products_collection"
+    milvus_knowledge_base_collection: str = "knowledge_base_collection"
+
     class Config:
         env_file = ".env"
         case_sensitive = False
