@@ -35,7 +35,9 @@ class DIContainer:
             self.setup_dump_services()
         else:
             self.setup_cosmos_services()
-        
+
+        print(f"Setting up Embedding Service for provider: {settings.embedding_provider}")
+
         if settings.embedding_provider == "azure_openai":
             self._services[EmbeddingServiceInterface] = OpenAIEmbeddingService
         elif settings.embedding_provider == "transformers":
@@ -43,11 +45,11 @@ class DIContainer:
 
         self._services[VectorServiceInterface] = MilvusService
 
-    def get_service(self, service_type):
+    def get_service(self, service_type, *args, **kwargs):
         """Get a service instance by type."""
         if service_type in self._services:
             service_class = self._services[service_type]
-            return service_class()
+            return service_class( *args, **kwargs)
         raise ValueError(f"Service {service_type} not registered")
 
 
@@ -66,3 +68,15 @@ def get_embedding_service() -> EmbeddingServiceInterface:
 def get_vector_service() -> VectorServiceInterface:
     """Dependency injection function for vector service."""
     return _container.get_service(VectorServiceInterface)
+
+def get_retrieval_service():
+    """Dependency injection function for retrieval service."""
+    from shopassist_api.application.services.retrieval_service import RetrievalService
+    vector_service = get_vector_service()
+    embedding_service = get_embedding_service()
+    product_service = get_product_service()
+    return RetrievalService(
+        vector_service=vector_service,
+        embedding_service=embedding_service,
+        product_service=product_service
+    )

@@ -57,10 +57,11 @@ def upload_file_to_cosmosdb(file_path:str):
         data = json.load(f)
 
     print(f"Uploading {len(data)} documents to CosmosDB container '{container_name}' in database '{database_name}'.")
-    random_indexes = random.sample(range(11, len(data)), min(10, len(data)))
+    random_indexes = random.sample(range(len(data)), min(10, len(data))) 
     print("Sample documents to be uploaded:", len(random_indexes))
-    for idx in random_indexes:
-        doc = data[idx]
+    #for idx in random_indexes:
+    #doc = data[idx]
+    for doc in data:
         try:
             container.create_item(body=transform_document_body(doc))
             print(f"Uploaded document ID: {doc.get('id')}, Category: {doc.get('category')}, Name: {doc.get('name')[0:20]}...")
@@ -68,9 +69,6 @@ def upload_file_to_cosmosdb(file_path:str):
             print(f"Error uploading document ID: {doc.get('id')}, Error: {str(e)}")
             traceback.print_exc()
 
-    # Upload each document to the container
-    # for doc in data[0:10]:# Limit to 2 item for testing
-    
     print("Upload complete.")
     
 

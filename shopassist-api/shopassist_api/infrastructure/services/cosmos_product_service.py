@@ -35,7 +35,7 @@ class CosmosProductService(ProductServiceInterface):
             self.product_container = None
             self.chat_container = None
 
-    async def get_product_by_id(self, product_id: str)-> Product:
+    async def get_product_by_id(self, product_id: str)-> dict[str, any]:
         """Retrieve a product by its ID from CosmosDB."""
         if not self.client or not self.database_name:
             return None
@@ -51,7 +51,7 @@ class CosmosProductService(ProductServiceInterface):
             query = f"SELECT * FROM c WHERE c.id = '{product_id}'"
             items = list(container.query_items(query=query, enable_cross_partition_query=True))
             if items:
-                return Product(**items[0])
+                return items[0]
             else:
                 return None
         except Exception as e:
@@ -59,7 +59,7 @@ class CosmosProductService(ProductServiceInterface):
             traceback.print_exc()
             return None
 
-    async def search_products_by_category(self, category: str)-> list[Product]:
+    async def search_products_by_category(self, category: str)-> list[dict[str, any]]:
         """Search products by category from CosmosDB."""
         if not self.client or not self.database_name:
             return []
@@ -83,7 +83,7 @@ class CosmosProductService(ProductServiceInterface):
             traceback.print_exc()
             return []
         
-    async def search_products_by_price_range(self, min_price: float, max_price: float) -> list[Product]:
+    async def search_products_by_price_range(self, min_price: float, max_price: float) -> list[dict[str, any]]:
         """Search products within a price range from CosmosDB."""
         if not self.client or not self.database_name:
             return []
@@ -120,11 +120,58 @@ class CosmosProductService(ProductServiceInterface):
 
             query = "SELECT TOP 1 * FROM c"
             items = list(container.query_items(query=query, enable_cross_partition_query=True))
-            for item in items:
+            for item in items[0:1]: # print only first item
                 print(item)
-
 
             print("Connected to CosmosDB successfully.")
         except Exception as e:
             print("An error occurred while connecting to CosmosDB:")
             traceback.print_exc()
+
+    async def search_products_by_text(self, text: str) -> list[dict[str, any]]:
+        """Search products by text from CosmosDB."""
+        if not self.client or not self.database_name:
+            return []
+
+        try:
+            # Get a database
+            database = self.client.get_database_client(self.database_name)
+
+            # Get the product container
+            container = database.get_container_client(self.product_container)
+
+            # Query for products by text in name or description
+            query = f"SELECT * FROM c WHERE CONTAINS(c.name, '{text}') OR CONTAINS(c.description, '{text}')"
+            items = list(container.query_items(
+                query=query,
+                enable_cross_partition_query=True
+                ))
+            return items
+        except Exception as e:
+            print("An error occurred while searching for products by text:")
+            traceback.print_exc()
+            return []
+    
+    async def search_products_by_name(self, name: str) -> list[dict[str, any]]:
+        """Search products by name from CosmosDB."""
+        if not self.client or not self.database_name:
+            return []
+
+        try:
+            # Get a database
+            database = self.client.get_database_client(self.database_name)
+
+            # Get the product container
+            container = database.get_container_client(self.product_container)
+
+            # Query for products by name
+            query = f"SELECT * FROM c WHERE CONTAINS(c.name, '{name}')"
+            items = list(container.query_items(
+                query=query,
+                enable_cross_partition_query=True
+                ))
+            return items
+        except Exception as e:
+            print("An error occurred while searching for products by name:")
+            traceback.print_exc()
+            return []

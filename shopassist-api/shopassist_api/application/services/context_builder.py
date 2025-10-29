@@ -1,5 +1,9 @@
 from typing import List, Dict
 import tiktoken
+from shopassist_api.logging_config import get_logger
+import traceback
+
+logger = get_logger(__name__)
 
 class ContextBuilder:
     """
@@ -22,18 +26,23 @@ class ContextBuilder:
         """
         context_parts = []
         total_tokens = 0
-        
-        for i, product in enumerate(products, 1):
-            product_text = self._format_product(product, i)
-            tokens = len(self.encoding.encode(product_text))
-            
-            # Check if adding this product exceeds limit
-            if total_tokens + tokens > self.max_tokens:
-                break
-            
-            context_parts.append(product_text)
-            total_tokens += tokens
-        
+        logger.info(f"Building product context: {len(products)} products")
+
+        try:
+            for i, product in enumerate(products, 1):
+                product_text = self._format_product(product, i)
+                tokens = len(self.encoding.encode(product_text))
+                
+                # Check if adding this product exceeds limit
+                if total_tokens + tokens > self.max_tokens:
+                    break
+                
+                context_parts.append(product_text)
+                total_tokens += tokens
+        except Exception as e:
+            logger.error(f"  Error logging product count: {e}")
+            traceback.print_exc()
+
         context = "\n\n".join(context_parts)
         return context
     
@@ -58,7 +67,8 @@ class ContextBuilder:
     
     def _format_product(self, product: Dict, index: int) -> str:
             """Format single product for context"""
-            return f"""Product {index}: {product['title']}
+            print(f"    Formatting product {index}:")
+            return f"""Product {index}: {product['name']}
                     Price: ${product['price']:.2f}
                     Category: {product['category']}
                     Brand: {product.get('brand', 'N/A')}

@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     azure_openai_embedding_model_deployment: Optional[str] = None
     
     #Transformers Configuration for EMBEDDING_PROVIDER = transformers
-    transformers_embedding_model: Optional[str] = "sentence-transformers/all-MiniLM-L6-v2"
+    transformers_embedding_model: Optional[str] = "sentence-transformers/multi-qa-mpnet-base-dot-v1"
 
     # Azure AI Search
     azure_search_endpoint: Optional[str] = None

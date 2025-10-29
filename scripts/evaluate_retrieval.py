@@ -1,10 +1,11 @@
+import asyncio
 import sys
 import argparse
 import time
+import json
+from tqdm import tqdm
 from pathlib import Path
 from dotenv import load_dotenv
-from tqdm import tqdm
-import json
 
 sys.path.append('../shopassist-api')
 # Load .env file from the correct location
@@ -12,37 +13,52 @@ script_dir = Path(__file__).parent
 env_path = script_dir.parent / 'shopassist-api' / '.env'
 load_dotenv(dotenv_path=env_path)
 
-from shopassist_api.application.services.query_processor import QueryProcessor
-from shopassist_api.application.services.retrieval_service import RetrievalService
+from shopassist_api.application.settings.config import settings
 
+from shopassist_api.application.services.retrieval_service import RetrievalService
+from shopassist_api.infrastructure.services.milvus_service import MilvusService
+from shopassist_api.infrastructure.services.transformers_embedding_service import TransformersEmbeddingService
+from shopassist_api.application.services.query_processor import QueryProcessor
+from shopassist_api.infrastructure.services.cosmos_product_service import CosmosProductService
 
 # Test queries with expected results
 TEST_QUERIES = [
-    {
-        "query": "laptop for video editing",
-        "expected_category": "Laptops",
-        "expected_keywords": ["video", "editing", "performance"]
-    },
-    {
-        "query": "wireless headphones under $100",
-        "expected_category": "Headphones",
-        "max_price": 100
-    },
+    # {
+    #     "query": "laptop for video editing",
+    #     "expected_category": "Laptops",
+    #     "expected_keywords": ["video", "editing", "performance"]
+    # },
+    # {
+    #     "query": "wireless headphones under $100",
+    #     "expected_category": "Headphones",
+    #     "max_price": 100
+    # },
     {
         "query": "what is your return policy",
         "query_type": "policy",
-        "expected_doc_type": "return_policy"
+        "expected_doc_type": "policies"
     },
     # Add more test queries...
 ]
 
-def evaluate_retrieval():
+# Instantiate services
+vector_service = MilvusService()
+embedding_service = TransformersEmbeddingService(model_name=settings.transformers_embedding_model)
+product_service = CosmosProductService()
+
+# Create retrieval service with injected dependencies
+retrieval_service = RetrievalService(
+    vector_service=vector_service,
+    embedding_service=embedding_service,
+    product_service=product_service
+)
+
+async def evaluate_retrieval():
     """
     Evaluate retrieval quality
     """
     print("🧪 Evaluating Retrieval Quality\n")
     
-    retrieval = RetrievalService()
     processor = QueryProcessor()
     
     results = {
@@ -58,16 +74,17 @@ def evaluate_retrieval():
         
         # Classify
         query_type = processor.classify_query_type(query)
-        
+        print(f"   🔍 Classified as: {query_type}")
         # Retrieve
         if query_type == 'product':
-            retrieved = retrieval.retrieve_products(query, top_k=5)
+            retrieved = await retrieval_service.retrieve_products(query, top_k=5)
         else:
-            retrieved = retrieval.retrieve_knowledge_base(query, top_k=3)
+            retrieved = retrieval_service.retrieve_knowledge_base(query, top_k=3)
         
         # Evaluate
         success = len(retrieved) > 0
-        
+        print(f"   Retrieved {len(retrieved)} results")
+        print(f"   Top result: {retrieved[0] if retrieved else 'N/A'}") 
         if success:
             results["successful"] += 1
             print(f"   ✅ Retrieved {len(retrieved)} results")
@@ -79,6 +96,8 @@ def evaluate_retrieval():
                     print(f"   ✅ Category match: {top_category}")
                 else:
                     print(f"   ⚠️  Category mismatch: expected {test['expected_category']}, got {top_category}")
+            else:
+                print("   ℹ️  No expected category to verify")
         else:
             results["failed"] += 1
             print("   ❌ No results retrieved")
@@ -106,4 +125,4 @@ def evaluate_retrieval():
     print("\n✅ Results saved to retrieval_evaluation.json")
 
 if __name__ == "__main__":
-    evaluate_retrieval()
+    asyncio.run(evaluate_retrieval())

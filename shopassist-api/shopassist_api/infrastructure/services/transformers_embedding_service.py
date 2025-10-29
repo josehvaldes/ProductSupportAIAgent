@@ -4,7 +4,7 @@ from shopassist_api.application.settings.config import settings
 
 class TransformersEmbeddingService(EmbeddingServiceInterface):
     """Service for generating embeddings using Transformers models."""
-    def __init__(self, model_name: str):
+    def __init__(self, model_name: str = None):
         self.model = None
         self.model_name = model_name
         self._initialize_client()
@@ -13,7 +13,7 @@ class TransformersEmbeddingService(EmbeddingServiceInterface):
     def _initialize_client(self):
         """Initialize the Transformers model based on configuration."""
         if not self.model_name:
-            self.model_name = settings.embedding_model or "sentence-transformers/multi-qa-mpnet-base-dot-v1"
+            self.model_name = settings.transformers_embedding_model or "sentence-transformers/multi-qa-mpnet-base-dot-v1"
         self.model = SentenceTransformer(self.model_name)
     
     def count_tokens(self, text: str) -> int:

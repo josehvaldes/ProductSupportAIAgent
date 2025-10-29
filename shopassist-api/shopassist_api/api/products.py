@@ -4,6 +4,9 @@ from typing import List, Optional
 from shopassist_api.application.interfaces.service_interfaces import ProductServiceInterface
 from shopassist_api.application.interfaces.di_container import get_product_service
 from shopassist_api.domain.models.product import Product
+from shopassist_api.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter()
 

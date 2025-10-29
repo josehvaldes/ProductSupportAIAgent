@@ -75,3 +75,41 @@ class DumpProductService(ProductServiceInterface):
                         "availability": "In Stock" }
             products.append(Product(**product))
         return products
+    
+    async def search_products_by_text(self, text: str) -> list[dict[str, any]]:
+        """Search products by description."""
+        products = []
+        for i in range(2):
+            product:Product = { "id": f"test{i}",
+                        "name": f"Test Product {i}",
+                        "description": "A product for testing with " + text, 
+                        "category": "Testing", 
+                        "price": f"{19.99 + i}", 
+                        "brand": "testbrand", 
+                        "rating": "4.5", 
+                        "review_count": "10", 
+                        "product_url": f"http://example.com/product/test{i}", 
+                        "image_url": f"http://example.com/product/test{i}/image.jpg",  
+                        "category_full": ["Smartphones","Testing","Unit Tests"], 
+                        "availability": "In Stock" }
+            products.append(Product(**product))
+        return products
+    
+    async def search_products_by_name(self, name: str) -> list[dict[str, any]]:
+        """Search products by name."""
+        products = []
+        for i in range(2):
+            product:Product = { "id": f"test{i}",
+                        "name": name,
+                        "description": "A product for testing", 
+                        "category": "Testing", 
+                        "price": f"{19.99 + i}", 
+                        "brand": "TestBrand", 
+                        "rating": "4.5", 
+                        "review_count": "10", 
+                        "product_url": f"http://example.com/product/test{i}", 
+                        "image_url": f"http://example.com/product/test{i}/image.jpg",  
+                        "category_full": ["Smartphones","Testing","Unit Tests"], 
+                        "availability": "In Stock" }
+            products.append(Product(**product))
+        return products

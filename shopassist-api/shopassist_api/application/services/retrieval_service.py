@@ -1,20 +1,22 @@
 from typing import List, Dict, Optional
-from fastapi import Depends
-from shopassist_api.application.interfaces.di_container import get_embedding_service, get_product_service, get_vector_service
 from shopassist_api.application.interfaces.service_interfaces import EmbeddingServiceInterface, ProductServiceInterface, VectorServiceInterface
 from shopassist_api.logging_config import get_logger
+import traceback
 
 logger = get_logger(__name__)
 
 
 class RetrievalService:
-    def __init__(self):
-        self.milvus:VectorServiceInterface = Depends(get_vector_service)
-        self.embedder:EmbeddingServiceInterface = Depends(get_embedding_service)
-        self.cosmos:ProductServiceInterface = Depends(get_product_service)
+    def __init__(self,
+        vector_service: VectorServiceInterface,
+        embedding_service: EmbeddingServiceInterface,
+        product_service: ProductServiceInterface):
+        self.milvus = vector_service
+        self.embedder = embedding_service
+        self.cosmos = product_service
 
 
-    def retrieve_products(
+    async def retrieve_products(
             self,
             query: str,
             top_k: int = 5,
@@ -33,7 +35,7 @@ class RetrievalService:
         """
         try:
             # Generate query embedding
-            logger.info(f"Generating embedding for query: {query}")
+            logger.info(f"  Generating embedding for query: {query}")
             query_embedding = self.embedder.generate_embedding(query)
             
             # Build filter expression for Milvus
@@ -42,21 +44,24 @@ class RetrievalService:
             # Search in Milvus
             results = self.milvus.search_products(
                 query_embedding=query_embedding,
-                top_k=top_k * 2,  # Get more to deduplicate
+                top_k=top_k, # * 2,  # Get more to deduplicate
                 filters=filter_expr
-            )
-            
+            )            
             # Deduplicate by product_id and aggregate scores
             products = self._deduplicate_and_aggregate(results)
-            
+            print(f"    Retrieved {len(products)} unique products from Milvus")
+            logger.info(f"Retrieved {len(products)} unique products from Milvus")   
             # Enrich with full product data from Cosmos DB
-            enriched = self._enrich_with_product_data(products)
+            enriched = await self._enrich_with_product_data(products)
             
             # Limit to top_k
+            print(f"    Returning top {top_k} products after enrichment")
             return enriched[:top_k]
             
         except Exception as e:
             logger.error(f"Error in retrieve_products: {e}")
+            print("Error in retrieve_products: ", e)
+            traceback.print_exc()
             return []
 
     def retrieve_knowledge_base(
@@ -92,7 +97,7 @@ class RetrievalService:
             logger.error(f"Error in retrieve_knowledge_base: {e}")
             return []
     
-    def hybrid_search(
+    async def hybrid_search(
         self,
         query: str,
         top_k: int = 5,
@@ -109,7 +114,7 @@ class RetrievalService:
             return self.retrieve_products(query, top_k)
         else:
             # Fallback to Cosmos DB keyword search
-            return self.cosmos.search_products_by_text(query, top_k)
+            return await self.cosmos.search_products_by_text(query, top_k)
     
     def _build_filter_expression(self, filters: Optional[Dict]) -> Optional[str]:
         """
@@ -168,17 +173,18 @@ class RetrievalService:
         
         return products
     
-    def _enrich_with_product_data(self, products: List[Dict]) -> List[Dict]:
+    async def _enrich_with_product_data(self, products: List[Dict]) -> List[Dict]:
         """
         Fetch full product details from Cosmos DB
         """
         enriched = []
-        
+        print("    Enriching products with full data from Cosmos DB...")
+        print(f"    Number of products to enrich: {len(products)}")
         for product in products:
             try:
                 # Get full product from Cosmos
-                full_product = self.cosmos.get_product_by_id(product['product_id'])
-                
+                print(f"      Fetching product ID: {product['product_id']}")
+                full_product = await self.cosmos.get_product_by_id(product['product_id'])
                 if full_product:
                     enriched.append({
                         **full_product,
@@ -187,6 +193,7 @@ class RetrievalService:
                     })
             except Exception as e:
                 logger.error(f"Error enriching product {product['product_id']}: {e}")
+                traceback.print_exc()
                 continue
-        
+        print(f"    * Enriched {len(enriched)} products with full data.")
         return enriched

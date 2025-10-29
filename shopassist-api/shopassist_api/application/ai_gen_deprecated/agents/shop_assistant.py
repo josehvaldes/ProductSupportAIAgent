@@ -3,9 +3,9 @@ Shop Assistant AI Agent - Main agent orchestrator.
 """
 from typing import Dict, Optional, List
 from shopassist_api.application.settings.config import settings
-from shopassist_api.application.ai.models.llm_client import LLMClient
-from shopassist_api.application.ai.retrieval.product_retriever import ProductRetriever
-from shopassist_api.application.ai.prompts.shop_assistant_prompts import ShopAssistantPrompts
+from shopassist_api.application.ai_gen_deprecated.models.llm_client import LLMClient
+from shopassist_api.application.ai_gen_deprecated.retrieval.product_retriever import ProductRetriever
+from shopassist_api.application.ai_gen_deprecated.prompts.shop_assistant_prompts import ShopAssistantPrompts
 
 
 class ShopAssistantAgent:

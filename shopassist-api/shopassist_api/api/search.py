@@ -8,12 +8,12 @@ from shopassist_api.application.services.query_processor import QueryProcessor
 from shopassist_api.application.services.retrieval_service import RetrievalService
 from shopassist_api.domain.models.product import Product
 from shopassist_api.logging_config import get_logger
+from shopassist_api.application.interfaces.di_container import get_retrieval_service
 
 logger = get_logger(__name__)
 
 router = APIRouter()
 
-retrieval_service = RetrievalService()
 query_processor = QueryProcessor()
 context_builder = ContextBuilder()
 
@@ -32,12 +32,14 @@ class SearchResponse(BaseModel):
 
 
 @router.post("/search/vector", response_model=SearchResponse)
-async def vector_search(request: SearchRequest):
+async def vector_search(request: SearchRequest,
+                        retrieval_service: RetrievalService = Depends(get_retrieval_service)):
     """
     Perform vector similarity search
     """
     try:
         # Process query
+        logger.info(f"Processing query: {request.query}")
         cleaned_query, extracted_filters = query_processor.process_query(request.query)
         
         # Merge filters
@@ -45,13 +47,16 @@ async def vector_search(request: SearchRequest):
         
         # Classify query type
         query_type = query_processor.classify_query_type(request.query)
-        
+        logger.info(f"  Query classified as: {query_type}")
+        logger.info(f"  Cleaned query: {cleaned_query}")
+        logger.info(f"  Applying filters: {filters}")
         # Retrieve
         if query_type == 'product':
-            results = retrieval_service.retrieve_products(
+            results = await retrieval_service.retrieve_products(
                 cleaned_query,
-                request.top_k,
-                filters
+                top_k=2,
+                #request.top_k,
+                #filters
             )
             context = context_builder.build_product_context(results)
         else:
@@ -73,29 +78,32 @@ async def vector_search(request: SearchRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/search/hybrid")
-async def hybrid_search(request: SearchRequest):
+async def hybrid_search(request: SearchRequest,
+                        retrieval_service: RetrievalService = Depends(get_retrieval_service)):
     """
     Perform hybrid search (vector + keyword)
     """
     # For now, same as vector search
     # Can add keyword search logic later
-    return await vector_search(request)
+    return await vector_search(request, retrieval_service)
 
 @router.get("/search/test")
-async def test_retrieval():
+async def test_retrieval(retrieval_service: RetrievalService = Depends(get_retrieval_service)):
     """
     Test retrieval with sample queries
     """
     test_queries = [
-        "laptop for video editing under $1500",
-        "wireless headphones",
-        "what is the return policy"
+        #"laptop for video editing under $1500",
+        #"wireless headphones",
+        "Cameras Sony",
+        #"laptop for video editing",
+        #"what is the return policy"
     ]
     
     results = {}
     
     for query in test_queries:
-        response = await vector_search(SearchRequest(query=query))
+        response = await vector_search(SearchRequest(query=query), retrieval_service)
         results[query] = {
             "num_results": len(response.results),
             "query_type": response.query_type,

@@ -10,28 +10,27 @@ class ProductServiceInterface(ABC):
     """Abstract base class for product service implementations."""
     
     @abstractmethod
-    async def get_product_by_id(self, product_id: str) -> Product:
+    async def get_product_by_id(self, product_id: str) -> dict[str, any]:
         """Retrieve a product by its ID."""
         pass
     
     @abstractmethod
-    async def search_products_by_category(self, category: str) -> List[Product]:
+    async def search_products_by_category(self, category: str) -> List[dict[str, any]]:
         """Search products by category."""
         pass
     
     @abstractmethod
-    async def search_products_by_price_range(self, min_price: float, max_price: float) -> List[Product]:
+    async def search_products_by_price_range(self, min_price: float, max_price: float) -> List[dict[str, any]]:
         """Search products within a price range."""
         pass
 
-    #TODO: Write implementations for the following methods
     @abstractmethod
-    async def search_products_by_text(self, brand: str) -> List[Product]:
+    async def search_products_by_text(self, text: str) -> List[dict[str, any]]:
         """Search products by brand."""
         pass
 
     @abstractmethod
-    async def search_products_by_name(self, name: str) -> List[Product]:
+    async def search_products_by_name(self, name: str) -> List[dict[str, any]]:
         """Search products by name."""
         pass
 
