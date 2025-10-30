@@ -1,12 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Optional, List, Dict
-from shopassist_api.application.interfaces.service_interfaces import ProductServiceInterface
-from shopassist_api.application.interfaces.di_container import get_product_service
 from shopassist_api.application.services.context_builder import ContextBuilder
 from shopassist_api.application.services.query_processor import QueryProcessor
 from shopassist_api.application.services.retrieval_service import RetrievalService
-from shopassist_api.domain.models.product import Product
 from shopassist_api.logging_config import get_logger
 from shopassist_api.application.interfaces.di_container import get_retrieval_service
 
@@ -31,7 +28,7 @@ class SearchResponse(BaseModel):
 
 
 
-@router.post("/search/vector", response_model=SearchResponse)
+@router.post("/vector", response_model=SearchResponse)
 async def vector_search(request: SearchRequest,
                         retrieval_service: RetrievalService = Depends(get_retrieval_service)):
     """
@@ -54,9 +51,8 @@ async def vector_search(request: SearchRequest,
         if query_type == 'product':
             results = await retrieval_service.retrieve_products(
                 cleaned_query,
-                top_k=2,
-                #request.top_k,
-                #filters
+                top_k=2, #request.top_k,
+                filters=filters
             )
             context = context_builder.build_product_context(results)
         else:
@@ -77,7 +73,7 @@ async def vector_search(request: SearchRequest,
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/search/hybrid")
+@router.post("/hybrid")
 async def hybrid_search(request: SearchRequest,
                         retrieval_service: RetrievalService = Depends(get_retrieval_service)):
     """
@@ -87,7 +83,7 @@ async def hybrid_search(request: SearchRequest,
     # Can add keyword search logic later
     return await vector_search(request, retrieval_service)
 
-@router.get("/search/test")
+@router.get("/test")
 async def test_retrieval(retrieval_service: RetrievalService = Depends(get_retrieval_service)):
     """
     Test retrieval with sample queries

@@ -67,10 +67,10 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(health.router, prefix="/api/v1", tags=["health"])
-app.include_router(chat.router, prefix="/api/v1", tags=["chat"])
-app.include_router(products.router, prefix="/api/v1", tags=["products"])
-app.include_router(search.router, prefix="/api/v1", tags=["search"])
+app.include_router(health.router, prefix="/api/v1/health", tags=["health"])
+app.include_router(chat.router, prefix="/api/v1/chat", tags=["chat"])#deprecated
+app.include_router(products.router, prefix="/api/v1/products", tags=["products"])
+app.include_router(search.router, prefix="/api/v1/search", tags=["search"])
 
 def run_production():
     """Entry point for the CLI script."""

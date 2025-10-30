@@ -3,43 +3,29 @@ import traceback
 import tiktoken
 from openai import AzureOpenAI
 from azure.search.documents import SearchClient
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from shopassist_api.application.settings.config import settings
 from shopassist_api.application.interfaces.service_interfaces import EmbeddingServiceInterface
+from shopassist_api.infrastructure.services.azure_credential_manager import get_credential_manager
 from shopassist_api.logging_config import get_logger
 
 logger = get_logger(__name__)
 
 class OpenAIEmbeddingService(EmbeddingServiceInterface):
-    def __init__(self):
-        self.api_base = None
-        self.api_version = None
-        self.default_embedding_model = None
-        self.deployment_name = None
-        self.client = None
-        self.encoding = None
-        self.DIMENSION = 1536  # Example dimension for 'text-embedding-3-small'
-        self._initialize_client()    
-    
-    def _initialize_client(self):
-        """Initialize the OpenAI client based on configuration."""
-
-        self.api_base = settings.azure_openai_endpoint 
-        self.api_version = settings.azure_openai_api_version or "2024-02-01"
-        self.default_embedding_model = settings.azure_openai_embedding_model # or "text-embedding-3-small" 
-        self.deployment_name = settings.azure_openai_embedding_model_deployment # or "text-embedding-3-small_POC"
+    def __init__(self, model_name: str = None):
+        self.model_name = model_name or settings.embedding_model or "text-embedding-3-small"
         
-        self.encoding = tiktoken.encoding_for_model("text-embedding-3-small")
-
-        token_provider = get_bearer_token_provider(DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
-
-        client = AzureOpenAI(
-            api_version = self.api_version, 
-            azure_endpoint = self.api_base,
+        # Use shared credential manager
+        credential_manager = get_credential_manager()
+        token_provider = credential_manager.get_openai_token_provider()
+        
+        self.client = AzureOpenAI(
+            api_version=settings.azure_openai_api_version or "2024-02-01",
+            azure_endpoint=settings.azure_openai_endpoint,
             azure_ad_token_provider=token_provider
         )
-        print(f"Initialized OpenAI Embedding Service with deployment: {self.deployment_name}")
-        self.client = client
+        self.DIMENSION = 1536
+
+        self.encoding = tiktoken.encoding_for_model(self.model_name)
 
     def count_tokens(self, text: str) -> int:
         """Count tokens in text"""
@@ -51,7 +37,7 @@ class OpenAIEmbeddingService(EmbeddingServiceInterface):
             print("Generating embedding for single text...")
             response = self.client.embeddings.create(
                 input=[input_text],
-                model=self.deployment_name
+                model=self.model_name
             )
             print("Response:")
             print(response.data[0])
@@ -72,7 +58,7 @@ class OpenAIEmbeddingService(EmbeddingServiceInterface):
             try:
                 response = self.client.embeddings.create(
                     input=batch,
-                    model=self.deployment_name
+                    model=self.model_name
                 )
                 
                 # Extract embeddings

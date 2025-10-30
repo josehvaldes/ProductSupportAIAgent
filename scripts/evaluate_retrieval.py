@@ -6,6 +6,7 @@ import json
 from tqdm import tqdm
 from pathlib import Path
 from dotenv import load_dotenv
+from typing import Dict, Optional, Tuple
 
 sys.path.append('../shopassist-api')
 # Load .env file from the correct location
@@ -28,16 +29,16 @@ TEST_QUERIES = [
     #     "expected_category": "Laptops",
     #     "expected_keywords": ["video", "editing", "performance"]
     # },
-    # {
-    #     "query": "wireless headphones under $100",
-    #     "expected_category": "Headphones",
-    #     "max_price": 100
-    # },
     {
-        "query": "what is your return policy",
-        "query_type": "policy",
-        "expected_doc_type": "policies"
+        "query": "wireless headphones under $100",
+        "expected_category": "Headphones",
+        "max_price": 100
     },
+    # {
+    #     "query": "what is your return policy",
+    #     "query_type": "policy",
+    #     "expected_doc_type": "policies"
+    # },
     # Add more test queries...
 ]
 
@@ -50,7 +51,7 @@ product_service = CosmosProductService()
 retrieval_service = RetrievalService(
     vector_service=vector_service,
     embedding_service=embedding_service,
-    product_service=product_service
+    repository_service=product_service
 )
 
 async def evaluate_retrieval():
@@ -74,10 +75,16 @@ async def evaluate_retrieval():
         
         # Classify
         query_type = processor.classify_query_type(query)
+        cleaned_query, extracted_filters = processor.process_query(query)
         print(f"   🔍 Classified as: {query_type}")
+        print(f"   🧹 Cleaned query: {cleaned_query}")
+        print(f"   🛠️  Extracted filters: {extracted_filters}")
+
         # Retrieve
         if query_type == 'product':
-            retrieved = await retrieval_service.retrieve_products(query, top_k=5)
+            retrieved = await retrieval_service.retrieve_products(cleaned_query, top_k=5, 
+                                                                  filters=extracted_filters, 
+                                                                  enriched=False)
         else:
             retrieved = retrieval_service.retrieve_knowledge_base(query, top_k=3)
         

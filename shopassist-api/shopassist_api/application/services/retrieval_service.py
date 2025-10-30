@@ -1,5 +1,5 @@
 from typing import List, Dict, Optional
-from shopassist_api.application.interfaces.service_interfaces import EmbeddingServiceInterface, ProductServiceInterface, VectorServiceInterface
+from shopassist_api.application.interfaces.service_interfaces import EmbeddingServiceInterface, RepositoryServiceInterface, VectorServiceInterface
 from shopassist_api.logging_config import get_logger
 import traceback
 
@@ -10,17 +10,18 @@ class RetrievalService:
     def __init__(self,
         vector_service: VectorServiceInterface,
         embedding_service: EmbeddingServiceInterface,
-        product_service: ProductServiceInterface):
+        repository_service: RepositoryServiceInterface):
         self.milvus = vector_service
         self.embedder = embedding_service
-        self.cosmos = product_service
+        self.cosmos = repository_service
 
 
     async def retrieve_products(
             self,
             query: str,
             top_k: int = 5,
-            filters: Optional[Dict] = None
+            filters: Optional[Dict] = None,
+            enriched: bool = True
         ) -> List[Dict]:
         """
         Retrieve relevant products using vector search
@@ -50,13 +51,18 @@ class RetrievalService:
             # Deduplicate by product_id and aggregate scores
             products = self._deduplicate_and_aggregate(results)
             print(f"    Retrieved {len(products)} unique products from Milvus")
-            logger.info(f"Retrieved {len(products)} unique products from Milvus")   
-            # Enrich with full product data from Cosmos DB
-            enriched = await self._enrich_with_product_data(products)
+            logger.info(f"Retrieved {len(products)} unique products from Milvus")
             
+            results_to_return = []
+            # Enrich with full product data from Cosmos DB
+            if enriched:
+                results_to_return = await self._enrich_with_product_data(products)
+            else:
+                results_to_return = products
+
             # Limit to top_k
             print(f"    Returning top {top_k} products after enrichment")
-            return enriched[:top_k]
+            return results_to_return[:top_k]
             
         except Exception as e:
             logger.error(f"Error in retrieve_products: {e}")

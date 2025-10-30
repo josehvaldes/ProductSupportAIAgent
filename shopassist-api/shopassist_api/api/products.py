@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import List, Optional
-from shopassist_api.application.interfaces.service_interfaces import ProductServiceInterface
-from shopassist_api.application.interfaces.di_container import get_product_service
+from shopassist_api.application.interfaces.service_interfaces import RepositoryServiceInterface
+from shopassist_api.application.interfaces.di_container import get_repository_service
 from shopassist_api.domain.models.product import Product
 from shopassist_api.logging_config import get_logger
 
@@ -19,10 +19,10 @@ router = APIRouter()
 
 
 
-@router.get("/products/{product_id}", response_model=Product)
+@router.get("/{product_id}", response_model=Product)
 async def get_product(
     product_id: str,
-    product_service: ProductServiceInterface = Depends(get_product_service)
+    product_service: RepositoryServiceInterface = Depends(get_repository_service)
 ):
     """
     Retrieve product details by product ID.
@@ -35,10 +35,10 @@ async def get_product(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/products/search/category/{category}", response_model=List[Product])
+@router.get("/search/category/{category}", response_model=List[Product])
 async def search_products_by_category(
     category: str,
-    product_service: ProductServiceInterface = Depends(get_product_service)
+    product_service: RepositoryServiceInterface = Depends(get_repository_service)
 ):
     """
     Search products by category.
@@ -49,11 +49,11 @@ async def search_products_by_category(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error searching products by category: {str(e)}")
 
-@router.get("/products/search/price", response_model=List[Product])
+@router.get("/search/price", response_model=List[Product])
 async def search_products_by_price_range(
     min_price: float, 
     max_price: float,
-    product_service: ProductServiceInterface = Depends(get_product_service)
+    product_service: RepositoryServiceInterface = Depends(get_repository_service)
 ):
     """
     Search products within a price range.
@@ -70,13 +70,13 @@ async def search_products_by_price_range(
         raise HTTPException(status_code=500, detail=f"Error searching products by price range: {str(e)}")
 
 # Optional: Keep a general search endpoint for future complex queries
-@router.get("/products/search", response_model=List[Product])
+@router.get("/search", response_model=List[Product])
 async def search_products_general(
     category: Optional[str] = None, 
     min_price: Optional[float] = None, 
     max_price: Optional[float] = None,
     name: Optional[str] = None,
-    product_service: ProductServiceInterface = Depends(get_product_service)
+    product_service: RepositoryServiceInterface = Depends(get_repository_service)
 ):
     """
     General product search with multiple optional filters.

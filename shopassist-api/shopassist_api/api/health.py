@@ -8,7 +8,7 @@ from shopassist_api.application.settings.config import settings
 router = APIRouter()
 
 
-@router.get("/health")
+@router.get("/")
 async def health_check():
     """Health check endpoint."""
     return {

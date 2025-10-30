@@ -2,10 +2,10 @@ import traceback
 from azure.cosmos import CosmosClient
 from azure.identity import DefaultAzureCredential
 from shopassist_api.application.settings.config import settings
-from shopassist_api.application.interfaces.service_interfaces import ProductServiceInterface
+from shopassist_api.application.interfaces.service_interfaces import RepositoryServiceInterface
 from shopassist_api.domain.models.product import Product
 
-class DumpProductService(ProductServiceInterface):
+class DumpProductService(RepositoryServiceInterface):
 
     def __init__(self):
         self.client = None
@@ -113,3 +113,37 @@ class DumpProductService(ProductServiceInterface):
                         "availability": "In Stock" }
             products.append(Product(**product))
         return products
+    
+    async def get_conversation_history(self, session_id: str) -> list[dict[str, any]]:
+        """Get conversation history for a session"""
+        history = [
+            {
+                "session_id": session_id,
+                "user_id": "user123",
+                "role": "user",
+                "content": "Hello, I need help with a product.",
+                "timestamp": "2024-01-01T12:00:00Z",
+                "metadata": {}
+            },
+            {
+                "session_id": session_id,
+                "user_id": "agent456",
+                "role": "agent",
+                "content": "Sure, what product do you need help with?",
+                "timestamp": "2024-01-01T12:01:00Z",
+                "metadata": {}
+            }
+        ]
+        return history
+    async def save_message(
+        self,
+        session_id: str,
+        user_id: str,
+        role: str,
+        content: str,
+        timestamp: str,
+        metadata: dict = None 
+    ):
+        """Save a message to the conversation history"""
+        print(f"Saving message to session {session_id}: [{role}] {content} at {timestamp}")
+        return

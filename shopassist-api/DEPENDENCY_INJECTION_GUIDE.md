@@ -8,7 +8,7 @@ This document explains how dependency injection has been implemented in the Shop
 ### 1. Interface Definition
 **File:** `shopassist_api/application/interfaces/product_service_interface.py`
 
-Created an abstract base class `ProductServiceInterface` that defines the contract for product services:
+Created an abstract base class `RepositoryServiceInterface` that defines the contract for product services:
 - `get_product_by_id(product_id: str) -> Product`
 - `search_products_by_category(category: str) -> List[Product]`
 - `search_products_by_price_range(min_price: float, max_price: float) -> List[Product]`
@@ -18,15 +18,15 @@ Created an abstract base class `ProductServiceInterface` that defines the contra
 
 Implemented a simple DI container with:
 - `DIContainer` class that manages service bindings
-- `get_product_service()` function that serves as the FastAPI dependency
+- `get_repository_service()` function that serves as the FastAPI dependency
 - Service registration in `_setup_services()` method
 
 ### 3. Service Implementation
 **File:** `shopassist_api/infrastructure/services/cosmos_product_service.py`
 
-Updated `CosmosProductService` to implement the `ProductServiceInterface`:
+Updated `CosmosProductService` to implement the `RepositoryServiceInterface`:
 ```python
-class CosmosProductService(ProductServiceInterface):
+class CosmosProductService(RepositoryServiceInterface):
     # Implements all abstract methods from the interface
 ```
 
@@ -46,7 +46,7 @@ async def get_product(product_id: str):
 ```python
 async def get_product(
     product_id: str,
-    product_service: ProductServiceInterface = Depends(get_product_service)
+    product_service: RepositoryServiceInterface = Depends(get_repository_service)
 ):
     product = await product_service.get_product_by_id(product_id)
 ```
@@ -76,7 +76,7 @@ async def get_product(
 @router.get("/products/{product_id}")
 async def get_product(
     product_id: str,
-    product_service: ProductServiceInterface = Depends(get_product_service)
+    product_service: RepositoryServiceInterface = Depends(get_repository_service)
 ):
     return await product_service.get_product_by_id(product_id)
 ```
@@ -84,11 +84,11 @@ async def get_product(
 ### Testing with Mock Services
 ```python
 def mock_product_service():
-    mock = Mock(spec=ProductServiceInterface)
+    mock = Mock(spec=RepositoryServiceInterface)
     mock.get_product_by_id.return_value = test_product
     return mock
 
-app.dependency_overrides[get_product_service] = mock_product_service
+app.dependency_overrides[get_repository_service] = mock_product_service
 ```
 
 ## File Structure
@@ -110,8 +110,8 @@ shopassist_api/
 
 The dependency injection implementation can be verified by running:
 ```bash
-python -c "from shopassist_api.application.interfaces.di_container import get_product_service; 
-           service = get_product_service(); 
+python -c "from shopassist_api.application.interfaces.di_container import get_repository_service; 
+           service = get_repository_service(); 
            print(f'Service type: {type(service)}'); 
            print('Dependency injection working!')"
 ```
@@ -131,8 +131,8 @@ Dependency injection working!
 
 ## Key Files Modified
 
-1. ✅ Created `ProductServiceInterface` - Defines service contract
-2. ✅ Created `DIContainer` and `get_product_service()` - Manages dependencies  
+1. ✅ Created `RepositoryServiceInterface` - Defines service contract
+2. ✅ Created `DIContainer` and `get_repository_service()` - Manages dependencies  
 3. ✅ Updated `CosmosProductService` - Implements interface
 4. ✅ Updated `products.py` endpoints - Uses dependency injection
 5. ✅ Updated `__init__.py` - Exports interfaces

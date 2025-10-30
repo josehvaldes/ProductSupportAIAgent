@@ -2,11 +2,10 @@
 Product service interface for dependency injection.
 """
 from abc import ABC, abstractmethod
-from typing import List
-from shopassist_api.domain.models.product import Product
+from typing import List, Dict, Generator
+from datetime import datetime
 
-
-class ProductServiceInterface(ABC):
+class RepositoryServiceInterface(ABC):
     """Abstract base class for product service implementations."""
     
     @abstractmethod
@@ -32,6 +31,23 @@ class ProductServiceInterface(ABC):
     @abstractmethod
     async def search_products_by_name(self, name: str) -> List[dict[str, any]]:
         """Search products by name."""
+        pass
+    @abstractmethod
+    async def get_conversation_history(self, session_id: str) -> List[Dict]:
+        """Get conversation history for a session"""
+        pass
+
+    @abstractmethod
+    async def save_message(
+        self,
+        session_id: str,
+        user_id: str,
+        role: str,
+        content: str,
+        timestamp: datetime,
+        metadata: Dict = None 
+    ):
+        """Save a message to the conversation history"""
         pass
 
 class EmbeddingServiceInterface(ABC):
@@ -82,4 +98,30 @@ class VectorServiceInterface(ABC):
         top_k: int = 3
     ) -> List[dict]:
         """Search knowledge base chunks by vector similarity."""
+        pass
+
+class LLMServiceInterface(ABC):
+    """Abstract base class for LLM service implementations."""
+    
+    @abstractmethod
+    def generate_response(
+        self,
+        messages: List[dict],
+        temperature: float = 0.3,
+        max_tokens: int = 500
+    ) -> Dict:
+        """Generate a response from the LLM."""
+        pass
+    @abstractmethod
+    def streaming_response(
+        self,
+        messages: List[dict],
+        temperature: float = 0.3,
+        max_tokens: int = 500
+    )-> Generator[str, None, None]:
+        """Generate a streaming response from the LLM."""
+        pass
+    @abstractmethod
+    def get_stats(self) -> Dict:
+        """Get usage statistics"""
         pass

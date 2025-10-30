@@ -606,7 +606,7 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
 
 ---
 
-### Day 9 - Tuesday, Oct 22, 2025
+### Day 9 - Monday, Oct 27, 2025
 **Today's Focus:** Milvus collection setup
 
 **Completed:**
@@ -697,7 +697,7 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
 
 ---
 
-### Day 10 - Wednesday, Oct 23, 2025
+### Day 10 - Tuesday, Oct 28, 2025
 **Today's Focus:** Document chunking and ingestion
 
 **Completed:**
@@ -764,7 +764,7 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
 - deprecate code in application/ai module.
 
 **Challenges & Solutions:**
-- 
+- Fix dependecy injection error for scripts outside FastAPI
 
 **Learnings:**
 - Milvus API and queries.
@@ -778,28 +778,95 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
 
 ---
 
-### Day 11 - Thursday, Oct 24, 2025
+### Day 11 - Wednesday, Oct 29, 2025
 **Today's Focus:** Retrieval service implementation
 
 **Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+1. [X] Create LLM service layer (1.5 hours)
+   - Create LLMServiceInterface in application/interfaces/service_interfaces
+   - Create OpenAILLMService.py in infrastructure/services/
+   - Initialize Azure OpenAI chat completion client
+   - Implement generate_response(prompt: str, context: str, history: List)
+   - Implement streaming_response() for better UX
+   - Add token counting and cost tracking
+   - Handle API errors and retries
+   - Test with sample prompts
+
+2. [X] Design and implement prompt templates (2 hours)
+   - Create application/prompts/templates.py
+   - Design system prompt for product assistant
+   - Create prompt template for product queries
+   - Create prompt template for policy queries
+   - Create prompt template for product comparison
+   - Add few-shot examples for better responses
+   - Include formatting instructions (markdown, lists)
+   - Test different prompt variations for testing
+
+3. [X] Build RAG orchestration service (1.5 hours)
+   - Create app/services/rag_service.py
+   - Orchestrate: retrieve → build context → generate response
+   - Implement query routing (product vs policy)
+   - Add response post-processing
+   - Include source citations
+   - Handle edge cases (no results, unclear query)
+   - Test end-to-end RAG flow
+
+4. [X] Implement response generation API (1 hour)
+   - Update POST /api/chat/message endpoint
+   - Accept user message and session_id
+   - Call RAG service
+   - Return response with sources
+   - Add streaming support (Server-Sent Events)
+   - Document request/response format
+   - Test with Postman
+
+5. [X] Add conversation history management (1 hour)
+   - Store conversations in Cosmos DB sessions container
+   - Implement get_conversation_history(session_id)
+   - Implement save_message(session_id, role, content)
+   - Limit history to last N turns (5-10)
+   - Format history for LLM context
+   - Test multi-turn conversations
+
+6. [X] Create prompt evaluation framework (1 hour)
+   - Create scripts/evaluate_prompts.py
+   - Define test scenarios (10-15 queries)
+   - Test different prompt variations
+   - Measure response quality (manual review)
+   - Measure response relevance
+   - Document best-performing prompts
+   - Identify hallucinations or errors
+
+7. [X] Test complete RAG pipeline (1 hour)
+   - Test product discovery queries
+   - Test specification questions
+   - Test policy questions
+   - Test multi-turn conversations
+   - Test edge cases (no results, ambiguous)
+   - Measure end-to-end latency
+   - Document response quality
 
 **Technical Decisions:**
-- 
+- Use GPT-4-mini as LLM
+- Implement dependecy injection for OpenAI implementation
+- Refactor CosmosDB implementation and rename the interface to RepositoryServiceInterface
+- Refactor FastAPI routes according to standards
+- Follow DRY practices to handle Azure credentials
+- Clean old generated files.
 
 **Challenges & Solutions:**
+- testing the prompts and analyze the results with a Basic prompt and later use the complex solution.
 - 
 
 **Learnings:**
-- 
+- RLock vs Lock for multithreading
+- better ways to handle azure credentials.
 
 **Next Steps:**
 - [ ] 
 - [ ] 
 
-**Time Invested:** ___ hours
+**Time Invested:** 6 hours
 
 ---
 

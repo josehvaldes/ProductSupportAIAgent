@@ -20,9 +20,9 @@ class Settings(BaseSettings):
     embedding_provider: str = "azure_openai"  # Options: 'azure_openai', 'transformers'
     
     # OpenAI Configuration
-    openai_api_key: Optional[str] = None
-    openai_model: str = "gpt-4o-mini"
-    
+    azure_openai_model: str = "gpt-4.1-mini"
+    azure_openai_model_deployment: str = "gpt-4.1-mini_shopassist"
+
     # Azure Configuration
     azure_openai_endpoint: Optional[str] = None
     azure_openai_api_version: str = "2024-02-15-preview"

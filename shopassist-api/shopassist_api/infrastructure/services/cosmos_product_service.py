@@ -1,17 +1,21 @@
 import traceback
+from datetime import datetime
+from typing import List, Dict
+import uuid
 from azure.cosmos import CosmosClient
 from azure.identity import DefaultAzureCredential
 from shopassist_api.application.settings.config import settings
-from shopassist_api.application.interfaces.service_interfaces import ProductServiceInterface
-from shopassist_api.domain.models.product import Product
+from shopassist_api.application.interfaces.service_interfaces import RepositoryServiceInterface
+from shopassist_api.logging_config import get_logger
+from shopassist_api.infrastructure.services.azure_credential_manager import get_credential_manager
 
-class CosmosProductService(ProductServiceInterface):
+logger = get_logger(__name__)
+
+class CosmosProductService(RepositoryServiceInterface):
 
     def __init__(self):
         self.client = None
-        self.model = None
         self.database_name = None
-        self.cosmosdb_endpoint = None
         self.product_container = None
         self.chat_container = None
         self._initialize_client()
@@ -19,21 +23,22 @@ class CosmosProductService(ProductServiceInterface):
     def _initialize_client(self):
         """Initialize the CosmosDB client based on configuration."""
         if settings.cosmosdb_endpoint:
-            # Use CosmosDB
+            # Use shared credential manager
+            credential_manager = get_credential_manager()
+            credential = credential_manager.get_cosmos_credential()
+            
             self.client = CosmosClient(
                 url=settings.cosmosdb_endpoint,
-                credential=DefaultAzureCredential()
+                credential=credential
             )
-            self.cosmosdb_endpoint = settings.cosmosdb_endpoint
             self.database_name = settings.cosmosdb_database
             self.product_container = settings.cosmosdb_product_container
             self.chat_container = settings.cosmosdb_chat_container
+
+            self.database = self.client.get_database_client(self.database_name)
+
         else:
-            # No CosmosDB configured
             self.client = None
-            self.database_name = None
-            self.product_container = None
-            self.chat_container = None
 
     async def get_product_by_id(self, product_id: str)-> dict[str, any]:
         """Retrieve a product by its ID from CosmosDB."""
@@ -41,11 +46,9 @@ class CosmosProductService(ProductServiceInterface):
             return None
 
         try:
-            # Get a database
-            database = self.client.get_database_client(self.database_name)
 
             # Get the product container
-            container = database.get_container_client(self.product_container)
+            container = self.database.get_container_client(self.product_container)
             print(f"Querying for product ID: {product_id} database:{self.database_name}, in container: {self.product_container}")
             # Query for the product by ID
             query = f"SELECT * FROM c WHERE c.id = '{product_id}'"
@@ -65,11 +68,8 @@ class CosmosProductService(ProductServiceInterface):
             return []
 
         try:
-            # Get a database
-            database = self.client.get_database_client(self.database_name)
-
             # Get the product container
-            container = database.get_container_client(self.product_container)
+            container = self.database.get_container_client(self.product_container)
 
             # Query for products by category
             query = f"SELECT * FROM c WHERE c.category = '{category}'"
@@ -89,11 +89,9 @@ class CosmosProductService(ProductServiceInterface):
             return []
 
         try:
-            # Get a database
-            database = self.client.get_database_client(self.database_name)
 
             # Get the product container
-            container = database.get_container_client(self.product_container)
+            container = self.database.get_container_client(self.product_container)
 
             # Query for products within the price range
             query = f"SELECT * FROM c WHERE c.price >= {min_price} AND c.price <= {max_price}"
@@ -111,12 +109,9 @@ class CosmosProductService(ProductServiceInterface):
             return
 
         try:
-            # Get a database
-            database = self.client.get_database_client(self.database_name)
-
             # Create (or get) a container
             container_name = self.product_container
-            container = database.get_container_client(container_name)
+            container = self.database.get_container_client(container_name)
 
             query = "SELECT TOP 1 * FROM c"
             items = list(container.query_items(query=query, enable_cross_partition_query=True))
@@ -134,11 +129,8 @@ class CosmosProductService(ProductServiceInterface):
             return []
 
         try:
-            # Get a database
-            database = self.client.get_database_client(self.database_name)
-
             # Get the product container
-            container = database.get_container_client(self.product_container)
+            container = self.database.get_container_client(self.product_container)
 
             # Query for products by text in name or description
             query = f"SELECT * FROM c WHERE CONTAINS(c.name, '{text}') OR CONTAINS(c.description, '{text}')"
@@ -158,11 +150,9 @@ class CosmosProductService(ProductServiceInterface):
             return []
 
         try:
-            # Get a database
-            database = self.client.get_database_client(self.database_name)
-
+            
             # Get the product container
-            container = database.get_container_client(self.product_container)
+            container = self.database.get_container_client(self.product_container)
 
             # Query for products by name
             query = f"SELECT * FROM c WHERE CONTAINS(c.name, '{name}')"
@@ -175,3 +165,60 @@ class CosmosProductService(ProductServiceInterface):
             print("An error occurred while searching for products by name:")
             traceback.print_exc()
             return []
+        
+
+
+    async def get_conversation_history(self, session_id: str) -> List[Dict]:
+        """Get conversation history for a session"""
+        try:
+            
+            container = self.database.get_container_client("sessions")
+            
+            query = """
+            SELECT c.role, c.content, c.timestamp
+            FROM c
+            WHERE c.session_id = @session_id
+            ORDER BY c.timestamp ASC
+            """
+            logger.info(f"Getting conversation history for session_id: {session_id}")
+            items = list(container.query_items(
+                query=query,
+                parameters=[{"name": "@session_id", "value": session_id}],
+                enable_cross_partition_query=True
+            ))
+            
+            return items
+            
+        except Exception as e:
+            logger.error(f"Error getting conversation history: {e}")
+            return []
+
+    async def save_message(
+        self,
+        session_id: str,
+        user_id: str,
+        role: str,
+        content: str,
+        timestamp: datetime,
+        metadata: Dict = None
+    ):
+        """Save a message to conversation history"""
+        try:
+            container = self.database.get_container_client("sessions")
+            
+            message = {
+                "id": str(uuid.uuid4()),
+                "user_id": user_id,
+                "session_id": session_id,
+                "role": role,
+                "content": content,
+                "timestamp": timestamp.isoformat(),
+                "metadata": metadata or {}
+            }
+            
+            container.create_item(body=message)
+            logger.info(f"Saved message for session {session_id}")
+            
+        except Exception as e:
+            logger.error(f"Error saving message: {e}")
+            raise
