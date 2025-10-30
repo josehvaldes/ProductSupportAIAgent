@@ -56,7 +56,7 @@ async def vector_search(request: SearchRequest,
             )
             context = context_builder.build_product_context(results)
         else:
-            results = retrieval_service.retrieve_knowledge_base(
+            results = await retrieval_service.retrieve_knowledge_base(
                 cleaned_query,
                 request.top_k
             )

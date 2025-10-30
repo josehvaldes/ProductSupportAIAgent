@@ -70,7 +70,7 @@ class RetrievalService:
             traceback.print_exc()
             return []
 
-    def retrieve_knowledge_base(
+    async def retrieve_knowledge_base(
             self,
             query: str,
             top_k: int = 3

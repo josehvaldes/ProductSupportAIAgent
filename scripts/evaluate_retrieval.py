@@ -86,7 +86,7 @@ async def evaluate_retrieval():
                                                                   filters=extracted_filters, 
                                                                   enriched=False)
         else:
-            retrieved = retrieval_service.retrieve_knowledge_base(query, top_k=3)
+            retrieved = await retrieval_service.retrieve_knowledge_base(query, top_k=3)
         
         # Evaluate
         success = len(retrieved) > 0

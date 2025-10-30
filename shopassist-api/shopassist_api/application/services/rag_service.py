@@ -92,7 +92,7 @@ class RAGService:
             print(f"Processed query: {cleaned_query}, type: {query_type}, filters: {filters}")
             # Step 2: Retrieve relevant documents
             if query_type == 'product':
-                results = self.retrieval.retrieve_products(
+                results = await self.retrieval.retrieve_products(
                     cleaned_query,
                     #TODO uncomment below later
                     top_k=2, # reduce the number of products to retrieve
@@ -100,7 +100,7 @@ class RAGService:
                 )
                 context = self.context_builder.build_product_context(results)
             else:
-                results = self.retrieval.retrieve_knowledge_base(
+                results = await self.retrieval.retrieve_knowledge_base(
                     cleaned_query,
                     top_k=3
                 )
@@ -108,6 +108,7 @@ class RAGService:
             
             print(f"Retrieved {len(results)} results for query")
             logger.info(f"Retrieved {len(results)} results for query")
+            logger.info(f"Built context for query: {context}")
             # Step 3: Handle no results
             if not results:
                 logger.warning("No results found for query")
@@ -166,6 +167,7 @@ class RAGService:
             
         except Exception as e:
             logger.error(f"Error in RAG pipeline: {e}")
+            traceback.print_exc()
             raise
     
     def _format_history(

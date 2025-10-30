@@ -7,6 +7,9 @@ from datetime import datetime, timezone
 from shopassist_api.application.interfaces.di_container import get_rag_service, get_repository_service
 from shopassist_api.application.interfaces.service_interfaces import RepositoryServiceInterface
 from shopassist_api.application.services.rag_service import RAGService
+from shopassist_api.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter()
 
@@ -35,8 +38,9 @@ async def chat_message(request: ChatRequest,
         session_id = request.session_id or str(uuid.uuid4())
         user_id = "default_user"  # Placeholder for user identification
         # Get conversation history
+        logger.info(f"Fetching conversation history for session_id: {session_id}, user_id: {user_id}, message: {request.message}")
         history = await cosmos_service.get_conversation_history(session_id)
-        
+        logger.info(f"Conversation history retrieved: {history}")        
         # Generate response using RAG
         result = await rag_service.generate_answer(
             query=request.message,
