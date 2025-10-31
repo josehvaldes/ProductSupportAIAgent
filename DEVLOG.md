@@ -779,7 +779,7 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
 ---
 
 ### Day 11 - Wednesday, Oct 29, 2025
-**Today's Focus:** Retrieval service implementation
+**Today's Focus:** LLM service and prompt engineering for RAG responses
 
 **Completed:**
 1. [X] Create LLM service layer (1.5 hours)
@@ -870,22 +870,85 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
 
 ---
 
-### Day 12 - Friday, Oct 25, 2025
-**Today's Focus:** LLM service and prompt engineering
+### Day 12 - Thursday, Oct 30, 2025
+**Today's Focus:** Frontend-backend chat integration and testing.
 
 **Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+1. [X] Create chat API service in frontend (1 hour)
+   - Create src/services/api/chat.ts
+   - Implement sendMessage(message: string, sessionId?: string)
+   - Implement getChatHistory(sessionId: string)
+   - Add types for chat messages and responses
+   - Handle streaming responses (optional)
+   - Add error handling
+   - Test API calls with mock data
+
+2. [X] Update ChatContainer component (1.5 hours)
+   - Connect to chat API service
+   - Display message history
+   - Show user messages and AI responses
+   - Add loading state (typing indicator)
+   - Handle errors gracefully
+   - Auto-scroll to latest message
+   - Store session_id in state/localStorage
+
+3. [X] Enhance ChatInput component (1 hour)
+   - Send message on Enter key
+   - Disable input while processing
+   - Clear input after sending
+   - Add character limit indicator
+   - Handle empty messages
+   - Show send button loading state
+   - Add keyboard shortcuts
+
+4. [X] Create product source display component (1 hour)
+   - Create ProductSource.tsx component
+   - Display product cards from AI response sources
+   - Show relevance scores
+   - Make products clickable (open detail view)
+   - Format pricing and key features
+   - Add "View Product" buttons
+   - Test with different response types
+
+5. [X] Add session management (1 hour)
+   - Generate and persist session_id
+   - Store session in localStorage
+   - Clear session button (new conversation)
+   - Display session info (optional)
+   - Handle session expiration
+   - Test session persistence across page reloads
+
+6. [X] Implement response formatting (1 hour)
+   - Parse markdown in AI responses
+   - Format bullet points and lists
+   - Handle code blocks (if any)
+   - Add syntax highlighting for product names/prices
+   - Linkify URLs
+   - Test with various response formats
+
+7. [X] End-to-end testing and polish (1.5 hours)
+   - Test complete user flow:
+     * User sends query
+     * AI responds with products
+     * User clicks product
+     * Multi-turn conversation
+   - Test error scenarios
+   - Polish UI transitions and animations
+   - Add loading skeletons
+   - Optimize performance
+   - Document any bugs found
 
 **Technical Decisions:**
-- 
+- Add a new ChatContainerExt component
+- Reuse ProductGrid
+- Remove Product format and let and API return raw products
+- Add a new /dumpmeessage endpoint for testing. Let the endpoint use a new Dump method that uses local milvus for searchs
 
 **Challenges & Solutions:**
-- 
+- Build a usefull UI. Use mantine components, and generated UI code
 
 **Learnings:**
-- 
+- Build UI components with Mantine
 
 **Next Steps:**
 - [ ] 
