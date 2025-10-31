@@ -24,6 +24,31 @@ class ChatResponse(BaseModel):
     query_type: str
     metadata: Dict
 
+@router.post("/dumpmessage", response_model=ChatResponse)
+async def chat_dump_message(request: ChatRequest,
+                       cosmos_service:RepositoryServiceInterface = Depends(get_repository_service),
+                       rag_service:RAGService = Depends(get_rag_service)):
+    """
+    Process a chat message and return AI response
+    """
+    session_id = request.session_id or str(uuid.uuid4())
+    user_id = "default_user"  # Placeholder for user identification
+    # Get conversation history
+    logger.info(f"Fetching conversation history for session_id: {session_id}, user_id: {user_id}, message: {request.message}")
+    history = await cosmos_service.get_conversation_history(session_id)
+    result = await rag_service.generate_dump_answer(
+        query=request.message,
+        conversation_history=history,
+        session_id=session_id
+    )    
+
+    return ChatResponse(
+            session_id=session_id,
+            response=result['response'],
+            sources=result['sources'],
+            query_type=result['query_type'],
+            metadata=result['metadata']
+        )
 
 
 @router.post("/message", response_model=ChatResponse)

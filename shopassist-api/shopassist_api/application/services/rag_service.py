@@ -41,12 +41,10 @@ class RAGService:
             llm_response = self.llm.generate_response(messages)
             print(f"LLM Response: {llm_response}")
             results = []  # Dummy results for testing
-            # Step 7: Format sources
-            sources = self._format_sources(results, query_type)
-            print(f"Formatted Sources: {sources}")            
+
             return {
                 "response": llm_response['response'],
-                "sources": sources,
+                "sources": results,
                 "query_type": query_type,
                 "has_results": True,
                 "filters_applied": filters,
@@ -61,6 +59,57 @@ class RAGService:
             logger.error(f"Error generating test answer: {e}")
             traceback.print_exc()
             raise
+
+    async def generate_dump_answer(
+        self,
+        query: str,
+        conversation_history: Optional[List[Dict]] = None,
+        session_id: Optional[str] = None
+    ) -> Dict:
+        """Generate dump answer for testing"""
+
+        # Step 1: Process query
+        cleaned_query, filters = self.query_processor.process_query(query)
+        query_type = self.query_processor.classify_query_type(query)
+        
+        logger.info(f"Query type: {query_type}, Filters: {filters}, query: {cleaned_query}")
+        print(f"Processed query: {cleaned_query}, type: {query_type}, filters: {filters}")
+        # Step 2: Retrieve relevant documents
+        if query_type == 'product':
+            results = await self.retrieval.retrieve_products(
+                cleaned_query,
+                enriched=True,
+                #TODO uncomment below later
+                top_k=2, # reduce the number of products to retrieve
+                filters=filters # Currently not applying filters for products
+            )
+            context = self.context_builder.build_product_context(results)
+        else:
+            results = await self.retrieval.retrieve_knowledge_base(
+                cleaned_query,
+                top_k=3
+            )
+            context = self.context_builder.build_knowledge_base_context(results)
+        
+        print(f"Retrieved {len(results)} results for query")
+        logger.info(f"Retrieved {len(results)} results for query")
+        logger.info(f"Built context for query: {context}")
+    
+        response = f"NO LLM call: [{query}]: {context}"
+        query_type = "product"
+
+        return {
+                "response": response,
+                "sources": results,
+                "query_type": query_type,
+                "has_results": True,
+                "filters_applied": filters,
+                "metadata": {
+                    "num_sources": len(results),
+                    "tokens": 0,
+                    "cost": 0
+                }
+            }
 
     async def generate_answer(
         self,
@@ -96,7 +145,7 @@ class RAGService:
                     cleaned_query,
                     #TODO uncomment below later
                     top_k=2, # reduce the number of products to retrieve
-                    #filters=filters # Currently not applying filters for products
+                    filters=filters # Currently not applying filters for products
                 )
                 context = self.context_builder.build_product_context(results)
             else:
@@ -149,12 +198,10 @@ class RAGService:
             print(f"LLM Response: {llm_response["tokens"]} tokens, Cost: {llm_response["cost"]}")
             logger.info(f"LLM response generated for session {session_id} with {llm_response['tokens']} tokens, cost: {llm_response['cost']}")
             # Step 7: Format sources
-            sources = self._format_sources(results, query_type)
-            print(f"Formatted Sources: {sources}")
-            logger.info(f"Formatted sources for session {sources}")            
+            #sources = self._format_sources(results, query_type)
             return {
                 "response": llm_response['response'],
-                "sources": sources,
+                "sources": results,
                 "query_type": query_type,
                 "has_results": True,
                 "filters_applied": filters,
@@ -186,29 +233,3 @@ class RAGService:
         
         return "\n".join(history_parts)
     
-    def _format_sources(
-        self,
-        results: List[Dict],
-        query_type: str
-    ) -> List[Dict]:
-        """Format sources for response"""
-        sources = []
-        
-        if query_type == 'product':
-            for result in results[:3]:  # Top 3
-                sources.append({
-                    "type": "product",
-                    "product_id": result.get('id'),
-                    "title": result.get('title'),
-                    "price": result.get('price'),
-                    "relevance_score": result.get('relevance_score', 0)
-                })
-        else:
-            for result in results:
-                sources.append({
-                    "type": "knowledge_base",
-                    "doc_type": result.get('doc_type'),
-                    "text_preview": result.get('text', '')[:100]
-                })
-        
-        return sources

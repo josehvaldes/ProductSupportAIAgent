@@ -1,7 +1,7 @@
 import { Box, Title, Text, NavLink} from '@mantine/core';
 import { ChatHistory } from './ChatHistory';
 
-type ActiveView = 'chat' | 'search' | 'settings' | 'help';
+type ActiveView = 'chat' | 'search' | 'settings' | 'help' | 'chat-ext';
 
 interface NavBarProps {
   activeView: ActiveView;
@@ -30,6 +30,11 @@ export function NavBar({ activeView, onViewChange }: NavBarProps) {
           label="Search" 
           active={activeView === 'search'}
           onClick={() => onViewChange('search')}
+        />
+        <NavLink 
+          label="Chat Ext" 
+          active={activeView === 'chat-ext'}
+          onClick={() => onViewChange('chat-ext')}
         />
       </Box>
       <Box>

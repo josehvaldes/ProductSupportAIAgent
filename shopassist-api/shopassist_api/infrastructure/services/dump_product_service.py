@@ -20,28 +20,28 @@ class DumpProductService(RepositoryServiceInterface):
         """Initialize the CosmosDB client based on configuration."""
         pass
 
-    async def get_product_by_id(self, product_id: str)-> Product:
+    async def get_product_by_id(self, product_id: str)-> dict[str, any]:
         """Retrieve a product by its ID from CosmosDB."""
 
-        product:Product = { "id": product_id,
+        return { "id": product_id,
                     "name": "Test Product",
                     "description": "A product for testing", 
                     "category": "Testing", 
-                    "price": "19.99", 
+                    "price": 19.99, 
                     "brand": "TestBrand", 
                     "rating": "4.5", 
                     "review_count": "10", 
                     "product_url": "http://example.com/product/test123", 
-                    "image_url": "http://example.com/product/test123/image.jpg",  
+                    "image_url": f"https://m.media-amazon.com/images/I/41gikeSuhAL._SY300_SX300_QL70_FMwebp_.jpg",
                     "category_full": ["Smartphones","Testing","Unit Tests"], 
                     "availability": "In Stock" }
-        return Product(**product)
+        
     
-    async def search_products_by_category(self, category: str) -> list[Product]:
+    async def search_products_by_category(self, category: str)-> list[dict[str, any]]:
         """Search products by category."""
         products = []
         for i in range(3):
-            product:Product = { "id": f"test{i}",
+            products.append( { "id": f"test{i}",
                         "name": f"Test Product {i}",
                         "description": "A product for testing", 
                         "category": category, 
@@ -50,18 +50,19 @@ class DumpProductService(RepositoryServiceInterface):
                         "rating": "4.5", 
                         "review_count": "10", 
                         "product_url": f"http://example.com/product/test{i}", 
-                        "image_url": f"http://example.com/product/test{i}/image.jpg",  
+                        "image_url": f"https://m.media-amazon.com/images/I/41gikeSuhAL._SY300_SX300_QL70_FMwebp_.jpg",  
                         "category_full": ["Smartphones","Testing","Unit Tests"], 
                         "availability": "In Stock" }
-            products.append(Product(**product))
+                        )
+
         return products
     
-    async def search_products_by_price_range(self, min_price: float, max_price: float) -> list[Product]:
+    async def search_products_by_price_range(self, min_price: float, max_price: float) -> list[dict[str, any]]:
         """Search products within a price range."""
         products = []
         for i in range(4):
             price = min_price + (i * (max_price - min_price) / 4)
-            product:Product = { "id": f"test{i}",
+            products.append( { "id": f"test{i}",
                         "name": f"Test Product {i}",
                         "description": "A product for testing", 
                         "category": "Testing", 
@@ -70,10 +71,10 @@ class DumpProductService(RepositoryServiceInterface):
                         "rating": "4.5", 
                         "review_count": "10", 
                         "product_url": f"http://example.com/product/test{i}", 
-                        "image_url": f"http://example.com/product/test{i}/image.jpg",  
+                        "image_url": f"https://m.media-amazon.com/images/I/41gikeSuhAL._SY300_SX300_QL70_FMwebp_.jpg",  
                         "category_full":["Smartphones","Testing","Unit Tests"], 
                         "availability": "In Stock" }
-            products.append(Product(**product))
+            )
         return products
     
     async def search_products_by_text(self, text: str) -> list[dict[str, any]]:
@@ -89,7 +90,7 @@ class DumpProductService(RepositoryServiceInterface):
                         "rating": "4.5", 
                         "review_count": "10", 
                         "product_url": f"http://example.com/product/test{i}", 
-                        "image_url": f"http://example.com/product/test{i}/image.jpg",  
+                        "image_url": "https://m.media-amazon.com/images/I/31dJ+lXJq3L._SY300_SX300_.jpg",  
                         "category_full": ["Smartphones","Testing","Unit Tests"], 
                         "availability": "In Stock" }
             products.append(Product(**product))
@@ -108,7 +109,7 @@ class DumpProductService(RepositoryServiceInterface):
                         "rating": "4.5", 
                         "review_count": "10", 
                         "product_url": f"http://example.com/product/test{i}", 
-                        "image_url": f"http://example.com/product/test{i}/image.jpg",  
+                        "image_url": "https://m.media-amazon.com/images/I/31dJ+lXJq3L._SY300_SX300_.jpg",
                         "category_full": ["Smartphones","Testing","Unit Tests"], 
                         "availability": "In Stock" }
             products.append(Product(**product))
@@ -118,20 +119,14 @@ class DumpProductService(RepositoryServiceInterface):
         """Get conversation history for a session"""
         history = [
             {
-                "session_id": session_id,
-                "user_id": "user123",
                 "role": "user",
-                "content": "Hello, I need help with a product.",
-                "timestamp": "2024-01-01T12:00:00Z",
-                "metadata": {}
+                "content": ".I need a printer under 100 USD",
+                "timestamp": "2025-10-30T20:44:28.195142+00:00"
             },
             {
-                "session_id": session_id,
-                "user_id": "agent456",
-                "role": "agent",
-                "content": "Sure, what product do you need help with?",
-                "timestamp": "2024-01-01T12:01:00Z",
-                "metadata": {}
+                "role": "assistant",
+                "content": ".You can find good printers under $100. Here are two options:\n\n1. **HP Deskjet 2723 AIO Printer**  \n   - Price: $77.05  \n   - Features: Print, copy, scan with WiFi and Bluetooth connectivity; Up to 1200 x 1200 DPI resolution; 60-sheet input tray, ideal for home use.\n\n2. **Canon PIXMA E477 All-in-One Wireless Ink Efficient Colour Printer**  \n   - Price: $69.91  \n   - Features: Print, scan, copy with WiFi and USB; High print resolution up to 4800 x 600 dpi; Supports various paper sizes, suitable for home and small office.\n\nWould you like details on warranty, ink cartridges, or setup for either printer?",
+                "timestamp": "2025-10-30T20:44:28.441405+00:00"
             }
         ]
         return history

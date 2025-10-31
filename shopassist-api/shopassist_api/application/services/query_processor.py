@@ -30,7 +30,9 @@ class QueryProcessor:
         'smartphone': 'Smartphones',
         'tablet': 'Tablets',
         'watch': 'Smartwatches',
-        'camera': 'Cameras'
+        'camera': 'Cameras',
+        'printer': 'Printers',
+        'monitor': 'Monitors',
     }
     
     # Policy keywords

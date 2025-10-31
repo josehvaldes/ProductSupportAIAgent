@@ -184,12 +184,12 @@ class RetrievalService:
         Fetch full product details from Cosmos DB
         """
         enriched = []
-        print("    Enriching products with full data from Cosmos DB...")
-        print(f"    Number of products to enrich: {len(products)}")
+        logger.info(f"Enriching {len(products)} products with full data from Cosmos DB")
+
         for product in products:
             try:
                 # Get full product from Cosmos
-                print(f"      Fetching product ID: {product['product_id']}")
+                logger.info(f"Fetching product ID: {product['product_id']}")
                 full_product = await self.cosmos.get_product_by_id(product['product_id'])
                 if full_product:
                     enriched.append({
@@ -201,5 +201,5 @@ class RetrievalService:
                 logger.error(f"Error enriching product {product['product_id']}: {e}")
                 traceback.print_exc()
                 continue
-        print(f"    * Enriched {len(enriched)} products with full data.")
+
         return enriched
