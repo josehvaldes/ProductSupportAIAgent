@@ -14,7 +14,7 @@ env_path = script_dir.parent / 'shopassist-api' / '.env'
 load_dotenv(dotenv_path=env_path)
 from shopassist_api.application.settings.config import settings
 
-product_jsonl_file = "c:/personal/_ProductSupportAIAgent/datasets/product_data/amazon_50_with_transformers_embeddings.jsonl"
+product_jsonl_file = "c:/personal/_ProductSupportAIAgent/datasets/product_data/amazon_100_with_transformers_embeddings.jsonl"
 knowledge_base_jsonl_file = "c:/personal/_ProductSupportAIAgent/ProductSupportAIAgent/scripts/knowledge_base_chunked/kb_with_embeddings.jsonl "
 
 def load_json(file_path: str):

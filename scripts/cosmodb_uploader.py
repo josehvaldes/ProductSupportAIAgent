@@ -72,7 +72,7 @@ def upload_file_to_cosmosdb(file_path:str):
     
 
 if __name__ == "__main__":
-    file_path = "c:/personal/_ProductSupportAIAgent/datasets/product_data/amazon_50.json"
+    file_path = "c:/personal/_ProductSupportAIAgent/datasets/product_data/amazon_100.json"
     upload_file_to_cosmosdb(file_path)
 
     print("Done.")

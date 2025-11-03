@@ -75,7 +75,7 @@ class RAGService:
             results = await self.retrieval.retrieve_products(
                 cleaned_query,
                 enriched=True,
-                top_k=3, # reduce the number of products to retrieve
+                top_k=4, # reduce the number of products to retrieve
                 filters=filters # Currently not applying filters for products
             )
             context = self.context_builder.build_product_context(results)
@@ -136,7 +136,7 @@ class RAGService:
             if query_type == 'product':
                 results = await self.retrieval.retrieve_products(
                     cleaned_query,
-                    top_k=3, # reduce the number of products to retrieve
+                    top_k=4, 
                     filters=filters # Currently not applying filters for products
                 )
                 context = self.context_builder.build_product_context(results)
@@ -162,7 +162,8 @@ class RAGService:
                     "has_results": False,
                     "metadata": {
                         "tokens": llm_response['tokens'],
-                        "cost": llm_response['cost']
+                        "cost": llm_response['cost'],
+                        "num_sources": len(results),
                     }
                 }
             

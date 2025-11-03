@@ -962,7 +962,7 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
 **Today's Focus:** wrap-up, testing, optimization, and documentation
 
 **Completed:**
-1. [ ] Comprehensive end-to-end testing (1.5 hours)
+1. [X] Comprehensive end-to-end testing (1.5 hours)
    - Test all 7 key scenarios from architecture doc:
      * Product discovery ("laptop for video editing under $1500")
      * Specification query ("Does MacBook have 16GB RAM?")
@@ -975,16 +975,17 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
    - Record response times
    - Note any issues or edge cases
 
-2. [ ] Performance optimization (1.5 hours)
+2. [X] Performance optimization (1.5 hours)
    - Measure current response latency (end-to-end)
    - Identify bottlenecks (embedding, retrieval, LLM)
    - Optimize Milvus search parameters (ef, nprobe)
    - Implement result caching for common queries
    - Optimize frontend rendering
-   - Test improvements and document gains
+   - Test improvements and document gains: 
    - Update performance metrics
 
-3. [ ] Error handling and edge cases (1 hour)
+3. [X] Error handling and edge cases (1 hour)
+   - Improve Health Checks
    - Test with malformed queries
    - Test with very long messages (>500 chars)
    - Test with empty/whitespace-only messages
@@ -992,10 +993,11 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
    - Test API error scenarios (service down)
    - Test session expiration
    - Verify all errors show user-friendly messages
+   
 
-4. [ ] Response quality evaluation (1 hour)
+4. [X] Response quality evaluation (1 hour)
    - Run evaluation script from Day 11
-   - Review 20+ responses for:
+   - Review 8 responses for:
      * Factual accuracy
      * Relevance to query
      * Formatting quality
@@ -1004,16 +1006,7 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
    - Document quality metrics
    - Note areas for prompt improvement
 
-5. [ ] Calculate and document Week 2 metrics (1 hour)
-   - Count total embeddings generated
-   - Measure average retrieval latency
-   - Calculate Milvus collection sizes
-   - Count successful test queries
-   - Document token usage and costs
-   - Calculate average response time
-   - Update DEVLOG Week 2 Summary
-
-6. [ ] Code cleanup and documentation (1.5 hours)
+5. [X] Code cleanup and documentation (1.5 hours)
    - Remove unused code and imports
    - Add missing docstrings
    - Update API documentation (Swagger)
@@ -1022,28 +1015,16 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
    - Update README with Week 2 features
    - Create troubleshooting section
 
-7. [ ] Create demo materials (1.5 hours)
-   - Record 3-5 minute demo video showing:
-     * Product search and chat interaction
-     * Multi-turn conversation
-     * Product sources display
-     * Error handling
-   - Take screenshots of:
-     * Chat interface with AI response
-     * Product sources
-     * Milvus Attu dashboard
-     * API response examples
-   - Write demo script/talking points
-   - Upload to GitHub/portfolio
-
 **Technical Decisions:**
+- Use Singleton pattern for Azure open AI clients
+- Use Singleton pattern for sentence transformer model
 - 
 
 **Challenges & Solutions:**
-- 
+- Estimate costs and prepare reports. The solution is running basic tests and print the results for manual analysis
 
 **Learnings:**
-- 
+- How to implement class based vs Module based singleton pattern in python
 
 **Next Steps:**
 - [ ] 

@@ -119,15 +119,15 @@ def main(option: str):
     #Use: embedding_service = OpenAIEmbeddingService() for OpenAI embeddings
     embedding_service = TransformersEmbeddingService(model_name=settings.transformers_embedding_model)
 
-    source_file = "c:/personal/_ProductSupportAIAgent/datasets/product_data/amazon_50.json"
-    output_file = "c:/personal/_ProductSupportAIAgent/datasets/product_data/amazon_50_with_transformers_embeddings.jsonl"  
+    source_file = "c:/personal/_ProductSupportAIAgent/datasets/product_data/amazon_100.json"
+    output_file = "c:/personal/_ProductSupportAIAgent/datasets/product_data/amazon_100_with_transformers_embeddings.jsonl"  
     
     if option in ["products", "both"]:
         print(f"Processing products from file: {source_file}")
         process_products_file(source_file, output_file, embedding_service)
 
     kb_source_folder = "c:/personal/_ProductSupportAIAgent/ProductSupportAIAgent/scripts/knowledge_base_chunked/"
-    output_file = "c:/personal/_ProductSupportAIAgent/ProductSupportAIAgent/scripts/knowledge_base_chunked/kb_with_embeddings.jsonl"
+    output_file = "c:/personal/_ProductSupportAIAgent/ProductSupportAIAgent/scripts/knowledge_base_chunked/kb_with_transformers_embeddings.jsonl"
     
     if option in ["knowledgebase", "both"]:
         print(f"Processing knowledge base from folder: {kb_source_folder}")
