@@ -14,18 +14,25 @@ class MilvusService(VectorServiceInterface):
         self._connect()
 
     def _connect(self):
-        """Connect to Milvus"""
+        """Connect to Milvus (reuses existing connection if available)"""
         try:
+            # Check if already connected
+            if connections.has_connection(alias="default"):
+                logger.info(f"Using existing Milvus connection")
+                self.connected = True
+                return
+            
+            # Create new connection
             connections.connect(
                 alias="default",
                 host=self.host,
                 port=self.port
             )
+            self.connected = True
             logger.info(f"Connected to Milvus at {self.host}:{self.port}")
         except Exception as e:
             logger.error(f"Failed to connect to Milvus: {e}")
-            connected = False
-            #raise
+            self.connected = False
     
     def insert_products(self, products: List[Dict]) -> int:
         """Insert product embeddings into Milvus"""
