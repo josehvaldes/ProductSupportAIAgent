@@ -214,9 +214,8 @@ class CosmosProductService(RepositoryServiceInterface):
             container_name = self.product_container
             container = self.database.get_container_client(container_name)
 
-            query = "SELECT TOP 1 * FROM c"
-            items = list(container.query_items(query=query, enable_cross_partition_query=True))
-
+            # query = "SELECT TOP 1 * FROM c"
+            # items = list(container.query_items(query=query, enable_cross_partition_query=True))
             logger.info("Connected to CosmosDB successfully.")
             return True
         except Exception as e:

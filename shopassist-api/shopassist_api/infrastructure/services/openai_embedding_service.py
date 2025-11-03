@@ -6,25 +6,44 @@ from shopassist_api.application.settings.config import settings
 from shopassist_api.application.interfaces.service_interfaces import EmbeddingServiceInterface
 from shopassist_api.infrastructure.services.azure_credential_manager import get_credential_manager
 from shopassist_api.logging_config import get_logger
+from threading import Lock
 
 logger = get_logger(__name__)
 
 class OpenAIEmbeddingService(EmbeddingServiceInterface):
+    
+    # Class-level singleton for Azure OpenAI client
+    _client = None
+    _client_lock = Lock()
+    
     def __init__(self, model_name: str = None):
         self.model_name = model_name or settings.embedding_model or "text-embedding-3-small"
-        
-        # Use shared credential manager
-        credential_manager = get_credential_manager()
-        token_provider = credential_manager.get_openai_token_provider()
-        
-        self.client = AzureOpenAI(
-            api_version=settings.azure_openai_api_version or "2024-02-01",
-            azure_endpoint=settings.azure_openai_endpoint,
-            azure_ad_token_provider=token_provider
-        )
         self.DIMENSION = 1536
-
         self.encoding = tiktoken.encoding_for_model(self.model_name)
+        
+        # Initialize singleton client
+        self._initialize_client()
+        self.client = OpenAIEmbeddingService._client
+
+    def _initialize_client(self):
+        """Initialize the Azure OpenAI client as singleton."""
+        if OpenAIEmbeddingService._client is None:
+            with OpenAIEmbeddingService._client_lock:
+                # Double-check after acquiring lock
+                if OpenAIEmbeddingService._client is None:
+                    logger.info("Initializing singleton Azure OpenAI client for embeddings")
+                    
+                    # Use shared credential manager
+                    credential_manager = get_credential_manager()
+                    token_provider = credential_manager.get_openai_token_provider()
+                    
+                    OpenAIEmbeddingService._client = AzureOpenAI(
+                        api_version=settings.azure_openai_api_version or "2024-02-01",
+                        azure_endpoint=settings.azure_openai_endpoint,
+                        azure_ad_token_provider=token_provider
+                    )
+                else:
+                    logger.info("Using existing singleton Azure OpenAI client for embeddings")
 
     def count_tokens(self, text: str) -> int:
         """Count tokens in text"""
@@ -65,22 +84,18 @@ class OpenAIEmbeddingService(EmbeddingServiceInterface):
                         "text": batch[j]
                     })
                 
-                logger.info(f"Batch {i//batch_size + 1}: {len(batch)} texts, ")
+                logger.info(f"Batch {i//batch_size + 1}: {len(batch)} texts")
 
                 # Rate limiting: sleep between batches
                 if i + batch_size < len(input_texts):
                     asyncio.sleep(0.5)
-                
                 
             except Exception as e:
                 logger.error(f"Error in batch {i//batch_size + 1}: {e}")
                 traceback.print_exc()
                 raise
         
-        logger.info(
-            f"Total: {len(all_embeddings)} embeddings, "
-            f"{self.total_tokens} tokens, ${self.total_cost:.6f}"
-        )
+        logger.info(f"Total: {len(all_embeddings)} embeddings generated")
         
         return all_embeddings
     

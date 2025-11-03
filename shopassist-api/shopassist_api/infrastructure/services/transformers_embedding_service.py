@@ -6,37 +6,35 @@ from shopassist_api.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-# Module-level singleton with thread safety
-_model_lock = RLock()
-_model_cache = {}  # Cache multiple models by name
-
 class TransformersEmbeddingService(EmbeddingServiceInterface):
     """Service for generating embeddings using Transformers models."""
-    
+
+    # Class-level singleton with thread safety
+    _model_lock = RLock()
+    _model_cache = {}  # Cache multiple models by name
+
     def __init__(self, model_name: str = None):
         self.model_name = model_name or settings.transformers_embedding_model or "sentence-transformers/multi-qa-mpnet-base-dot-v1"
-        self._initialize_client()
         self.DIMENSION = 768  # Adjust based on model
+        
+        # Initialize model (uses cache)
+        self._initialize_client()
 
     def _initialize_client(self):
         """Initialize the Transformers model based on configuration."""
-        if settings.use_singleton_transformers_model:
-            # Use cached model if available
-            if self.model_name in _model_cache:
-                logger.info(f"Using cached model: {self.model_name}")
-                self.model = _model_cache[self.model_name]
-            else:
-                # Load model with thread safety
-                with _model_lock:
-                    # Double-check after acquiring lock
-                    if self.model_name not in _model_cache:
-                        logger.info(f"Loading model (first time): {self.model_name}")
-                        _model_cache[self.model_name] = SentenceTransformer(self.model_name)
-                    self.model = _model_cache[self.model_name]
+        
+        # Use cached model if available
+        if self.model_name in TransformersEmbeddingService._model_cache:
+            logger.info(f"Using cached model: {self.model_name}")
+            self.model = TransformersEmbeddingService._model_cache[self.model_name]
         else:
-            # Load new model instance each time (not recommended for production)
-            logger.info(f"Loading new model instance: {self.model_name}")
-            self.model = SentenceTransformer(self.model_name)
+            # Load model with thread safety
+            with TransformersEmbeddingService._model_lock:
+                # Double-check after acquiring lock
+                if self.model_name not in TransformersEmbeddingService._model_cache:
+                    logger.info(f"Loading model (first time): {self.model_name}")
+                    TransformersEmbeddingService._model_cache[self.model_name] = SentenceTransformer(self.model_name)
+                self.model = TransformersEmbeddingService._model_cache[self.model_name]
     
     def count_tokens(self, text: str) -> int:
         """Count tokens in text"""

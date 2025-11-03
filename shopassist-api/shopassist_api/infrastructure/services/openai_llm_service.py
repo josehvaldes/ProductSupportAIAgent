@@ -5,11 +5,16 @@ from shopassist_api.application.interfaces.service_interfaces import LLMServiceI
 from shopassist_api.infrastructure.services.azure_credential_manager import get_credential_manager
 from shopassist_api.logging_config import get_logger
 from shopassist_api.application.settings.config import settings
+from threading import RLock
 
 logger = get_logger(__name__)
 
 class OpenAILLMService(LLMServiceInterface):
     """Service for generating responses using Azure OpenAI"""
+    
+    # Class-level singleton for Azure OpenAI client
+    _client = None
+    _client_lock = RLock()
     
     def __init__(self):
         self.deployment = settings.azure_openai_model_deployment
@@ -19,14 +24,29 @@ class OpenAILLMService(LLMServiceInterface):
         self.total_tokens_used = 0
         self.total_cost = 0.0
         
-        # Use shared credential manager
-        credential_manager = get_credential_manager()
-        token_provider = credential_manager.get_openai_token_provider()
-        self.client = AzureOpenAI(
-            api_version=settings.azure_openai_api_version or "2024-02-01",
-            azure_endpoint=settings.azure_openai_endpoint,
-            azure_ad_token_provider=token_provider
-        )
+        # Initialize singleton client
+        self._initialize_client()
+        self.client = OpenAILLMService._client
+        
+    def _initialize_client(self):
+        """Initialize the Azure OpenAI client as singleton."""
+        if OpenAILLMService._client is None:
+            with OpenAILLMService._client_lock:
+                # Double-check after acquiring lock
+                if OpenAILLMService._client is None:
+                    logger.info("Initializing singleton Azure OpenAI client")
+                    
+                    # Use shared credential manager
+                    credential_manager = get_credential_manager()
+                    token_provider = credential_manager.get_openai_token_provider()
+                    
+                    OpenAILLMService._client = AzureOpenAI(
+                        api_version=settings.azure_openai_api_version or "2024-02-01",
+                        azure_endpoint=settings.azure_openai_endpoint,
+                        azure_ad_token_provider=token_provider
+                    )
+                else:
+                    logger.info("Using existing singleton Azure OpenAI client")
         
     def generate_response(
         self,
