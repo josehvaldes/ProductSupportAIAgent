@@ -67,7 +67,6 @@ class ContextBuilder:
     
     def _format_product(self, product: Dict, index: int) -> str:
             """Format single product for context"""
-            print(f"    Formatting product {index}:")
             return f"""Product {index}: {product['name']}
                     Price: ${product['price']:.2f}
                     Category: {product['category']}

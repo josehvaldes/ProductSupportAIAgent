@@ -1,6 +1,5 @@
 import json
 import jsonlines
-import uuid
 import sys
 import argparse
 from pathlib import Path

@@ -30,7 +30,7 @@ export function ChatContainerExt() {
 
     // Get session from localStorage or create new
     let storedSessionId = localStorage.getItem('chat_session_id');
-    
+
     if (!storedSessionId) {
       storedSessionId = uuidv4();
       localStorage.setItem('chat_session_id', storedSessionId);

@@ -50,7 +50,6 @@ class RetrievalService:
             )            
             # Deduplicate by product_id and aggregate scores
             products = self._deduplicate_and_aggregate(results)
-            print(f"    Retrieved {len(products)} unique products from Milvus")
             logger.info(f"Retrieved {len(products)} unique products from Milvus")
             
             results_to_return = []
@@ -61,12 +60,10 @@ class RetrievalService:
                 results_to_return = products
 
             # Limit to top_k
-            print(f"    Returning top {top_k} products after enrichment")
             return results_to_return[:top_k]
             
         except Exception as e:
             logger.error(f"Error in retrieve_products: {e}")
-            print("Error in retrieve_products: ", e)
             traceback.print_exc()
             return []
 
@@ -203,3 +200,20 @@ class RetrievalService:
                 continue
 
         return enriched
+    
+    async def health_check(self) -> dict:
+        """Ping the service to check connectivity"""
+        try:
+            vector_healthy = await self.milvus.health_check()
+            embedding_healthy = await self.embedder.health_check()
+            repository_healthy = await self.cosmos.health_check()
+            
+            return {
+                "vector_service": "healthy" if vector_healthy else "unhealthy",
+                "embedding_service": "healthy" if embedding_healthy else "unhealthy",
+                "repository_service": "healthy" if repository_healthy else "unhealthy"
+            }
+        except Exception as e:
+            return {
+                "error": str(e)
+            }

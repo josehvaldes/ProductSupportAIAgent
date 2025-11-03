@@ -1,8 +1,7 @@
 import os
 import json
 import random
-from azure.cosmos import CosmosClient, PartitionKey
-from azure.core.credentials import AzureKeyCredential
+from azure.cosmos import CosmosClient
 from azure.identity import DefaultAzureCredential
 import traceback
 

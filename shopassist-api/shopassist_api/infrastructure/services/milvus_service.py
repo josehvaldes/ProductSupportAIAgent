@@ -10,6 +10,7 @@ class MilvusService(VectorServiceInterface):
     def __init__(self, host: str = "localhost", port: str = "19530"):
         self.host = host
         self.port = port
+        self.connected = False
         self._connect()
 
     def _connect(self):
@@ -23,7 +24,8 @@ class MilvusService(VectorServiceInterface):
             logger.info(f"Connected to Milvus at {self.host}:{self.port}")
         except Exception as e:
             logger.error(f"Failed to connect to Milvus: {e}")
-            raise
+            connected = False
+            #raise
     
     def insert_products(self, products: List[Dict]) -> int:
         """Insert product embeddings into Milvus"""
@@ -45,7 +47,6 @@ class MilvusService(VectorServiceInterface):
         # Insert
         mr = collection.insert(data)
         collection.flush()
-        print(f"    Inserted {len(products)} product chunks")
         logger.info(f"Inserted {len(products)} product chunks")
         return mr.insert_count
 
@@ -64,7 +65,6 @@ class MilvusService(VectorServiceInterface):
         
         mr = collection.insert(data)
         collection.flush()
-        print(f"    Inserted {len(chunks)} knowledge base chunks")
         logger.info(f"Inserted {len(chunks)} knowledge base chunks")
         return mr.insert_count
     
@@ -152,3 +152,11 @@ class MilvusService(VectorServiceInterface):
             "num_entities": collection.num_entities,
             "description": collection.description
         }
+    
+    async def health_check(self) -> bool:
+        """Ping the service to check connectivity"""
+        try:
+            return connections.has_connection(alias="default")
+        except Exception as e:
+            logger.error(f"Milvus health check failed: {e}")
+            return False

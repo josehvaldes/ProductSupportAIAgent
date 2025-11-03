@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     api_version: str = "0.1.0"
     debug: bool = False
 
-    use_dump_service: bool = True
+    use_dumb_service: bool = True
 
     # Embedding Configuration
     embedding_provider: str = "azure_openai"  # Options: 'azure_openai', 'transformers'
@@ -32,7 +32,8 @@ class Settings(BaseSettings):
     
     #Transformers Configuration for EMBEDDING_PROVIDER = transformers
     transformers_embedding_model: Optional[str] = "sentence-transformers/multi-qa-mpnet-base-dot-v1"
-
+    use_singleton_transformers_model: bool = True
+    
     # Azure AI Search
     azure_search_endpoint: Optional[str] = None
     azure_search_key: Optional[str] = None

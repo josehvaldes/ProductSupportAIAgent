@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import List, Dict
 import uuid
 from azure.cosmos import CosmosClient
-from azure.identity import DefaultAzureCredential
 from shopassist_api.application.settings.config import settings
 from shopassist_api.application.interfaces.service_interfaces import RepositoryServiceInterface
 from shopassist_api.logging_config import get_logger
@@ -49,7 +48,7 @@ class CosmosProductService(RepositoryServiceInterface):
 
             # Get the product container
             container = self.database.get_container_client(self.product_container)
-            print(f"Querying for product ID: {product_id} database:{self.database_name}, in container: {self.product_container}")
+            logger.info(f"Querying for product ID: {product_id} database:{self.database_name}, in container: {self.product_container}")
             # Query for the product by ID
             query = f"SELECT * FROM c WHERE c.id = '{product_id}'"
             items = list(container.query_items(query=query, enable_cross_partition_query=True))
@@ -58,7 +57,7 @@ class CosmosProductService(RepositoryServiceInterface):
             else:
                 return None
         except Exception as e:
-            print("An error occurred while retrieving the product:")
+            logger.error(f"Error retrieving product by ID: {e}")
             traceback.print_exc()
             return None
 
@@ -79,7 +78,7 @@ class CosmosProductService(RepositoryServiceInterface):
                 ))
             return items
         except Exception as e:
-            print("An error occurred while searching for products:")
+            logger.error(f"Error searching products by category: {e}")
             traceback.print_exc()
             return []
         
@@ -98,30 +97,9 @@ class CosmosProductService(RepositoryServiceInterface):
             items = list(container.query_items(query=query, enable_cross_partition_query=True))
             return items
         except Exception as e:
-            print("An error occurred while searching for products by price range:")
+            logger.error(f"Error searching products by price range: {e}")
             traceback.print_exc()
             return []
-
-    async def health_check_connection(self):
-        """Test connection to Azure CosmosDB."""
-        if not self.client or not self.database_name:
-            print("CosmosDB is not properly configured.")
-            return
-
-        try:
-            # Create (or get) a container
-            container_name = self.product_container
-            container = self.database.get_container_client(container_name)
-
-            query = "SELECT TOP 1 * FROM c"
-            items = list(container.query_items(query=query, enable_cross_partition_query=True))
-            for item in items[0:1]: # print only first item
-                print(item)
-
-            print("Connected to CosmosDB successfully.")
-        except Exception as e:
-            print("An error occurred while connecting to CosmosDB:")
-            traceback.print_exc()
 
     async def search_products_by_text(self, text: str) -> list[dict[str, any]]:
         """Search products by text from CosmosDB."""
@@ -140,7 +118,7 @@ class CosmosProductService(RepositoryServiceInterface):
                 ))
             return items
         except Exception as e:
-            print("An error occurred while searching for products by text:")
+            logger.error(f"Error searching products by text: {e}")
             traceback.print_exc()
             return []
     
@@ -162,7 +140,7 @@ class CosmosProductService(RepositoryServiceInterface):
                 ))
             return items
         except Exception as e:
-            print("An error occurred while searching for products by name:")
+            logger.error(f"Error searching products by name: {e}")
             traceback.print_exc()
             return []
         
@@ -222,3 +200,26 @@ class CosmosProductService(RepositoryServiceInterface):
         except Exception as e:
             logger.error(f"Error saving message: {e}")
             raise
+    
+    
+    async def health_check(self) -> bool:
+        """Ping the service to check connectivity"""
+        """Test connection to Azure CosmosDB."""
+        """health_check_connection"""
+        if not self.client or not self.database_name:
+            logger.error("CosmosDB client not initialized.")
+            return False
+        try:
+            # Create (or get) a container
+            container_name = self.product_container
+            container = self.database.get_container_client(container_name)
+
+            query = "SELECT TOP 1 * FROM c"
+            items = list(container.query_items(query=query, enable_cross_partition_query=True))
+
+            logger.info("Connected to CosmosDB successfully.")
+            return True
+        except Exception as e:
+            logger.error(f"Error connecting to CosmosDB: {e}")
+            traceback.print_exc()
+            return False

@@ -4,8 +4,11 @@ from azure.identity import DefaultAzureCredential
 from shopassist_api.application.settings.config import settings
 from shopassist_api.application.interfaces.service_interfaces import RepositoryServiceInterface
 from shopassist_api.domain.models.product import Product
+from shopassist_api.logging_config import get_logger
 
-class DumpProductService(RepositoryServiceInterface):
+logger = get_logger(__name__)
+
+class DumbProductService(RepositoryServiceInterface):
 
     def __init__(self):
         self.client = None
@@ -116,8 +119,11 @@ class DumpProductService(RepositoryServiceInterface):
         return products
     
     async def get_conversation_history(self, session_id: str) -> list[dict[str, any]]:
+
         """Get conversation history for a session"""
-        history = [
+        history = []
+        if session_id == "58ca3bbb-1fbc-4cfa":
+            history = [
             {
                 "role": "user",
                 "content": ".I need a printer under 100 USD",
@@ -129,6 +135,7 @@ class DumpProductService(RepositoryServiceInterface):
                 "timestamp": "2025-10-30T20:44:28.441405+00:00"
             }
         ]
+
         return history
     async def save_message(
         self,
@@ -140,5 +147,9 @@ class DumpProductService(RepositoryServiceInterface):
         metadata: dict = None 
     ):
         """Save a message to the conversation history"""
-        print(f"Saving message to session {session_id}: [{role}] {content} at {timestamp}")
+        logger.info(f"Saving message to session {session_id}: [{role}] {content} at {timestamp}")
         return
+
+    async def health_check(self) -> bool:
+        """Ping the service to check connectivity"""
+        return True

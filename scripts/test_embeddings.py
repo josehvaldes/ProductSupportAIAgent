@@ -1,6 +1,4 @@
-import json
 import jsonlines
-import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
 def cosine_sim(emb1, emb2):

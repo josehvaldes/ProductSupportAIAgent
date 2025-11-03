@@ -2,7 +2,6 @@ import asyncio
 import traceback
 import tiktoken
 from openai import AzureOpenAI
-from azure.search.documents import SearchClient
 from shopassist_api.application.settings.config import settings
 from shopassist_api.application.interfaces.service_interfaces import EmbeddingServiceInterface
 from shopassist_api.infrastructure.services.azure_credential_manager import get_credential_manager
@@ -34,17 +33,14 @@ class OpenAIEmbeddingService(EmbeddingServiceInterface):
     def generate_embedding(self, input_text: str) -> list[float]:
         """Generate embedding for the given input text."""
         try:
-            print("Generating embedding for single text...")
             response = self.client.embeddings.create(
                 input=[input_text],
                 model=self.model_name
             )
-            print("Response:")
-            print(response.data[0])
             embedding = response.data[0].embedding
             return embedding
         except Exception as e:
-            print("An error occurred while generating embedding:")
+            logger.error(f"Error generating embedding: {e}")
             traceback.print_exc()
             return []
         
@@ -87,3 +83,17 @@ class OpenAIEmbeddingService(EmbeddingServiceInterface):
         )
         
         return all_embeddings
+    
+    async def health_check(self) -> bool:
+        """Ping the service to check connectivity"""
+        try:
+            # Simple test call to generate embedding for a short text
+            test_text = "Health check"
+            if not self.client:
+                logger.error("OpenAI client not initialized.")
+                return False
+
+            return not self.client.is_closed()            
+        except Exception as e:
+            logger.error(f"OpenAI Embedding service health check failed: {e}")
+            return False

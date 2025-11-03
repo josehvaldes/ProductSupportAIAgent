@@ -2,7 +2,6 @@ import sys
 import time
 from pathlib import Path
 from dotenv import load_dotenv
-from tqdm import tqdm
 
 sys.path.append('../shopassist-api')
 # Load .env file from the correct location

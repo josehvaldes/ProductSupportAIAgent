@@ -1,7 +1,6 @@
 import { Paper, Stack, Text, useMantineTheme } from '@mantine/core';
 import ReactMarkdown from 'react-markdown';
 import type { ChatMessage as ChatMessageType, ProductSource as ProductSourceType } from '../../api/chat';
-import { ProductSource } from './ProductSource';
 import { ProductGrid } from '../ProductGrid';
 import type { Product } from "../../types/Product";
 interface ChatMessageProps {
@@ -52,15 +51,7 @@ export function ChatMessage({ message, sources }: ChatMessageProps) {
         ) 
       } />
       )}
-        {/* <div style={{ marginLeft: 8 }}> 
-          {sources.map((source, index) => (
-            <ProductSource key={index} source={source} />
-          ))
-          }
-        </div>
-      )
-      } */}
-      
+     
     </Stack>
   );
 }

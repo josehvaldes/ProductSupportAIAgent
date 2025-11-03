@@ -22,11 +22,10 @@ export function ProductGrid({products } :ProductGridProps) {
     <SimpleGrid cols={2} spacing="xl" verticalSpacing="xl" w={"100%"}>
 
       { (products && products.length > 0)? products.map((product) => (
-        <Card shadow="sm" padding="lg" radius="md" withBorder mt="md" w={300} mx="auto" key={product.id}>
+        <Card shadow="sm" padding="lg" radius="md" withBorder mt="md" w={250} mx="auto" key={product.id}>
           <Card.Section>
             <Image 
               src={product.image_url}  
-              height={160} 
               alt={product.name}>
                 </Image>
           </Card.Section>

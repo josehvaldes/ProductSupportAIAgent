@@ -1,8 +1,6 @@
-import json
 from azure.cosmos import CosmosClient, PartitionKey
 from azure.core.credentials import AzureKeyCredential
 from azure.identity import DefaultAzureCredential
-import traceback
 
 COSMOSDB_ENDPOINT = "https://<accoutname>.documents.azure.com:443/"
 COSMOSDB_NAME = "<database_name>"

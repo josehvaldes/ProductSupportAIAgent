@@ -1,12 +1,9 @@
 import asyncio
 import sys
-import argparse
-import time
 import json
 from tqdm import tqdm
 from pathlib import Path
 from dotenv import load_dotenv
-from typing import Dict, Optional, Tuple
 
 sys.path.append('../shopassist-api')
 # Load .env file from the correct location
@@ -24,21 +21,21 @@ from shopassist_api.infrastructure.services.cosmos_product_service import Cosmos
 
 # Test queries with expected results
 TEST_QUERIES = [
-    # {
-    #     "query": "laptop for video editing",
-    #     "expected_category": "Laptops",
-    #     "expected_keywords": ["video", "editing", "performance"]
-    # },
+    {
+        "query": "laptop for video editing",
+        "expected_category": "Laptops",
+        "expected_keywords": ["video", "editing", "performance"]
+    },
     {
         "query": "wireless headphones under $100",
         "expected_category": "Headphones",
         "max_price": 100
     },
-    # {
-    #     "query": "what is your return policy",
-    #     "query_type": "policy",
-    #     "expected_doc_type": "policies"
-    # },
+    {
+        "query": "what is your return policy",
+        "query_type": "policy",
+        "expected_doc_type": "policies"
+    },
     # Add more test queries...
 ]
 

@@ -1,12 +1,8 @@
 import asyncio
 import sys
-import argparse
-import time
 import json
-from tqdm import tqdm
 from pathlib import Path
 from dotenv import load_dotenv
-from typing import Dict, Optional, Tuple
 
 sys.path.append('../shopassist-api')
 # Load .env file from the correct location

@@ -50,6 +50,10 @@ class RepositoryServiceInterface(ABC):
         """Save a message to the conversation history"""
         pass
 
+    async def health_check(self) -> bool:
+        """Ping the service to check connectivity"""
+        pass
+
 class EmbeddingServiceInterface(ABC):
     """Abstract base class for embedding service implementations."""
     
@@ -67,6 +71,10 @@ class EmbeddingServiceInterface(ABC):
     def generate_embedding_batch(self, input_texts: list[str], batch_size: int = 50) -> list[dict]:
         """Generate embeddings for a list of input texts."""
         pass
+    async def health_check(self) -> bool:
+        """Ping the service to check connectivity"""
+        pass
+
 
 class VectorServiceInterface(ABC):
     """Abstract base class for Milvus service implementations."""
@@ -99,6 +107,10 @@ class VectorServiceInterface(ABC):
     ) -> List[dict]:
         """Search knowledge base chunks by vector similarity."""
         pass
+    async def health_check(self) -> bool:
+        """Ping the service to check connectivity"""
+        pass
+
 
 class LLMServiceInterface(ABC):
     """Abstract base class for LLM service implementations."""
@@ -124,4 +136,8 @@ class LLMServiceInterface(ABC):
     @abstractmethod
     def get_stats(self) -> Dict:
         """Get usage statistics"""
+        pass
+
+    async def health_check(self) -> bool:
+        """Ping the service to check connectivity"""
         pass

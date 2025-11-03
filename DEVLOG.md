@@ -954,42 +954,87 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
 - [ ] 
 - [ ] 
 
-**Time Invested:** ___ hours
+**Time Invested:** 4 hours
 
 ---
 
-### Day 13 - Saturday, Oct 26, 2025
-**Today's Focus:** Chat API endpoint
+### Day 13 - Friday, Oct 31, 2025
+**Today's Focus:** wrap-up, testing, optimization, and documentation
 
 **Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+1. [ ] Comprehensive end-to-end testing (1.5 hours)
+   - Test all 7 key scenarios from architecture doc:
+     * Product discovery ("laptop for video editing under $1500")
+     * Specification query ("Does MacBook have 16GB RAM?")
+     * Product comparison ("Compare MacBook vs Dell XPS")
+     * Policy question ("What's your return policy?")
+     * Out of stock handling (test with unavailable product)
+     * Multi-turn conversation (3-5 turn dialogue)
+     * Escalation scenario (order cancellation request)
+   - Document test results for each scenario
+   - Record response times
+   - Note any issues or edge cases
 
-**Technical Decisions:**
-- 
+2. [ ] Performance optimization (1.5 hours)
+   - Measure current response latency (end-to-end)
+   - Identify bottlenecks (embedding, retrieval, LLM)
+   - Optimize Milvus search parameters (ef, nprobe)
+   - Implement result caching for common queries
+   - Optimize frontend rendering
+   - Test improvements and document gains
+   - Update performance metrics
 
-**Challenges & Solutions:**
-- 
+3. [ ] Error handling and edge cases (1 hour)
+   - Test with malformed queries
+   - Test with very long messages (>500 chars)
+   - Test with empty/whitespace-only messages
+   - Test with special characters
+   - Test API error scenarios (service down)
+   - Test session expiration
+   - Verify all errors show user-friendly messages
 
-**Learnings:**
-- 
+4. [ ] Response quality evaluation (1 hour)
+   - Run evaluation script from Day 11
+   - Review 20+ responses for:
+     * Factual accuracy
+     * Relevance to query
+     * Formatting quality
+     * Citation correctness
+   - Identify hallucinations or errors
+   - Document quality metrics
+   - Note areas for prompt improvement
 
-**Next Steps:**
-- [ ] 
-- [ ] 
+5. [ ] Calculate and document Week 2 metrics (1 hour)
+   - Count total embeddings generated
+   - Measure average retrieval latency
+   - Calculate Milvus collection sizes
+   - Count successful test queries
+   - Document token usage and costs
+   - Calculate average response time
+   - Update DEVLOG Week 2 Summary
 
-**Time Invested:** ___ hours
+6. [ ] Code cleanup and documentation (1.5 hours)
+   - Remove unused code and imports
+   - Add missing docstrings
+   - Update API documentation (Swagger)
+   - Document prompt templates
+   - Add inline comments for complex logic
+   - Update README with Week 2 features
+   - Create troubleshooting section
 
----
-
-### Day 14 - Sunday, Oct 27, 2025
-**Today's Focus:** Testing and refinement
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+7. [ ] Create demo materials (1.5 hours)
+   - Record 3-5 minute demo video showing:
+     * Product search and chat interaction
+     * Multi-turn conversation
+     * Product sources display
+     * Error handling
+   - Take screenshots of:
+     * Chat interface with AI response
+     * Product sources
+     * Milvus Attu dashboard
+     * API response examples
+   - Write demo script/talking points
+   - Upload to GitHub/portfolio
 
 **Technical Decisions:**
 - 

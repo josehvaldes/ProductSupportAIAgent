@@ -7,7 +7,6 @@ from shopassist_api.application.services.retrieval_service import RetrievalServi
 from shopassist_api.application.interfaces.service_interfaces import LLMServiceInterface
 from shopassist_api.logging_config import get_logger
 
-
 logger = get_logger(__name__)
 
 
@@ -36,10 +35,8 @@ class RAGService:
 
             messages = TestPromptTemplates.sample_prompt(
                     cleaned_query, "context", "history_text")
-            print(f"Generated Messages: {messages}")
             # Step 6: Generate response
             llm_response = self.llm.generate_response(messages)
-            print(f"LLM Response: {llm_response}")
             results = []  # Dummy results for testing
 
             return {
@@ -73,14 +70,12 @@ class RAGService:
         query_type = self.query_processor.classify_query_type(query)
         
         logger.info(f"Query type: {query_type}, Filters: {filters}, query: {cleaned_query}")
-        print(f"Processed query: {cleaned_query}, type: {query_type}, filters: {filters}")
         # Step 2: Retrieve relevant documents
         if query_type == 'product':
             results = await self.retrieval.retrieve_products(
                 cleaned_query,
                 enriched=True,
-                #TODO uncomment below later
-                top_k=2, # reduce the number of products to retrieve
+                top_k=3, # reduce the number of products to retrieve
                 filters=filters # Currently not applying filters for products
             )
             context = self.context_builder.build_product_context(results)
@@ -91,9 +86,7 @@ class RAGService:
             )
             context = self.context_builder.build_knowledge_base_context(results)
         
-        print(f"Retrieved {len(results)} results for query")
         logger.info(f"Retrieved {len(results)} results for query")
-        logger.info(f"Built context for query: {context}")
     
         response = f"NO LLM call: [{query}]: {context}"
         query_type = "product"
@@ -138,13 +131,12 @@ class RAGService:
             query_type = self.query_processor.classify_query_type(query)
             
             logger.info(f"Query type: {query_type}, Filters: {filters}, query: {cleaned_query}")
-            print(f"Processed query: {cleaned_query}, type: {query_type}, filters: {filters}")
+
             # Step 2: Retrieve relevant documents
             if query_type == 'product':
                 results = await self.retrieval.retrieve_products(
                     cleaned_query,
-                    #TODO uncomment below later
-                    top_k=2, # reduce the number of products to retrieve
+                    top_k=3, # reduce the number of products to retrieve
                     filters=filters # Currently not applying filters for products
                 )
                 context = self.context_builder.build_product_context(results)
@@ -155,13 +147,11 @@ class RAGService:
                 )
                 context = self.context_builder.build_knowledge_base_context(results)
             
-            print(f"Retrieved {len(results)} results for query")
             logger.info(f"Retrieved {len(results)} results for query")
             logger.info(f"Built context for query: {context}")
             # Step 3: Handle no results
             if not results:
                 logger.warning("No results found for query")
-                print("No results found for query")
                 messages = PromptTemplates.no_results_prompt(query)
                 llm_response = self.llm.generate_response(messages)
                 
@@ -178,7 +168,6 @@ class RAGService:
             
             # Step 4: Format conversation history
             history_text = self._format_history(conversation_history)
-            print(f"Formatted conversation history: {history_text}")
             logger.info(f"Formatted conversation history for session {session_id}")
             # Step 5: Build prompt
             if query_type == 'product':
@@ -190,15 +179,14 @@ class RAGService:
                     query, context, history_text
                 )
             
-            print(f"Generated Messages for LLM: {messages}")
+
             logger.info(f"Generated messages for LLM for session {session_id}")
             # Step 6: Generate response
             llm_response = self.llm.generate_response(messages)
-            print(f"LLM Response: {llm_response["response"]}")
-            print(f"LLM Response: {llm_response["tokens"]} tokens, Cost: {llm_response["cost"]}")
+
             logger.info(f"LLM response generated for session {session_id} with {llm_response['tokens']} tokens, cost: {llm_response['cost']}")
             # Step 7: Format sources
-            #sources = self._format_sources(results, query_type)
+
             return {
                 "response": llm_response['response'],
                 "sources": results,
@@ -233,3 +221,14 @@ class RAGService:
         
         return "\n".join(history_parts)
     
+    async def health_check(self) -> dict:
+        """Ping the service to check connectivity"""
+        try:
+            health = {}
+            is_healthy = await self.llm.health_check()
+            health['llm_service'] = "healthy" if is_healthy else "unhealthy"
+            health['retrieval_service'] = await self.retrieval.health_check()
+            return health
+        except Exception as e:
+            logger.error(f"Health check failed: {e}")
+            return False

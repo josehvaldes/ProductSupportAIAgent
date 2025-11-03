@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional, Generator
+from typing import List, Dict, Generator
 from openai import AzureOpenAI
 import tiktoken
 from shopassist_api.application.interfaces.service_interfaces import LLMServiceInterface
@@ -14,7 +14,6 @@ class OpenAILLMService(LLMServiceInterface):
     def __init__(self):
         self.deployment = settings.azure_openai_model_deployment
         self.model_name = settings.azure_openai_model
-        print(f"Using model: {self.model_name}, deployment: {self.deployment}")
         logger.info(f"Using model: {self.model_name}, deployment: {self.deployment}")
         self.encoding = tiktoken.encoding_for_model(self.model_name)
         self.total_tokens_used = 0
@@ -74,10 +73,10 @@ class OpenAILLMService(LLMServiceInterface):
             total_tokens = response.usage.total_tokens
             
             # Calculate cost (GPT-4o-mini pricing)
-            # Input: $0.150 per 1M tokens
-            # Output: $0.600 per 1M tokens
-            input_cost = (prompt_tokens / 1_000_000) * 0.150
-            output_cost = (completion_tokens / 1_000_000) * 0.600
+            # Input: $0.40 per 1M tokens
+            # Output: $1.60 per 1M tokens
+            input_cost = (prompt_tokens / 1_000_000) * 0.40
+            output_cost = (completion_tokens / 1_000_000) * 1.60
             total_cost = input_cost + output_cost
             
             self.total_tokens_used += total_tokens
@@ -139,3 +138,18 @@ class OpenAILLMService(LLMServiceInterface):
             "total_cost": self.total_cost,
             "avg_cost_per_call": self.total_cost / max(1, self.total_tokens_used / 1000)
         }
+
+    async def health_check(self) -> bool:
+        """Ping the service to check connectivity"""
+        try:
+            # Simple test call
+            if self.client is None:
+                return False
+
+            response = self.client.models.list()
+            if response:
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"OpenAI LLM health check failed: {e}")
+            return False
