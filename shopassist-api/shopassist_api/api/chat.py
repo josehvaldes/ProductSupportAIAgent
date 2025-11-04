@@ -24,7 +24,7 @@ class ChatResponse(BaseModel):
     query_type: str
     metadata: Dict
 
-@router.post("/dumpmessage", response_model=ChatResponse)
+@router.post("/dumbmessage", response_model=ChatResponse)
 async def chat_dump_message(request: ChatRequest,
                        cosmos_service:RepositoryServiceInterface = Depends(get_repository_service),
                        rag_service:RAGService = Depends(get_rag_service)):
@@ -36,7 +36,7 @@ async def chat_dump_message(request: ChatRequest,
     # Get conversation history
     logger.info(f"Fetching conversation history for session_id: {session_id}, user_id: {user_id}, message: {request.message}")
     history = await cosmos_service.get_conversation_history(session_id)
-    result = await rag_service.generate_dump_answer(
+    result = await rag_service.generate_dumb_answer(
         query=request.message,
         conversation_history=history,
         session_id=session_id

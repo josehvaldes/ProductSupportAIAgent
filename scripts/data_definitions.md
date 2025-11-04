@@ -11,10 +11,7 @@
 	"review_count": 179691.0,
 	"product_url": "link here",
 	"image_url": "lnk here",
-	"category_full": [
-		"Computers&Accessories",
-		"NetworkingDevices",
-	],
+	"category_full": "Computers&Accessories > NetworkingDevices",
 	"vector_text": "combined name description here",
 	"vector_metadata": {
 		"total_tokens": 530,
@@ -40,7 +37,7 @@
   "review_count": 179691,
   "product_url": "...",
   "image_url": "...",
-  "category_full": ["Computers&Accessories", "NetworkingDevices"],
+  "category_full": "Computers&Accessories > NetworkingDevices",
   "availability": "in_stock",
   
   // Add this for convenience:
@@ -161,7 +158,7 @@ API Chat Product Model
   "review_count": 179691,
   "product_url": "...",
   "image_url": "...",
-  "category_full": ["Computers&Accessories", "NetworkingDevices"],
+  "category_full": "Computers&Accessories > NetworkingDevices",
   "availability": "in_stock",
   
   // Add this for convenience:
@@ -170,3 +167,10 @@ API Chat Product Model
   // Partition key for Cosmos DB
   "_partitionKey": "WirelessUSBAdapters"  // ← category for efficient queries
 }
+
+Categories in Milvus
+{
+    "id": "electronics.mobilesaccessories.smartphonesbasicmobiles.smartphones",
+    "name": "Smartphones",
+    "full_name": "Electronics > Mobiles&Accessories > Smartphones&BasicMobiles > Smartphones"
+},

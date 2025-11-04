@@ -15,6 +15,25 @@ class RetrievalService:
         self.embedder = embedding_service
         self.cosmos = repository_service
 
+    async def retrieve_top_categories(self, query:str, top_k=5) -> List[Dict]:
+        """Retrieve product categories"""
+        try:
+            logger.info(f"Generating embedding for query: {query}")
+            query_embedding = self.embedder.generate_embedding(query)
+            categories = self.milvus.search_categories(
+                query_embedding=query_embedding,
+                top_k=top_k) # Get top category
+            
+            logger.info(f"Retrieved categories: {len(categories)}")
+            if categories:
+                return categories
+            else:
+                return {}
+            
+        except Exception as e:
+            logger.error(f"Error retrieving categories: {e}")
+            traceback.print_exc()
+            return ""
 
     async def retrieve_products(
             self,

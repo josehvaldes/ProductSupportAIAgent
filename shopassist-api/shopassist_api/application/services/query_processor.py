@@ -1,5 +1,5 @@
 import re
-from typing import Dict, Optional, Tuple
+from typing import Dict, Tuple
 from shopassist_api.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -18,22 +18,6 @@ class QueryProcessor:
         r'between \$?(\d+) and \$?(\d+)',
         r'\$?(\d+) to \$?(\d+)',
     ]
-    
-    # Category keywords
-    CATEGORIES = {
-        'laptop': 'Laptops',
-        'notebook': 'Laptops',
-        'computer': 'Laptops',
-        'headphone': 'Headphones',
-        'earphone': 'Headphones',
-        'phone': 'Smartphones',
-        'smartphone': 'Smartphones',
-        'tablet': 'Tablets',
-        'watch': 'Smartwatches',
-        'camera': 'Cameras',
-        'printer': 'Printers',
-        'monitor': 'Monitors',
-    }
     
     # Policy keywords
     POLICY_KEYWORDS = [
@@ -55,11 +39,6 @@ class QueryProcessor:
         price_filter = self._extract_price_filter(query_lower)
         if price_filter:
             filters.update(price_filter)
-        
-        # Extract category
-        category = self._extract_category(query_lower)
-        if category:
-            filters['category'] = category
         
         # Clean query (remove filter text)
         cleaned_query = self._clean_query(query)
@@ -102,12 +81,6 @@ class QueryProcessor:
         
         return filters
     
-    def _extract_category(self, query: str) -> Optional[str]:
-        """Extract product category from query"""
-        for keyword, category in self.CATEGORIES.items():
-            if keyword in query:
-                return category
-        return None
     
     def _clean_query(self, query: str) -> str:
         """Remove filter expressions from query"""

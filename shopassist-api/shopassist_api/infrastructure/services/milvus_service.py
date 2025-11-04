@@ -75,6 +75,22 @@ class MilvusService(VectorServiceInterface):
         logger.info(f"Inserted {len(chunks)} knowledge base chunks")
         return mr.insert_count
     
+    def insert_categories(self, categories: List[Dict]) -> int:
+        """Insert category embeddings into Milvus"""
+        collection = Collection("categories_collection")
+        
+        data = [
+            [c["id"] for c in categories],
+            [c["name"] for c in categories],
+            [c["full_name"] for c in categories],
+            [c["embedding"] for c in categories]
+        ]
+        
+        mr = collection.insert(data)
+        collection.flush()
+        logger.info(f"Inserted {len(categories)} categories")
+        return mr.insert_count
+
     def search_products(
         self,
         query_embedding: List[float],
@@ -150,6 +166,35 @@ class MilvusService(VectorServiceInterface):
         
         return formatted
     
+    def search_categories(
+        self,query_embedding: List[float],
+        top_k: int = 5) -> List[Dict]:
+        """Search categories by vector similarity"""
+        collection = Collection("categories_collection")
+        collection.load()
+        search_params = {
+            "metric_type": "COSINE",
+            "params": {"ef": 64}
+        }
+        results = collection.search(
+            data=[query_embedding],
+            anns_field="embedding",
+            param=search_params,
+            limit=top_k,
+            output_fields=["name", "full_name"]
+        )
+        formatted = []
+        for hits in results:
+            for hit in hits:
+                formatted.append({
+                    "id": hit.id,
+                    "distance": hit.distance,
+                    "name": hit.entity.get("name"),
+                    "full_name": hit.entity.get("full_name")
+                })
+
+        return formatted
+
     def get_collection_stats(self, collection_name: str) -> Dict:
         """Get collection statistics"""
         collection = Collection(collection_name)

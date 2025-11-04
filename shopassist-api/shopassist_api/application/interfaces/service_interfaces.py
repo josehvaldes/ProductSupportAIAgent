@@ -88,6 +88,10 @@ class VectorServiceInterface(ABC):
     def insert_knowledge_base(self, chunks: List[dict]) -> int:
         """Insert knowledge base chunks into Milvus."""
         pass
+    @abstractmethod
+    def insert_categories(self, categories: List[dict]) -> int:
+        """Insert category embeddings into Milvus."""
+        pass
     
     @abstractmethod
     def search_products(
@@ -107,6 +111,13 @@ class VectorServiceInterface(ABC):
     ) -> List[dict]:
         """Search knowledge base chunks by vector similarity."""
         pass
+
+    def search_categories(
+        self,query_embedding: List[float],
+        top_k: int = 5) -> List[Dict]:
+        """Search categories by vector similarity."""
+        pass
+            
     async def health_check(self) -> bool:
         """Ping the service to check connectivity"""
         pass

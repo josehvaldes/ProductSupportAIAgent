@@ -90,6 +90,40 @@ def create_knowledge_base_collection():
     print(f"✅ Created collection: knowledge_base_collection")
     return collection
 
+def create_categories_collection():
+    """Create categories collection"""
+    fields = [
+        FieldSchema(name="id", dtype=DataType.VARCHAR, is_primary=True, max_length=100),
+        FieldSchema(name="name", dtype=DataType.VARCHAR, max_length=200),
+        FieldSchema(name="full_name", dtype=DataType.VARCHAR, max_length=1000),
+        FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=768), # Adjust dimension as needed
+    ]
+    
+    schema = CollectionSchema(
+        fields=fields,
+        description="Product categories"
+    )
+    
+    collection = Collection(
+        name="categories_collection",
+        schema=schema
+    )
+
+        # Create index
+    index_params = {
+        "metric_type": "COSINE",
+        "index_type": "HNSW",
+        "params": {"M": 16, "efConstruction": 256}
+    }
+    
+    collection.create_index(
+        field_name="embedding",
+        index_params=index_params
+    )
+    
+    print(f"✅ Created collection: categories_collection")
+    return collection
+
 def main():
    # Connect to Milvus
     connections.connect(
@@ -109,9 +143,14 @@ def main():
         utility.drop_collection("knowledge_base_collection")
         print("Dropped existing knowledge_base_collection")
     
+    if utility.has_collection("categories_collection"):
+        utility.drop_collection("categories_collection")
+        print("Dropped existing categories_collection")
+
     # Create collections
     create_products_collection()
     create_knowledge_base_collection()
+    create_categories_collection()
     
     # List collections
     collections = utility.list_collections()

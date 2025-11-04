@@ -12,7 +12,7 @@ class Product(BaseModel):
   review_count: int
   product_url:Optional[str]
   image_url:Optional[str]
-  category_full:Optional[list[str]]
+  category_full:Optional[str]
   availability:Optional[str]
   
 

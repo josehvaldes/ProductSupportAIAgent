@@ -113,6 +113,30 @@ def process_knowledge_base_folder(source_folder: str, output_file: str, embeddin
             with jsonlines.open(output_file, mode='w') as writer:
                 writer.write_all(all_kb_chunks)
 
+def process_category_file(source_file: str, output_file: str, embedding_service: EmbeddingServiceInterface):
+    """Process the category file to generate embeddings and save to output file."""
+    print(f"Processing category file: {source_file}")
+    output = []
+    with open(source_file, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+        for record in data:  # Process each category record
+            category_name = record.get("name", "")
+            if not category_name:
+                print(f"Skipping record ID: {record.get('id', 'N/A')} as it has no name.")
+                continue
+            
+            print(f"Generating embedding for category ID: {record.get('id', 'N/A')}.")
+            embedding = embedding_service.generate_embedding(category_name)
+            output.append({
+                "id": record.get("id", "N/A"),
+                "name": category_name,
+                "full_name": record.get("full_name", ""),
+                "embedding": embedding
+            })
+    print(f"Saving category embeddings to: {output_file}")   
+    with jsonlines.open(output_file, mode='w') as writer:
+        writer.write_all(output)
+
 def main(option: str):
 
     print("Generating embeddings for sample files")
@@ -133,9 +157,14 @@ def main(option: str):
         print(f"Processing knowledge base from folder: {kb_source_folder}")
         process_knowledge_base_folder(kb_source_folder, output_file, embedding_service)
 
+    category_source_file = "c:/personal/_ProductSupportAIAgent/datasets/product_data/amazon_50_categories.json"
+    output_file = "c:/personal/_ProductSupportAIAgent/datasets/product_data/amazon_50_categories_with_transformer_embeddings.jsonl"
+    if option in ["categories", "both"]:
+        print("Category embeddings generation.")
+        process_category_file(category_source_file, output_file, embedding_service)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Embedding Generation Script")
-    parser.add_argument("option", type=str, help="Products, KnowledgeBase, or Both")
+    parser.add_argument("option", type=str, help="Products, KnowledgeBase, Categories, or Both")
     args = parser.parse_args()
     main(args.option.lower())

@@ -17,6 +17,7 @@ class DumbProductService(RepositoryServiceInterface):
         self.cosmosdb_endpoint = None
         self.product_container = None
         self.chat_container = None
+        self.category_container = None
         self._initialize_client()
     
     def _initialize_client(self):
@@ -36,7 +37,7 @@ class DumbProductService(RepositoryServiceInterface):
                     "review_count": "10", 
                     "product_url": "http://example.com/product/test123", 
                     "image_url": f"https://m.media-amazon.com/images/I/41gikeSuhAL._SY300_SX300_QL70_FMwebp_.jpg",
-                    "category_full": ["Smartphones","Testing","Unit Tests"], 
+                    "category_full": "Smartphones > Testing > Unit Tests", 
                     "availability": "In Stock" }
         
     
@@ -54,7 +55,7 @@ class DumbProductService(RepositoryServiceInterface):
                         "review_count": "10", 
                         "product_url": f"http://example.com/product/test{i}", 
                         "image_url": f"https://m.media-amazon.com/images/I/41gikeSuhAL._SY300_SX300_QL70_FMwebp_.jpg",  
-                        "category_full": ["Smartphones","Testing","Unit Tests"], 
+                        "category_full": "Smartphones > Testing > Unit Tests", 
                         "availability": "In Stock" }
                         )
 
@@ -75,7 +76,7 @@ class DumbProductService(RepositoryServiceInterface):
                         "review_count": "10", 
                         "product_url": f"http://example.com/product/test{i}", 
                         "image_url": f"https://m.media-amazon.com/images/I/41gikeSuhAL._SY300_SX300_QL70_FMwebp_.jpg",  
-                        "category_full":["Smartphones","Testing","Unit Tests"], 
+                        "category_full":"Smartphones > Testing > Unit Tests", 
                         "availability": "In Stock" }
             )
         return products
@@ -94,7 +95,7 @@ class DumbProductService(RepositoryServiceInterface):
                         "review_count": "10", 
                         "product_url": f"http://example.com/product/test{i}", 
                         "image_url": "https://m.media-amazon.com/images/I/31dJ+lXJq3L._SY300_SX300_.jpg",  
-                        "category_full": ["Smartphones","Testing","Unit Tests"], 
+                        "category_full": "Smartphones > Testing > Unit Tests", 
                         "availability": "In Stock" }
             products.append(Product(**product))
         return products
@@ -113,7 +114,7 @@ class DumbProductService(RepositoryServiceInterface):
                         "review_count": "10", 
                         "product_url": f"http://example.com/product/test{i}", 
                         "image_url": "https://m.media-amazon.com/images/I/31dJ+lXJq3L._SY300_SX300_.jpg",
-                        "category_full": ["Smartphones","Testing","Unit Tests"], 
+                        "category_full": "Smartphones > Testing > Unit Tests", 
                         "availability": "In Stock" }
             products.append(Product(**product))
         return products
@@ -153,3 +154,4 @@ class DumbProductService(RepositoryServiceInterface):
     async def health_check(self) -> bool:
         """Ping the service to check connectivity"""
         return True
+   

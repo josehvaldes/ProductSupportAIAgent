@@ -57,7 +57,7 @@ class RAGService:
             traceback.print_exc()
             raise
 
-    async def generate_dump_answer(
+    async def generate_dumb_answer(
         self,
         query: str,
         conversation_history: Optional[List[Dict]] = None,
@@ -72,11 +72,19 @@ class RAGService:
         logger.info(f"Query type: {query_type}, Filters: {filters}, query: {cleaned_query}")
         # Step 2: Retrieve relevant documents
         if query_type == 'product':
+
+            categories = await self.retrieval.retrieve_top_categories(query, 1)
+            if categories and len(categories) > 0:
+                name = categories[0]['name']
+                logger.info(f"  Extracted category filter: {name}")
+                filters = {**filters, **{'category': name}}
+
+            logger.info(f"  Final filters applied: {filters}")
             results = await self.retrieval.retrieve_products(
                 cleaned_query,
                 enriched=True,
                 top_k=4, # reduce the number of products to retrieve
-                filters=filters # Currently not applying filters for products
+                filters=filters
             )
             context = self.context_builder.build_product_context(results)
         else:
@@ -131,13 +139,23 @@ class RAGService:
             query_type = self.query_processor.classify_query_type(query)
             
             logger.info(f"Query type: {query_type}, Filters: {filters}, query: {cleaned_query}")
-
+            
+            
             # Step 2: Retrieve relevant documents
             if query_type == 'product':
+                
+                categories = await self.retrieval.retrieve_top_categories(query, 1)
+                if categories and len(categories) > 0:
+                    name = categories[0]['name']
+                    logger.info(f"  Extracted category filter: {name}")
+                    filters = {**filters, **{'category': name}}
+                
+                logger.info(f"  Final filters applied: {filters}")
+
                 results = await self.retrieval.retrieve_products(
                     cleaned_query,
                     top_k=4, 
-                    filters=filters # Currently not applying filters for products
+                    filters=filters
                 )
                 context = self.context_builder.build_product_context(results)
             else:

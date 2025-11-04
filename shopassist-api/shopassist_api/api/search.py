@@ -39,16 +39,24 @@ async def vector_search(request: SearchRequest,
         logger.info(f"Processing query: {request.query}")
         cleaned_query, extracted_filters = query_processor.process_query(request.query)
         
-        # Merge filters
-        filters = {**(request.filters or {}), **extracted_filters}
-        
         # Classify query type
         query_type = query_processor.classify_query_type(request.query)
         logger.info(f"  Query classified as: {query_type}")
         logger.info(f"  Cleaned query: {cleaned_query}")
-        logger.info(f"  Applying filters: {filters}")
         # Retrieve
         if query_type == 'product':
+            # Get top categories to enhance filters            
+            top_categories = retrieval_service.retrieve_top_categories(cleaned_query, top_k=1)
+            logger.info(f"  Top categories: {top_categories}")
+            if top_categories and len(top_categories) > 0:
+                category_name = top_categories[0]['name']
+                logger.info(f"  Extracted category filter from top categories: {category_name}")
+                extracted_filters = {**extracted_filters, **{'category': category_name}}
+            
+            # Merge filters
+            filters = {**(request.filters or {}), **extracted_filters}
+            
+            logger.info(f"  Applying filters: {filters}")
             results = await retrieval_service.retrieve_products(
                 cleaned_query,
                 top_k=2, #request.top_k,
