@@ -20,13 +20,17 @@ from shopassist_api.infrastructure.services.cosmos_product_service import Cosmos
 
 # Instantiate services
 vector_service = MilvusService()
-embedding_service = TransformersEmbeddingService(model_name=settings.transformers_embedding_model)
+embedder_service = TransformersEmbeddingService(model_name=settings.transformers_embedding_model)
+
+category_embedder_service = TransformersEmbeddingService(model_name=settings.transformers_category_embedding_model)
+
 product_service = CosmosProductService()
 # Create retrieval service with injected dependencies
 retrieval_service = RetrievalService(
     vector_service=vector_service,
-    embedding_service=embedding_service,
-    repository_service=product_service
+    embedding_service=embedder_service,
+    repository_service=product_service,
+    category_embedder_service=category_embedder_service
 )
 
 async def evaluate_retrieval():

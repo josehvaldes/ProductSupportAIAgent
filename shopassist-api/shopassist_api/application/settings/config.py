@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     #Transformers Configuration for EMBEDDING_PROVIDER = transformers
     transformers_embedding_model: Optional[str] = "sentence-transformers/multi-qa-mpnet-base-dot-v1"
     transformers_category_embedding_model: Optional[str] = "intfloat/e5-large-v2"
+    
+    transformers_embedding_model_dim: int = 768
+    transformers_category_embedding_model_dim: int = 1024
 
     use_singleton_transformers_model: bool = True
     

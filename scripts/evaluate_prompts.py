@@ -30,7 +30,7 @@ logger = get_logger(__name__)
 
 TEST_QUERIES = [
     {
-        "query": "I need an smarttv with at least 32 inches screen",
+        "query": "I need an smart tv with at least 32 inches screen",
         "expected_aspects": ["recommendations", "price", "specs", "video editing"]
     },
     # {
@@ -82,14 +82,16 @@ async def evaluate_prompts():
     llm = OpenAILLMService()
 
     vector_service = MilvusService()
-    embedding_service = TransformersEmbeddingService(model_name=settings.transformers_embedding_model)
     product_service = CosmosProductService()
+    embedding_service = TransformersEmbeddingService(model_name=settings.transformers_embedding_model)
+    category_embedder_service = TransformersEmbeddingService(model_name=settings.transformers_category_embedding_model)
 
     # Create retrieval service with injected dependencies
     retrieval_service = RetrievalService(
         vector_service=vector_service,
         embedding_service=embedding_service,
-        repository_service=product_service
+        repository_service=product_service,
+        category_embedder_service=category_embedder_service
     )
 
     rag = RAGService(llm_service=llm, retrieval_service=retrieval_service)

@@ -76,16 +76,27 @@ def get_llm_service():
     """Dependency injection function for LLM service."""
     return _container.get_service(LLMServiceInterface)
 
+def get_embedding_category_service() -> EmbeddingServiceInterface:
+    """Dependency injection function for category embedding service."""
+    if settings.embedding_provider == "azure_openai":
+        embedded_service = OpenAIEmbeddingService()
+    elif settings.embedding_provider == "transformers":
+        embedded_service = TransformersEmbeddingService(model_name=settings.transformers_category_embedding_model)
+
+    return embedded_service
+
 def get_retrieval_service():
     """Dependency injection function for retrieval service."""
     from shopassist_api.application.services.retrieval_service import RetrievalService
     vector_service = get_vector_service()
     embedding_service = get_embedding_service()
     product_service = get_repository_service()
+    category_embedder_service = get_embedding_category_service()
     return RetrievalService(
         vector_service=vector_service,
         embedding_service=embedding_service,
-        repository_service=product_service
+        repository_service=product_service,
+        category_embedder_service=category_embedder_service
     )
 
 def get_rag_service():

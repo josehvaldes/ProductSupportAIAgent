@@ -10,16 +10,19 @@ class RetrievalService:
     def __init__(self,
         vector_service: VectorServiceInterface,
         embedding_service: EmbeddingServiceInterface,
-        repository_service: RepositoryServiceInterface):
+        repository_service: RepositoryServiceInterface,
+        category_embedder_service: EmbeddingServiceInterface
+        ):
         self.milvus = vector_service
         self.embedder = embedding_service
         self.cosmos = repository_service
+        self.category_embedder = category_embedder_service
 
     async def retrieve_top_categories(self, query:str, top_k=5) -> List[Dict]:
         """Retrieve product categories"""
         try:
             logger.info(f"Generating embedding for query: {query}")
-            query_embedding = self.embedder.generate_embedding(query)
+            query_embedding = self.category_embedder.generate_embedding(query)
             categories = self.milvus.search_categories(
                 query_embedding=query_embedding,
                 top_k=top_k) # Get top category

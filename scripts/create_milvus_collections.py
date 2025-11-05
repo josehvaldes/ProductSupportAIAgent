@@ -96,7 +96,10 @@ def create_categories_collection():
         FieldSchema(name="id", dtype=DataType.VARCHAR, is_primary=True, max_length=100),
         FieldSchema(name="name", dtype=DataType.VARCHAR, max_length=200),
         FieldSchema(name="full_name", dtype=DataType.VARCHAR, max_length=1000),
-        FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=768), # Adjust dimension as needed
+        # Adjust dimension as needed. Use 1024 for intfloat/e5-large-v2
+        # Use 768 for sentence-transformers/multi-qa-mpnet-base-dot-v1
+        FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=1024), # Adjust dimension as needed
+
     ]
     
     schema = CollectionSchema(

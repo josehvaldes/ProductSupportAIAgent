@@ -140,28 +140,32 @@ def process_category_file(source_file: str, output_file: str, embedding_service:
 def main(option: str):
 
     print("Generating embeddings for sample files")
+    print(f"Using Transformers model for products: {settings.transformers_embedding_model}")
+    print(f"Using Transformers model for categories: {settings.transformers_category_embedding_model}")
+
     #Use: embedding_service = OpenAIEmbeddingService() for OpenAI embeddings
-    embedding_service = TransformersEmbeddingService(model_name=settings.transformers_embedding_model)
+    embedder_service = TransformersEmbeddingService(model_name=settings.transformers_embedding_model)
+    category_embedder_service = TransformersEmbeddingService(model_name=settings.transformers_category_embedding_model)
 
     source_file = "c:/personal/_ProductSupportAIAgent/datasets/product_data/amazon_100.json"
     output_file = "c:/personal/_ProductSupportAIAgent/datasets/product_data/amazon_100_with_transformers_embeddings.jsonl"  
     
     if option in ["products", "both"]:
         print(f"Processing products from file: {source_file}")
-        process_products_file(source_file, output_file, embedding_service)
+        process_products_file(source_file, output_file, embedder_service)
 
     kb_source_folder = "c:/personal/_ProductSupportAIAgent/ProductSupportAIAgent/scripts/knowledge_base_chunked/"
     output_file = "c:/personal/_ProductSupportAIAgent/ProductSupportAIAgent/scripts/knowledge_base_chunked/kb_with_transformers_embeddings.jsonl"
     
     if option in ["knowledgebase", "both"]:
         print(f"Processing knowledge base from folder: {kb_source_folder}")
-        process_knowledge_base_folder(kb_source_folder, output_file, embedding_service)
+        process_knowledge_base_folder(kb_source_folder, output_file, embedder_service)
 
     category_source_file = "c:/personal/_ProductSupportAIAgent/datasets/product_data/amazon_50_categories.json"
     output_file = "c:/personal/_ProductSupportAIAgent/datasets/product_data/amazon_50_categories_with_transformer_embeddings.jsonl"
     if option in ["categories", "both"]:
         print("Category embeddings generation.")
-        process_category_file(category_source_file, output_file, embedding_service)
+        process_category_file(category_source_file, output_file, category_embedder_service)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Embedding Generation Script")
