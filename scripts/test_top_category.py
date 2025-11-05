@@ -35,14 +35,14 @@ async def evaluate_retrieval():
     top_categories = await retrieval_service.retrieve_top_categories(query, top_k=2)
     print(f"Top Categories Retrieved:")
     for cat in top_categories:
-        print(f"  Category: {cat['name']}, Score: {cat['distance']} {cat['full_name']}")
+        print(f"  Category: {cat['name']}, Score: {cat['distance']}, full_name: {cat['full_name']}")
 
     query = "smartphone with good camera"
     print(f"\n🧪 Evaluating Top Category Retrieval for query: '{query}")
     top_categories = await retrieval_service.retrieve_top_categories(query, top_k=2)
     print(f"Top Categories Retrieved:")
     for cat in top_categories:
-        print(f"  Category: {cat['name']}, Score: {cat['distance']} {cat['full_name']}")
+        print(f"  Category: {cat['name']}, Score: {cat['distance']}, full_name: {cat['full_name']}")
 
 
     query = "cellphones with good camera"
@@ -50,7 +50,32 @@ async def evaluate_retrieval():
     top_categories = await retrieval_service.retrieve_top_categories(query, top_k=2)
     print(f"Top Categories Retrieved:")
     for cat in top_categories:
-        print(f"  Category: {cat['name']}, Score: {cat['distance']} {cat['full_name']}")
+        print(f"  Category: {cat['name']}, Score: {cat['distance']}, full_name: {cat['full_name']}")
+
+    #query with smarttv
+    query = "I need an smarttv with at least 32 inches screen"
+    print(f"\n🧪 Evaluating Top Category Retrieval for query: '{query}")
+    top_categories = await retrieval_service.retrieve_top_categories(query, top_k=3)
+    print(f"Top Categories Retrieved:")
+    for cat in top_categories:
+        print(f"  Category: {cat['name']}, Score: {cat['distance']}, full_name: {cat['full_name']}")
+
+    #query with smart tv
+    query = "I need an smart tv with at least 32 inches screen"
+    print(f"\n🧪 Evaluating Top Category Retrieval for query: '{query}")
+    top_categories = await retrieval_service.retrieve_top_categories(query, top_k=3)
+    print(f"Top Categories Retrieved:")
+    for cat in top_categories:
+        print(f"  Category: {cat['name']}, Score: {cat['distance']}, full_name: {cat['full_name']}")
+
+    #query with smart television
+    query = "I need an smart television with at least 32 inches screen"
+    print(f"\n🧪 Evaluating Top Category Retrieval for query: '{query}")
+    top_categories = await retrieval_service.retrieve_top_categories(query, top_k=3)
+    print(f"Top Categories Retrieved:")
+    for cat in top_categories:
+        print(f"  Category: {cat['name']}, Score: {cat['distance']}, full_name: {cat['full_name']}")
+
 
 if __name__ == "__main__":
     asyncio.run(evaluate_retrieval())

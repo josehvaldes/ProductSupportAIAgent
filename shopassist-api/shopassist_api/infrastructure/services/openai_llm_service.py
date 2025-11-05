@@ -1,5 +1,5 @@
 from typing import List, Dict, Generator
-from openai import AzureOpenAI
+from openai import AsyncAzureOpenAI
 import tiktoken
 from shopassist_api.application.interfaces.service_interfaces import LLMServiceInterface
 from shopassist_api.infrastructure.services.azure_credential_manager import get_credential_manager
@@ -40,7 +40,7 @@ class OpenAILLMService(LLMServiceInterface):
                     credential_manager = get_credential_manager()
                     token_provider = credential_manager.get_openai_token_provider()
                     
-                    OpenAILLMService._client = AzureOpenAI(
+                    OpenAILLMService._client = AsyncAzureOpenAI(
                         api_version=settings.azure_openai_api_version or "2024-02-01",
                         azure_endpoint=settings.azure_openai_endpoint,
                         azure_ad_token_provider=token_provider
@@ -48,7 +48,7 @@ class OpenAILLMService(LLMServiceInterface):
                 else:
                     logger.info("Using existing singleton Azure OpenAI client")
         
-    def generate_response(
+    async def generate_response(
         self,
         messages: List[Dict[str, str]],
         temperature: float = 0.3,
@@ -66,6 +66,13 @@ class OpenAILLMService(LLMServiceInterface):
             Dict with response text, tokens used, and cost
         """
         try:
+            
+            if self.client is None:
+                raise ValueError("Azure OpenAI client is not initialized.")
+            if not messages:
+                logger.error("Cannot generate response: messages list is empty")
+                raise ValueError("Messages list cannot be empty. At least one message is required to generate a response.")
+
             # Count input tokens
             input_text = "\n".join([m['content'] for m in messages])
             input_tokens = len(self.encoding.encode(input_text))
@@ -73,7 +80,7 @@ class OpenAILLMService(LLMServiceInterface):
             logger.info(f"Generating response (input tokens: {input_tokens})")
             
             # Call Azure OpenAI
-            response = self.client.chat.completions.create(
+            response = await self.client.chat.completions.create(
                 model=self.deployment,
                 messages=messages,
                 temperature=temperature,

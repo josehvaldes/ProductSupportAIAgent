@@ -47,6 +47,7 @@ class QueryProcessor:
         
         return cleaned_query, filters
     
+    @DeprecationWarning
     def classify_query_type(self, query: str) -> str:
         """
         Classify if query is about products or policies

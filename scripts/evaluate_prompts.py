@@ -18,15 +18,25 @@ from shopassist_api.infrastructure.services.cosmos_product_service import Cosmos
 from shopassist_api.application.services.rag_service import RAGService
 from shopassist_api.application.services.retrieval_service import RetrievalService
 
+from shopassist_api.logging_config import setup_logging
+from shopassist_api.logging_config import get_logger
+
+setup_logging(
+        log_level=settings.log_level,
+        log_file=settings.log_file,
+        log_to_console=settings.log_to_console
+    )
+logger = get_logger(__name__)
+
 TEST_QUERIES = [
-    # {
-    #     "query": "I need a laptop for video editing under $1500",
-    #     "expected_aspects": ["recommendations", "price", "specs", "video editing"]
-    # },
     {
-        "query": "What's your return policy?",
-        "expected_aspects": ["return window", "conditions", "refund process"]
+        "query": "I need an smarttv with at least 32 inches screen",
+        "expected_aspects": ["recommendations", "price", "specs", "video editing"]
     },
+    # {
+    #     "query": "What's your return policy?",
+    #     "expected_aspects": ["return window", "conditions", "refund process"]
+    # },
     # {
     #     "query": "Do you have wireless headphones?",
     #     "expected_aspects": ["product list", "features", "prices"]
@@ -67,6 +77,7 @@ async def evaluate_prompts():
     Evaluate prompt quality and response relevance
     """
     print("🧪 Evaluating Prompt Performance\n")
+    logger.info("Initializing services for prompt evaluation")
 
     llm = OpenAILLMService()
 
@@ -107,14 +118,14 @@ async def evaluate_prompts():
             "response": response,
             "metadata": result['metadata']
         })
-    
-    # Save results
-    with open('prompt_evaluation.json', 'w') as f:
-        json.dump(results, f, indent=2)
-    
-    print("\n✅ Evaluation complete! Results saved to prompt_evaluation.json")
+        # In real scenario, collect user input for rating
+
+    print("\n💾 Print results...")
+    print(json.dumps(results, indent=2))
+   
 
 if __name__ == "__main__":
+    logger.warning("Starting prompt evaluation script")
     asyncio.run(evaluate_prompts())
     #asyncio.run(evaluate_basic_prompt())
     print("All evaluations completed.")

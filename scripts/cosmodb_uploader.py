@@ -86,7 +86,7 @@ def upload_file_to_cosmosdb(file_path:str, output_categories_file:str=None):
     for doc in data:
         try:
    
-            #container.create_item(body=transform_document_body(doc))
+            container.create_item(body=transform_document_body(doc))
             print(f"Uploaded document ID: {doc.get('id')}, Category: {doc.get('category')}, Name: {doc.get('name')[0:20]}...")
             
             category_doc = transform_category_body(doc)

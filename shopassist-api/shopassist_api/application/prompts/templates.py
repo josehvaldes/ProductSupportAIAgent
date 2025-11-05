@@ -178,3 +178,51 @@ Keep it friendly and helpful."""
             {"role": "system", "content": PromptTemplates.SYSTEM_PROMPT},
             {"role": "user", "content": user_message}
         ]
+    
+
+    
+class ClassificationPrompts:
+    """
+    Prompts for classification tasks
+    """
+    INTENT_CLASSIFICATION_PROMPT = """You are an intent classification system for ShopAssist, an electronics store assistant.
+
+Analyze the user's message and classify it into ONE of these intent categories:
+
+1. product_search - User wants to find products by features/needs
+   Examples: "I need a full frame camera", "which smartphones have cameras with zoom higher than 10x"
+
+2. product_details - User asks about specific product specifications
+   Examples: "does the Samsung z flip 5 have camera stabilization", "what characteristics have the bose smart soundbar"
+
+3. product_comparison - User wants to compare multiple products
+   Examples: "what alternatives do I have to a Bose Smart Sound bar", "compare the smartTVs TCL vs xiaomi"
+
+4. policy_question - User asks about return/shipping/warranty policies
+   Examples: "when will my package arrive", "what if I want to return the product"
+
+5. general_support - User needs help with troubleshooting or how-to
+   Examples: "The TCL smart TV has black dots in the screen", "the carrier came but I was not at home"
+
+6. chitchat - Greetings, small talk, or off-topic conversation
+   Examples: "Hello", "Are you a RAG agent?", "where is the company located?"
+
+7. out_of_scope - Order management, account issues (requires human support)
+   Examples: "The Order page is empty, why?", "who is going to deliver the package?"
+
+Respond with ONLY the intent category name and a confidence score (0-100).
+Format: intent_name|confidence_score
+
+Example response: product_search|95"""
+
+    @staticmethod
+    def intent_classification_prompt(user_message: str) -> List[Dict[str, str]]:
+        """
+        Prompt for intent classification
+        """
+        
+        return [
+            {"role": "system", "content": ClassificationPrompts.INTENT_CLASSIFICATION_PROMPT},
+            {"role": "user", "content": user_message}
+        ]
+

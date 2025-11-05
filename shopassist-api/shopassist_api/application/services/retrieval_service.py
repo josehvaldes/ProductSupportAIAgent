@@ -163,8 +163,14 @@ class RetrievalService:
         if "max_price" in filters:
             expressions.append(f"price <= {filters['max_price']}")
         
+        # Categorical filters
         if "category" in filters:
             expressions.append(f"category == '{filters['category']}'")
+
+        if "categories" in filters:
+            category_list = filters['categories']
+            category_expr = " or ".join([f"category == '{cat}'" for cat in category_list])
+            expressions.append(f"({category_expr})")
         
         if "brand" in filters:
             expressions.append(f"brand == '{filters['brand']}'")

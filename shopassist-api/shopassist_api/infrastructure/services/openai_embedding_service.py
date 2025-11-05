@@ -102,8 +102,6 @@ class OpenAIEmbeddingService(EmbeddingServiceInterface):
     async def health_check(self) -> bool:
         """Ping the service to check connectivity"""
         try:
-            # Simple test call to generate embedding for a short text
-            test_text = "Health check"
             if not self.client:
                 logger.error("OpenAI client not initialized.")
                 return False
