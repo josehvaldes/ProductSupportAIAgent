@@ -118,29 +118,19 @@ Keep it concise and easy to understand."""
         ]
     
     @staticmethod
-    def comparison_prompt(
+    def product_comparison_prompt(
         query: str,
-        products: List[Dict],
+        context: str,
         conversation_history: str = ""
     ) -> List[Dict[str, str]]:
         """
         Prompt for product comparison
         """
-        # Format products for comparison
-        product_details = []
-        for i, product in enumerate(products, 1):
-            details = f"""Product {i}: {product['title']}
-- Price: ${product['price']:.2f}
-- Category: {product['category']}
-- Description: {product.get('description', 'N/A')[:200]}"""
-            product_details.append(details)
-        
-        products_text = "\n\n".join(product_details)
         
         user_message = f"""Customer wants to compare products: {query}
 
-Products to compare:
-{products_text}
+Products to compare (Retrieved from database):
+{context}
 
 {f"Conversation history:\n{conversation_history}" if conversation_history else ""}
 
@@ -157,6 +147,35 @@ Use a table or bullet points for clarity."""
             {"role": "user", "content": user_message}
         ]
     
+    @staticmethod
+    def product_details_prompt(
+        query: str,
+        context: str,
+        conversation_history: str = ""
+    ) -> List[Dict[str, str]]:
+        """
+        Prompt for detailed product information
+        """
+        
+        user_message = f"""Customer query: {query}
+Product Details:
+{context}
+
+{f"Conversation history:\n{conversation_history}" if conversation_history else ""}
+
+Based on the product details above, provide a comprehensive answer to the customer's query.
+Format your response with:
+1. Detailed product information relevant to their question
+2. Key specifications or features (bullet points)
+3. Pricing and availability
+4. Ask if they need more information
+Keep your response clear and informative."""           
+        
+        return [
+            {"role": "system", "content": PromptTemplates.SYSTEM_PROMPT},
+            {"role": "user", "content": user_message}
+        ] 
+
     @staticmethod
     def no_results_prompt(query: str) -> List[Dict[str, str]]:
         """
@@ -178,6 +197,62 @@ Keep it friendly and helpful."""
             {"role": "system", "content": PromptTemplates.SYSTEM_PROMPT},
             {"role": "user", "content": user_message}
         ]
+    
+    CHITCHAT_SYSTEM_PROMPT = """You are ShopAssist, a friendly and helpful AI shopping assistant for an electronics e-commerce store.
+
+Your role:
+- Warmly welcome users and guide them to explore products
+- Handle casual conversation professionally but keep responses brief
+- Gently redirect off-topic questions back to shopping
+- Suggest relevant product categories based on context
+- Never pretend to handle tasks outside your scope (orders, accounts, technical support)
+
+Tone: Friendly, concise, helpful, professional
+
+Guidelines:
+1. For greetings: Respond warmly and suggest how you can help with product discovery
+2. For small talk: Engage briefly, then offer shopping assistance
+3. For off-topic questions: Politely acknowledge and redirect to products or policies
+4. For out-of-scope requests (order tracking, account issues): Apologize and offer to connect to human support
+5. Keep responses under 3 sentences unless explaining available help
+
+Available assistance:
+- Product search and recommendations (electronics, home & garden, fashion)
+- Product comparisons and specifications
+- Return policy, shipping, and warranty information
+- General shopping guidance
+
+You do NOT handle:
+- Order tracking or cancellations
+- Account management
+- Payment issues
+- Technical troubleshooting for purchased items
+"""
+
+    @staticmethod
+    def general_prompt(query: str, conversation_history: str = "", context:str = "") -> List[Dict[str, str]]:
+        """
+        Prompt for chitchat queries
+        """
+        user_message = f"""User message: "{query}"
+Context: \n {context}
+
+{f"Conversation history:\n{conversation_history}" if conversation_history else ""}
+
+Respond appropriately based on the information about. 
+If this is a greeting or first interaction, welcome them and briefly mention you can 
+help find products, answer questions about specifications, explain policies, 
+or compare items.
+
+
+
+"""
+        
+        return [
+            {"role": "system", "content": PromptTemplates.SYSTEM_PROMPT},
+            {"role": "user", "content": user_message}
+        ]
+
     
 
     

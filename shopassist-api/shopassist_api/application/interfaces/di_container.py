@@ -2,6 +2,7 @@
 Dependency injection container for the Shop Assistant API.
 """
 
+
 from shopassist_api.infrastructure.services.cosmos_product_service import CosmosProductService
 from shopassist_api.infrastructure.services.dumb_product_service import DumbProductService
 from shopassist_api.infrastructure.services.milvus_service import MilvusService
@@ -10,6 +11,7 @@ from shopassist_api.infrastructure.services.openai_llm_service import OpenAILLMS
 from shopassist_api.infrastructure.services.transformers_embedding_service import TransformersEmbeddingService
 from shopassist_api.application.interfaces.service_interfaces import LLMServiceInterface, RepositoryServiceInterface, VectorServiceInterface
 from shopassist_api.application.interfaces.service_interfaces import EmbeddingServiceInterface
+from shopassist_api.application.services.intent_classifier import IntentClassifier
 from shopassist_api.application.services.rag_service import RAGService
 from shopassist_api.application.settings.config import settings
 
@@ -76,7 +78,7 @@ def get_llm_service():
     """Dependency injection function for LLM service."""
     return _container.get_service(LLMServiceInterface)
 
-def get_embedding_category_service() -> EmbeddingServiceInterface:
+def get_category_embedding_service() -> EmbeddingServiceInterface:
     """Dependency injection function for category embedding service."""
     if settings.embedding_provider == "azure_openai":
         embedded_service = OpenAIEmbeddingService()
@@ -91,7 +93,7 @@ def get_retrieval_service():
     vector_service = get_vector_service()
     embedding_service = get_embedding_service()
     product_service = get_repository_service()
-    category_embedder_service = get_embedding_category_service()
+    category_embedder_service = get_category_embedding_service()
     return RetrievalService(
         vector_service=vector_service,
         embedding_service=embedding_service,
@@ -105,3 +107,8 @@ def get_rag_service():
     llm_service = get_llm_service()
     retrieval_service = get_retrieval_service()
     return RAGService(llm_service=llm_service, retrieval_service=retrieval_service)
+
+def get_classifier_service():
+    """Dependency injection function for classifier service."""
+    llm_service = get_llm_service()
+    return IntentClassifier(llm_service=llm_service)

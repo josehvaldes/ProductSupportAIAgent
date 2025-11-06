@@ -12,7 +12,7 @@ class ContextBuilder:
     def __init__(self, max_tokens: int = 2000):
         self.max_tokens = max_tokens
         self.encoding = tiktoken.encoding_for_model("gpt-4")
-    
+
     def build_product_context(self, products: List[Dict]) -> str:
         """
         Build context string from product results
@@ -21,6 +21,8 @@ class ContextBuilder:
         Product 1: [Name]
         Price: $X.XX
         Category: [Category]
+        Brand: [Brand]
+        Available: [in_stock/out_of_stock]
         Description: [Text]
         ---
         """
@@ -71,5 +73,6 @@ class ContextBuilder:
                     Price: ${product['price']:.2f}
                     Category: {product['category']}
                     Brand: {product.get('brand', 'N/A')}
+                    Available: { product.get('availability', 'out_of_stock')}
                     Description: {product.get('description', product.get('matched_text', 'N/A'))}
                     Relevance Score: {product.get('relevance_score', 0):.3f}"""

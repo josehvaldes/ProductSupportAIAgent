@@ -5,7 +5,7 @@ from shopassist_api.application.services.context_builder import ContextBuilder
 from shopassist_api.application.services.query_processor import QueryProcessor
 from shopassist_api.application.services.retrieval_service import RetrievalService
 from shopassist_api.logging_config import get_logger
-from shopassist_api.application.interfaces.di_container import get_retrieval_service
+from shopassist_api.application.interfaces.di_container import get_classifier_service, get_retrieval_service
 
 logger = get_logger(__name__)
 
@@ -30,36 +30,39 @@ class SearchResponse(BaseModel):
 
 @router.post("/vector", response_model=SearchResponse)
 async def vector_search(request: SearchRequest,
-                        retrieval_service: RetrievalService = Depends(get_retrieval_service)):
+                        retrieval_service: RetrievalService = Depends(get_retrieval_service),
+                        classifier_service = Depends(get_classifier_service)):
     """
     Perform vector similarity search
     """
     try:
         # Process query
         logger.info(f"Processing query: {request.query}")
-        cleaned_query, extracted_filters = query_processor.process_query(request.query)
+        cleaned_query, filters = query_processor.process_query(request.query)
         
         # Classify query type
-        query_type = query_processor.classify_query_type(request.query)
-        logger.info(f"  Query classified as: {query_type}")
+        
+        llm_query_type, confidence = await classifier_service.classify(request.query)
+        logger.info(f"  Query classified as: {llm_query_type} with confidence {confidence}")
         logger.info(f"  Cleaned query: {cleaned_query}")
         # Retrieve
-        if query_type == 'product':
+        if llm_query_type == 'product_search':
             # Get top categories to enhance filters            
-            top_categories = retrieval_service.retrieve_top_categories(cleaned_query, top_k=1)
+            top_categories = retrieval_service.retrieve_top_categories(cleaned_query, top_k=2)
             logger.info(f"  Top categories: {top_categories}")
             if top_categories and len(top_categories) > 0:
-                category_name = top_categories[0]['name']
-                logger.info(f"  Extracted category filter from top categories: {category_name}")
-                extracted_filters = {**extracted_filters, **{'category': category_name}}
-            
-            # Merge filters
-            filters = {**(request.filters or {}), **extracted_filters}
+                category_names = []
+                for cat in top_categories:
+                    logger.info(f"  Top category: {cat['name']}, score: {cat['distance']}")
+                    logger.info(f"  Extracted category filter: {cat['name']}")
+                    category_names.append(cat['name'])
+                    
+                filters = {**filters, **{'categories': category_names}}
             
             logger.info(f"  Applying filters: {filters}")
             results = await retrieval_service.retrieve_products(
                 cleaned_query,
-                top_k=2, #request.top_k,
+                top_k=request.top_k, 
                 filters=filters
             )
             context = context_builder.build_product_context(results)
@@ -74,7 +77,7 @@ async def vector_search(request: SearchRequest,
             query=request.query,
             results=results,
             context=context,
-            query_type=query_type,
+            query_type=llm_query_type,
             filters_applied=filters
         )
         

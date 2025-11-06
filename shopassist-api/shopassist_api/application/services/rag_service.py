@@ -157,17 +157,22 @@ class RAGService:
                     messages, results = await self.handle_product_search(query, filters, history_text)
                 case 'product_details':
                     logger.info("Handling product details intent")
+                    messages, results = await self.handle_product_details(query, filters, history_text)
                 case 'product_comparison':
                     logger.info("Handling product comparison intent")
+                    messages, results = await self.handle_product_comparison(query, filters, history_text)
                 case 'policy_question':
                     logger.info("Handling policy question intent")
                     messages, results = await self.handle_policy_question(query, history_text)
                 case 'general_support':
                     logger.info("Handling general support intent")
+                    messages, results = await self.handle_general_support(query, history_text)
                 case 'chitchat':
                     logger.info("Handling chitchat intent")
+                    messages, results = await self.handle_chitchat(query, history_text)
                 case 'out_of_scope':
                     logger.info("Handling out_of_scope intent")
+                    messages, results = await self.handle_general_out_of_scope(query, history_text)
                 case _:
                     logger.info("Handling default/general intent")
                     messages, results = await self.handle_general_out_of_scope(query, history_text)
@@ -198,10 +203,99 @@ class RAGService:
             traceback.print_exc()
             raise
     
-    async def handle_policy_question(self, query:str, history:str) -> tuple[List[Dict[str,str]], List[Dict]]:
+    async def handle_product_details(self, query:str, filters:Dict, history:str) -> tuple[List[Dict[str,str]], List[Dict]]:
+        # Step 2: Retrieve relevant documents
+        results = await self.retrieval.retrieve_products(
+            query,
+            top_k=1, # use the most relevant product 
+            filters=filters
+        )
+        context = self.context_builder.build_product_context(results)
+
+        logger.info(f"Retrieved {len(results)} results for query")
+        logger.info(f"Built context for query: {context}")
+        messages = []
+        # Step 3: Handle no results
+        if not results:
+            logger.warning("No results found for product details query")
+            messages = PromptTemplates.no_results_prompt(query)
+            results = []
+        else:
+            messages = PromptTemplates.product_details_prompt(
+                query, context, history)
+            
+        return messages, results
+
+    async def handle_product_comparison(self, query:str, filters:Dict, history:str) -> tuple[List[Dict[str,str]], List[Dict]]:
+        # Step 2: Retrieve relevant documents
+        results = await self.retrieval.retrieve_products(
+            query,
+            top_k=2, # reduce number of products to retrieve and comparison
+            filters=filters
+        )
+        context = self.context_builder.build_product_context(results)
+
+        logger.info(f"Retrieved {len(results)} results for query")
+        logger.info(f"Built context for query: {context}")
+        messages = []
+        # Step 3: Handle no results
+        if not results:
+            logger.warning("No results found for product comparison query")
+            messages = PromptTemplates.no_results_prompt(query)
+            results = []
+        else:
+            messages = PromptTemplates.product_comparison_prompt(
+                query, context, history)
+            
+        return messages, results
+
+    async def handle_general_support(self, query:str, history:str) -> tuple[List[Dict[str,str]], List[Dict]]:
+        
+        # Step 2: Retrieve relevant documents
         results = await self.retrieval.retrieve_knowledge_base(
             query,
-            top_k=3
+            top_k=1
+        )
+        
+        if not results:
+            logger.warning("No results found for general support query")
+            messages = PromptTemplates.no_results_prompt(query)
+            results = []
+        else:
+            context = self.context_builder.build_knowledge_base_context(results)
+            messages = PromptTemplates.general_prompt(
+                        query, context, history
+                    )
+        
+        return messages, results
+
+    async def handle_chitchat(self, query:str, history:str) -> tuple[List[Dict[str,str]], List[Dict]]:
+        # Step 2: Retrieve relevant documents
+        results = []
+        
+        logger.warning("No results found for chitchat query")
+        messages = PromptTemplates.general_prompt(query, history)
+        results = []
+    
+        return messages, results
+
+    async def handle_general_out_of_scope(self, query:str, history:str) -> tuple[List[Dict[str,str]], List[Dict]]:
+        
+        # Step 2: Retrieve relevant documents
+        results = []
+        
+        logger.warning("No results found for out_of_scope query")
+        messages = PromptTemplates.general_prompt(query, history)
+        results = []
+    
+        return messages, results
+
+    async def handle_policy_question(self, query:str, history:str) -> tuple[List[Dict[str,str]], List[Dict]]:
+        
+        # Step 2: Retrieve relevant documents
+        results = await self.retrieval.retrieve_knowledge_base(
+            query,
+            top_k=2
         )
         context = ""
         
@@ -253,21 +347,6 @@ class RAGService:
                 query, context, history)
             
         return messages, results
-
-    async def handle_product_details():
-        pass
-
-    async def handle_comparison():
-        pass
-
-    async def handle_general_support():
-        pass
-
-    async def handle_general_chitchat():
-        pass
-    
-    async def handle_general_out_of_scope():
-        pass
 
     def _format_history(
         self,

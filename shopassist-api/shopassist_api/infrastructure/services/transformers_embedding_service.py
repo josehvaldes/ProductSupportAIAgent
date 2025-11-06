@@ -32,7 +32,6 @@ class TransformersEmbeddingService(EmbeddingServiceInterface):
                 # Double-check after acquiring lock
                 if self.model_name not in TransformersEmbeddingService._model_cache:
                     logger.info(f"Loading model (first time): {self.model_name}")
-                    print(f"    * Loading Transformers model: {self.model_name}")
                     TransformersEmbeddingService._model_cache[self.model_name] = SentenceTransformer(self.model_name)
                 self.model = TransformersEmbeddingService._model_cache[self.model_name]
     
