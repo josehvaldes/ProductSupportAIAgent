@@ -19,9 +19,8 @@ export interface ChatMessage {
                 'policy_question'|
                 'general_support' | 
                 'chitchat' | 
-                'out_of_scope' | 
-                'follow_up';
-}
+                'out_of_scope';
+  }
 
 export interface ProductSource {
   type: 'product';
@@ -47,8 +46,7 @@ export interface ChatResponse {
               'policy_question'|
               'general_support' | 
               'chitchat' | 
-              'out_of_scope' | 
-              'follow_up';
+              'out_of_scope';
 
   metadata: {
     query_type_confidence: number;

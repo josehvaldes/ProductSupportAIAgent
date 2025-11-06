@@ -175,8 +175,6 @@ class RAGService:
                 case 'out_of_scope':
                     logger.info("Handling out_of_scope intent")
                     messages, results = await self.handle_general_out_of_scope(query, history_text)
-                case 'follow_up':
-                    logger.info("Handling follow_up intent")
                 case _:
                     logger.info("Handling default/general intent")
                     messages, results = await self.handle_general_out_of_scope(query, history_text)

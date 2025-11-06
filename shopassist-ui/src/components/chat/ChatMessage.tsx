@@ -58,7 +58,7 @@ export function ChatMessage({ message, sources, query_type }: ChatMessageProps) 
 
       { !isUser && (query_type === 'policy_question'
         || query_type === 'general_support' || query_type === 'out_of_scope' 
-        || query_type === 'follow_up' || query_type === 'chitchat'
+        || query_type === 'chitchat'
       ) && sources && sources.length > 0 && (
           <Text >Don't show anything!</Text>
       )
