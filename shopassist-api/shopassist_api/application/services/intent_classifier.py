@@ -14,7 +14,8 @@ class IntentClassifier:
                     "policy_question", 
                     "general_support", 
                     "chitchat", 
-                    "out_of_scope"
+                    "out_of_scope",
+                    "follow_up"
                 ]                
 
     def __init__(self, llm_service: LLMServiceInterface):

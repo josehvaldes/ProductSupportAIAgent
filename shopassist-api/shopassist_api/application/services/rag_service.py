@@ -47,6 +47,7 @@ class RAGService:
                 "has_results": True,
                 "filters_applied": filters,
                 "metadata": {
+                    "query_type_confidence": 0.5,
                     "num_sources": len(results),
                     "tokens": llm_response['tokens'],
                     "cost": llm_response['cost']
@@ -68,11 +69,11 @@ class RAGService:
 
         # Step 1: Process query
         cleaned_query, filters = self.query_processor.process_query(query)
-        query_type = self.query_processor.classify_query_type(query)
+        query_type = "product_search"  if session_id == '1' else 'policy_question' # Dummy query type for testing
         
         logger.info(f"Query type: {query_type}, Filters: {filters}, query: {cleaned_query}")
         # Step 2: Retrieve relevant documents
-        if query_type == 'product':
+        if query_type == 'product_search':
 
             categories = await self.retrieval.retrieve_top_categories(query, 1)
             if categories and len(categories) > 0:
@@ -97,7 +98,7 @@ class RAGService:
         
         logger.info(f"Retrieved {len(results)} results for query")
     
-        response = f"NO LLM call: [{query}]: {context}"
+        response = f"NO LLM call: [{query}]:"
 
         return {
                 "response": response,
@@ -106,6 +107,7 @@ class RAGService:
                 "has_results": True,
                 "filters_applied": filters,
                 "metadata": {
+                    "query_type_confidence": 0.5,
                     "num_sources": len(results),
                     "tokens": 0,
                     "cost": 0
@@ -173,6 +175,8 @@ class RAGService:
                 case 'out_of_scope':
                     logger.info("Handling out_of_scope intent")
                     messages, results = await self.handle_general_out_of_scope(query, history_text)
+                case 'follow_up':
+                    logger.info("Handling follow_up intent")
                 case _:
                     logger.info("Handling default/general intent")
                     messages, results = await self.handle_general_out_of_scope(query, history_text)
@@ -192,6 +196,7 @@ class RAGService:
                 "has_results": True,
                 "filters_applied": filters,
                 "metadata": {
+                    "query_type_confidence": confidence,
                     "num_sources": len(results),
                     "tokens": llm_response['tokens'],
                     "cost": llm_response['cost']

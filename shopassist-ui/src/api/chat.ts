@@ -13,6 +13,14 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp?: string;
+  query_type?: 'product_search' | 
+                'product_details' | 
+                'product_comparison' |
+                'policy_question'|
+                'general_support' | 
+                'chitchat' | 
+                'out_of_scope' | 
+                'follow_up';
 }
 
 export interface ProductSource {
@@ -33,8 +41,17 @@ export interface ChatResponse {
   session_id: string;
   response: string;
   sources: ProductSource[];
-  query_type: 'product' | 'policy';
+  query_type: 'product_search' | 
+              'product_details' | 
+              'product_comparison' |
+              'policy_question'|
+              'general_support' | 
+              'chitchat' | 
+              'out_of_scope' | 
+              'follow_up';
+
   metadata: {
+    query_type_confidence: number;
     num_sources: number;
     tokens:number;
     cost: number;
@@ -49,22 +66,8 @@ export interface ChatHistoryResponse {
 
 
 export const chatApi = {
-  // Send a message to your agent/chatbot
-    sendMessage_old: async (message: string): Promise<ApiResponse> => {
-      
-      const body = {
-        message: message,
-        conversation_id: "",
-        user_id: ""
-      }
-      return apiRequest('/dummy_chat', {
-        method: 'POST',
-        body: JSON.stringify(body),
-        });
 
-    },
-
-    /**
+  /**
      * Send a message and get AI response
      * @param message 
      * @param sessionId 
@@ -75,7 +78,7 @@ export const chatApi = {
         sessionId?: string
       ): Promise<ChatResponse> => {
 
-      const response = await apiRequest<ChatResponse>('/chat/dumpmessage', {
+      const response = await apiRequest<ChatResponse>('/chat/dumbmessage', {
           method: 'POST',
           body: JSON.stringify({
           message,

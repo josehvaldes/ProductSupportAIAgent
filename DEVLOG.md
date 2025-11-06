@@ -1070,21 +1070,83 @@ Intent classification, context management, frontend integration
 **Dates:** Oct 28 - Nov 3, 2025
 
 ### Day 15 - Monday, Oct 28, 2025
-**Today's Focus:** Intent classifier implementation
+**Today's Focus:** Formal intent classification system 
 
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+1. [X] Define clear intent categories (1 hour)
+   - Define clear intent categories:
+      product_search - Finding products by features/needs
+      product_details - Asking about specific product specs
+      product_comparison - Comparing multiple products
+      policy_question - Return/shipping/warranty queries
+      general_support - How-to, troubleshooting
+      chitchat - Greetings, off-topic
+      out_of_scope - Order management, account issues
+   - Create intent examples (10 per category)
+   - Document intent routing rules
 
+2 [X] Implement intent classifier (2 hours)
+   - Create app/services/intent_classifier.py
+   - Option A: Prompt-based classification (use LLM)
+      Design classification prompt
+      Parse LLM response to intent enum
+      Add confidence scoring
+   - Add fallback to general_support for low confidence
+   - Test with sample queries
+
+3 [X] Add intent-based routing (1.5 hours)
+   - Update rag_service.py to use intent classifier
+   - Create specialized handlers per intent:
+      handle_product_search()
+      handle_product_details()
+      handle_comparison()
+      handle_policy_question()
+   - Adjust retrieval strategy per intent
+   - Customize prompts per intent
+   - Test routing logic
+
+4 [X] Create evaluation dataset (1 hour)
+   - Create scripts/integration_intent_tests.json
+   - queries across all intent types
+   - Include edge cases (ambiguous, multi-intent)
+   - Label ground truth intents
+   - Add intent confusion matrix examples
+
+5 [X] Test and evaluate intent accuracy (1.5 hours)
+   - Create scripts/evaluate_intent_classifier.py
+   - Run classifier on test dataset
+   - Calculate accuracy, precision, recall per intent
+   - Identify misclassification patterns
+   - Document results in DEVLOG
+   - Target: >85% accuracy
+
+6 [X] Add intent to API response (30 min)
+   - Update ChatResponse model with detected_intent field
+   - Include confidence score
+   - Log intents for analytics
+   - Display intent in frontend (optional, for debugging)
+
+7 [X] Frontend: Intent-based UI hints (30 min)
+
+   - Show different placeholders based on previous intent
+      After product search: "Want to compare products?"
+      After policy question: "Any other questions?"
+
+   - Add quick action buttons per intent
+   - Test user experience improvements
+ 
 **Technical Decisions:**
-- 
+- Use intfloat/e5-large-v2 model for category classification
+- use the top 2 categories for vector search
+- use different prompts for different intented queries
+- Use LLM to classify intent queries
+
 
 **Challenges & Solutions:**
-- 
+- find cost effective solutions to category classification mismatches. Solution: use an better model for taxonomy classification
 
 **Learnings:**
-- 
+- Different models can be used for different purposes
+- Specific class for Asynchrouns calls to Azure Open AI
 
 **Next Steps:**
 - [ ] 

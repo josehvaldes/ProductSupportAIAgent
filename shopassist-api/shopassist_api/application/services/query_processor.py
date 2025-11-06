@@ -47,22 +47,6 @@ class QueryProcessor:
         
         return cleaned_query, filters
     
-    @DeprecationWarning
-    def classify_query_type(self, query: str) -> str:
-        """
-        Classify if query is about products or policies
-        
-        Returns:
-            'product' or 'policy'
-        """
-        query_lower = query.lower()
-        
-        # Check for policy keywords
-        if any(keyword in query_lower for keyword in self.POLICY_KEYWORDS):
-            return 'policy'
-        
-        return 'product'
-    
     def _extract_price_filter(self, query: str) -> Dict:
         """Extract price range from query"""
         filters = {}

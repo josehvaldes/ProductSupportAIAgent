@@ -78,6 +78,7 @@ export function ChatContainerExt() {
         content: response.response,
         timestamp: new Date().toISOString(),
         sources: response.sources,  // ← Store sources here
+        query_type: response.query_type,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -164,6 +165,7 @@ export function ChatContainerExt() {
                 key={index} 
                 message={msg}
                 sources={msg.sources || []}
+                query_type={msg.query_type || 'question'}
               />
             ))}
 

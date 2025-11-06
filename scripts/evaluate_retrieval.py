@@ -71,14 +71,14 @@ async def evaluate_retrieval():
         print(f"\n📝 Testing: '{query}'")
         
         # Classify
-        query_type = processor.classify_query_type(query)
+        query_type = "product_search" # "policy_question"
         cleaned_query, extracted_filters = processor.process_query(query)
         print(f"   🔍 Classified as: {query_type}")
         print(f"   🧹 Cleaned query: {cleaned_query}")
         print(f"   🛠️  Extracted filters: {extracted_filters}")
 
         # Retrieve
-        if query_type == 'product':
+        if query_type == 'product_search':
             retrieved = await retrieval_service.retrieve_products(cleaned_query, top_k=5, 
                                                                   filters=extracted_filters, 
                                                                   enriched=False)
