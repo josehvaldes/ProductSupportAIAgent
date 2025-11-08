@@ -5,7 +5,7 @@ from shopassist_api.application.services.context_builder import ContextBuilder
 from shopassist_api.application.services.query_processor import QueryProcessor
 from shopassist_api.application.services.retrieval_service import RetrievalService
 from shopassist_api.logging_config import get_logger
-from shopassist_api.application.interfaces.di_container import get_classifier_service, get_retrieval_service
+from shopassist_api.application.interfaces.di_container import get_retrieval_service
 
 logger = get_logger(__name__)
 
@@ -30,8 +30,8 @@ class SearchResponse(BaseModel):
 
 @router.post("/vector", response_model=SearchResponse)
 async def vector_search(request: SearchRequest,
-                        retrieval_service: RetrievalService = Depends(get_retrieval_service),
-                        classifier_service = Depends(get_classifier_service)):
+                        retrieval_service: RetrievalService = Depends(get_retrieval_service)
+                        ):
     """
     Perform vector similarity search
     """
@@ -42,7 +42,9 @@ async def vector_search(request: SearchRequest,
         
         # Classify query type
         
-        llm_query_type, confidence = await classifier_service.classify(request.query)
+        llm_query_type = 'product_search'
+        confidence = 1.0
+        
         logger.info(f"  Query classified as: {llm_query_type} with confidence {confidence}")
         logger.info(f"  Cleaned query: {cleaned_query}")
         # Retrieve

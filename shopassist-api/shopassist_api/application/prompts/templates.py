@@ -249,16 +249,80 @@ or compare items.
 """
         
         return [
-            {"role": "system", "content": PromptTemplates.SYSTEM_PROMPT},
+            {"role": "system", "content": PromptTemplates.CHITCHAT_SYSTEM_PROMPT},
             {"role": "user", "content": user_message}
         ]
 
     
+class ContextAnalysisPrompts:
+    """
+    Optimized prompts for intent classification and context analysis.
+    Following best practices: clarity, conciseness, structured output.
+    """
+    CONTEXT_ANALYSIS_PROMPT = """
+    You are an intent classifier for ShopAssist, an electronics e-commerce AI assistant.
 
-    
+Your task: Analyze the user's message and classify the intent, then determine if conversation history provides sufficient context.
+
+INTENT CATEGORIES:
+1. product_search: Finding products by features/needs
+2. product_details: Asking about specific product specs
+3. product_comparison: Comparing multiple products
+4. policy_question: Return/shipping/warranty policies
+5. general_support: Troubleshooting, how-to, account issues
+6. chitchat: Greetings, small talk, off-topic
+7. out_of_scope: Requires human support (order tracking, delivery issues)
+
+CONTEXT ANALYSIS:
+- is_sufficient = "yes": Context history contains enough info to answer
+- is_sufficient = "no": Need to retrieve products/policies from database
+- query_retrieval_hint: Refined search query (only if is_sufficient="no")
+
+OUTPUT FORMAT: Valid JSON only, no markdown or extra text.
+"""
+
+    @staticmethod
+    def context_analysis_prompt(query: str, history:str) -> List[Dict[str, str]]:
+        """
+        Generate prompt messages for context analysis.
+        
+        Args:
+            query: Current user message
+            history: Formatted conversation history (or empty string)
+        
+        Returns:
+            List of message dictionaries for LLM
+        """
+        
+        # Build user message efficiently
+        user_parts = [f"User Message: \"{query}\""]
+        
+        if history.strip():
+            user_parts.append(f"\nConversation History:\n{history}")
+        else:
+            user_parts.append("\nConversation History: [None]")
+        
+        user_parts.append("""
+Respond with this JSON structure:
+{
+    "intent_query": "<one of: product_search|product_details|product_comparison|policy_question|general_support|chitchat|out_of_scope>",
+    "is_sufficient": "<yes or no>",
+    "reason": "<brief explanation in 1-2 sentences>",
+    "confidence": <float 0.0-1.0>,
+    "query_retrieval_hint": "<refined search query or empty string>"
+}""")
+        
+        user_message = "\n".join(user_parts)
+        
+        return [
+            {"role": "system", "content": ContextAnalysisPrompts.CONTEXT_ANALYSIS_PROMPT},
+            {"role": "user", "content": user_message}
+        ] 
+
 class ClassificationPrompts:
     """
     Prompts for classification tasks
+    Delete after testing ContextAnalysisPrompts
     """
     INTENT_CLASSIFICATION_PROMPT = """You are an intent classification system for ShopAssist, an electronics store assistant.
 
@@ -271,19 +335,21 @@ Analyze the user's message and classify it into ONE of these intent categories:
    Examples: "does the Samsung z flip 5 have camera stabilization", "what characteristics have the bose smart soundbar"
 
 3. product_comparison - User wants to compare multiple products
-   Examples: "what alternatives do I have to a Bose Smart Sound bar", "compare the smartTVs TCL vs xiaomi"
+   Examples: "what alternatives do I have to a Bose Smart Sound bar"
 
 4. policy_question - User asks about return/shipping/warranty policies
    Examples: "when will my package arrive", "what if I want to return the product"
 
 5. general_support - User needs help with troubleshooting or how-to
-   Examples: "The TCL smart TV has black dots in the screen", "the carrier came but I was not at home"
+   Examples: "The TCL smart TV has black dots in the screen"
+   "I want to change my payment method", "how do I change my password?"
 
 6. chitchat - Greetings, small talk, or off-topic conversation
    Examples: "Hello", "Are you a RAG agent?", "where is the company located?"
 
-7. out_of_scope - Order management, account issues (requires human support)
-   Examples: "The Order page is empty, why?", "who is going to deliver the package?"
+7. out_of_scope - Order management, wrong addresses (requires human support)
+   Examples: "who is going to deliver the package?, 
+   
 
 Respond with ONLY the intent category name and a confidence score (0-100).
 Format: intent_name|confidence_score
@@ -300,4 +366,4 @@ Example response: product_search|95"""
             {"role": "system", "content": ClassificationPrompts.INTENT_CLASSIFICATION_PROMPT},
             {"role": "user", "content": user_message}
         ]
-
+    

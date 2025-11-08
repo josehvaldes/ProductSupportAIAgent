@@ -6,6 +6,9 @@ logger = get_logger(__name__)
 
 
 class IntentClassifier:    
+    """Classify user intent using LLM.
+        Deprecated - use ContextAnalysisPrompts and LLMSufficiencyBuilder instead.
+    """
 
     VALID_INTENTS = [
                     "product_search",

@@ -16,20 +16,33 @@ class OpenAILLMService(LLMServiceInterface):
     _client = None
     _client_lock = RLock()
     
-    def __init__(self):
-        self.deployment = settings.azure_openai_model_deployment
-        self.model_name = settings.azure_openai_model
+    def __init__(self, model_name:str = None, deployment_name: str = None):
+        self.model_name = model_name or settings.azure_openai_model
+        self.deployment = deployment_name or settings.azure_openai_model_deployment
         logger.info(f"Using model: {self.model_name}, deployment: {self.deployment}")
         self.encoding = tiktoken.encoding_for_model(self.model_name)
         self.total_tokens_used = 0
         self.total_cost = 0.0
         
+        self.input_cost = 0.0
+        self.output_cost = 0.0
+
         # Initialize singleton client
         self._initialize_client()
         self.client = OpenAILLMService._client
         
     def _initialize_client(self):
         """Initialize the Azure OpenAI client as singleton."""
+
+        if self.model_name == "gpt-4o-mini":
+            logger.info("Configuring for GPT-4o-mini pricing")
+            self.input_cost = 0.40
+            self.output_cost = 1.60
+        elif self.model_name == "gpt-4o":
+            logger.info("Configuring for GPT-4o pricing")
+            self.input_cost = 0.03
+            self.output_cost = 0.06
+
         if OpenAILLMService._client is None:
             with OpenAILLMService._client_lock:
                 # Double-check after acquiring lock
@@ -47,7 +60,8 @@ class OpenAILLMService(LLMServiceInterface):
                     )
                 else:
                     logger.info("Using existing singleton Azure OpenAI client")
-        
+    
+   
     async def generate_response(
         self,
         messages: List[Dict[str, str]],
@@ -78,7 +92,7 @@ class OpenAILLMService(LLMServiceInterface):
             input_tokens = len(self.encoding.encode(input_text))
             
             logger.info(f"Generating response (input tokens: {input_tokens})")
-            
+            print(f" * Generating response from Azure OpenAI: {self.deployment}")
             # Call Azure OpenAI
             response = await self.client.chat.completions.create(
                 model=self.deployment,
@@ -98,12 +112,10 @@ class OpenAILLMService(LLMServiceInterface):
             prompt_tokens = response.usage.prompt_tokens
             completion_tokens = response.usage.completion_tokens
             total_tokens = response.usage.total_tokens
-            
-            # Calculate cost (GPT-4o-mini pricing)
-            # Input: $0.40 per 1M tokens
-            # Output: $1.60 per 1M tokens
-            input_cost = (prompt_tokens / 1_000_000) * 0.40
-            output_cost = (completion_tokens / 1_000_000) * 1.60
+
+            # Cost calculation            
+            input_cost = (prompt_tokens / 1_000_000) * self.input_cost
+            output_cost = (completion_tokens / 1_000_000) * self.output_cost
             total_cost = input_cost + output_cost
             
             self.total_tokens_used += total_tokens

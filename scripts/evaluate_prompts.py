@@ -49,6 +49,9 @@ async def evaluate_basic_prompt():
       Evaluate basic prompt response"""
     print("🧪 Evaluating Basic Prompt\n")    
     llm = OpenAILLMService()
+    nano_llm = OpenAILLMService(model_name=settings.azure_openai_nano_model,
+                                   deployment_name=settings.azure_openai_nano_model_deployment)
+
     print(f"Using LLM Service ready")
     vector_service = MilvusService()
     embedding_service = TransformersEmbeddingService(model_name=settings.transformers_embedding_model)
@@ -62,7 +65,7 @@ async def evaluate_basic_prompt():
         repository_service=product_service
     )
     print(f"Using Retrieval Service ready")
-    rag = RAGService(llm_service=llm, retrieval_service=retrieval_service)
+    rag = RAGService(llm_service=llm, nanolm_service=nano_llm, retrieval_service=retrieval_service)
     print(f"\n📝 Query: rivers and mountains")
     result = await rag.generate_test_answer(
         query="rivers and mountains"
@@ -80,6 +83,8 @@ async def evaluate_prompts():
     logger.info("Initializing services for prompt evaluation")
 
     llm = OpenAILLMService()
+    nano_llm = OpenAILLMService(model_name=settings.azure_openai_nano_model,
+                                   deployment_name=settings.azure_openai_nano_model_deployment)
 
     vector_service = MilvusService()
     product_service = CosmosProductService()
@@ -94,7 +99,7 @@ async def evaluate_prompts():
         category_embedder_service=category_embedder_service
     )
 
-    rag = RAGService(llm_service=llm, retrieval_service=retrieval_service)
+    rag = RAGService(llm_service=llm, nanolm_service=nano_llm, retrieval_service=retrieval_service)
     results = []
     
     for test in TEST_QUERIES:

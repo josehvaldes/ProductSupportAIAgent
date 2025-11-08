@@ -16,16 +16,46 @@ from shopassist_api.application.settings.config import settings
 async def test_llm_response():
     print("🧪 Testing OpenAI LLM service...\n")
     
-    llm_service = OpenAILLMService()
+    #test intent classifier with nano model
+    llm_service = OpenAILLMService( model_name=settings.azure_openai_nano_model,
+                                     deployment_name=settings.azure_openai_nano_model_deployment)
+    
     classifier = IntentClassifier(llm_service)
     test_prompts = [
-        "What is the return policy for electronics?",
-        "Suggest a laptop for video editing under $1500.",
-        "which is better for outdoor photography samsung s24 or iPhone 16 Pro Max"
-        "Good morning chat, ready for looking sales today?"
+        {
+            "prompt": "Find me a smartphone with a good camera and long battery life.",
+            "expected_intent": "product_search"
+        },
+        {
+            "prompt": "What is the return policy for electronics?",
+            "expected_intent": "policy_question"
+        }
+        ,
+        {
+            "prompt": "Can you compare the latest laptops for gaming?",
+            "expected_intent": "product_comparison"
+        },
+        {
+            "prompt": "Tell me a joke about computers.",
+            "expected_intent": "chitchat"
+        },
+        {
+            "prompt": "How do I reset my account password?",
+            "expected_intent": "general_support"
+        },
+        {
+            "prompt": "What are your store hours?",
+            "expected_intent": "policy_question"
+        },
+        {
+            "prompt": "give me details of the samsung z flip 5?",
+            "expected_intent": "product_details"
+        },
     ]
     
-    for prompt in test_prompts:
+    for item in test_prompts:
+        prompt = item['prompt']
+        expected_intent = item['expected_intent']
         print(f"\n📝 Prompt: '{prompt}'")
         
         start_time = time.time()
@@ -35,7 +65,7 @@ async def test_llm_response():
         latency = (time.time() - start_time) * 1000  # ms
         
         print(f"   Latency: {latency:.2f}ms")
-        print(f"   Intent: {response[0]}")
+        print(f"   Intent: {response[0]}, expected: {expected_intent}, match: {response[0] == expected_intent}")
         print(f"   Confidence: {response[1]}")
 
 if __name__ == "__main__":

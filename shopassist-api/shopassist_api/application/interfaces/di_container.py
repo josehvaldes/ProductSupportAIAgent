@@ -11,7 +11,7 @@ from shopassist_api.infrastructure.services.openai_llm_service import OpenAILLMS
 from shopassist_api.infrastructure.services.transformers_embedding_service import TransformersEmbeddingService
 from shopassist_api.application.interfaces.service_interfaces import LLMServiceInterface, RepositoryServiceInterface, VectorServiceInterface
 from shopassist_api.application.interfaces.service_interfaces import EmbeddingServiceInterface
-from shopassist_api.application.services.intent_classifier import IntentClassifier
+from shopassist_api.application.services.retrieval_service import RetrievalService
 from shopassist_api.application.services.rag_service import RAGService
 from shopassist_api.application.settings.config import settings
 
@@ -66,17 +66,26 @@ def get_repository_service() -> RepositoryServiceInterface:
     """Dependency injection function for product service."""
     return _container.get_service(RepositoryServiceInterface)
 
-def get_embedding_service() -> EmbeddingServiceInterface:
-    """Dependency injection function for embedding service."""
-    return _container.get_service(EmbeddingServiceInterface)
 
 def get_vector_service() -> VectorServiceInterface:
     """Dependency injection function for vector service."""
     return _container.get_service(VectorServiceInterface)
 
+#TODO refactor and use self._services[''] mapping
 def get_llm_service():
     """Dependency injection function for LLM service."""
     return _container.get_service(LLMServiceInterface)
+
+def get_nanolm_service():
+    """Dependency injection function for nano LLM service."""
+    return _container.get_service(LLMServiceInterface,
+                                  model_name=settings.azure_openai_nano_model,
+                                  deployment_name=settings.azure_openai_nano_model_deployment)
+
+#TODO refactor and use self._services[''] mapping
+def get_embedding_service() -> EmbeddingServiceInterface:
+    """Dependency injection function for embedding service."""
+    return _container.get_service(EmbeddingServiceInterface)
 
 def get_category_embedding_service() -> EmbeddingServiceInterface:
     """Dependency injection function for category embedding service."""
@@ -89,7 +98,7 @@ def get_category_embedding_service() -> EmbeddingServiceInterface:
 
 def get_retrieval_service():
     """Dependency injection function for retrieval service."""
-    from shopassist_api.application.services.retrieval_service import RetrievalService
+
     vector_service = get_vector_service()
     embedding_service = get_embedding_service()
     product_service = get_repository_service()
@@ -103,12 +112,8 @@ def get_retrieval_service():
 
 def get_rag_service():
     """Dependency injection function for RAG service."""
-
     llm_service = get_llm_service()
+    nanolm_service = get_nanolm_service()
     retrieval_service = get_retrieval_service()
-    return RAGService(llm_service=llm_service, retrieval_service=retrieval_service)
+    return RAGService(llm_service=llm_service, nanolm_service=nanolm_service, retrieval_service=retrieval_service)
 
-def get_classifier_service():
-    """Dependency injection function for classifier service."""
-    llm_service = get_llm_service()
-    return IntentClassifier(llm_service=llm_service)

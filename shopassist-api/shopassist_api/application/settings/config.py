@@ -30,10 +30,14 @@ class Settings(BaseSettings):
     azure_openai_embedding_model: Optional[str] = None
     azure_openai_embedding_model_deployment: Optional[str] = None
     
+    azure_openai_nano_model: str = "gpt-4.1-nano"
+    azure_openai_nano_model_deployment: str = "gpt-4.1-nano_shopassist"
+
     #Transformers Configuration for EMBEDDING_PROVIDER = transformers
     transformers_embedding_model: Optional[str] = "sentence-transformers/multi-qa-mpnet-base-dot-v1"
     transformers_category_embedding_model: Optional[str] = "intfloat/e5-large-v2"
     
+    #not used now but kept for possible future use
     transformers_embedding_model_dim: int = 768
     transformers_category_embedding_model_dim: int = 1024
 
