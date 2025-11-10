@@ -11,6 +11,7 @@ sys.path.append('../shopassist-api')
 script_dir = Path(__file__).parent
 env_path = script_dir.parent / 'shopassist-api' / '.env'
 load_dotenv(dotenv_path=env_path)
+from shopassist_api.application.services.formaters import FormatterUtils
 from shopassist_api.application.services.rag_service import RAGService
 from shopassist_api.infrastructure.services.cosmos_product_service import CosmosProductService
 from shopassist_api.infrastructure.services.openai_llm_service import OpenAILLMService
@@ -28,11 +29,10 @@ setup_logging(
 logger = get_logger(__name__)
 
 # llm_service = OpenAILLMService( model_name=settings.azure_openai_nano_model,
-#                                      deployment_name=settings.azure_openai_nano_model_deployment)
+#                                       deployment_name=settings.azure_openai_nano_model_deployment)
 
 llm_service = OpenAILLMService( model_name=settings.azure_openai_model,
                                      deployment_name=settings.azure_openai_model_deployment)
-
 
 llm_context_builder = LLMSufficiencyBuilder(
     llm_service=llm_service
@@ -78,50 +78,22 @@ async def test_llm_response():
 
 
 
-
-def _format_history(
-    conversation_history: List[Dict]
-) -> str:
-    """Format conversation history for prompt"""
-    if not conversation_history:
-        return ""
-    
-    history_parts = []
-    for msg in conversation_history[-5:]:  # Last 5 turns
-        role = msg.get('role', 'user')
-        content = msg.get('content', '')
-        metadata = msg.get('metadata', {})
-        history_parts.append(f"{role.title()}: {content}")
-        lightweight_meta = metadata.get('lightweight_sources', [])
-
-        if lightweight_meta:
-            history_parts.append(f"\n   Sources:")
-            for index, lightweight in enumerate(lightweight_meta):
-                history_parts.append(f"Product [{index+1}] : {lightweight.get('name', '')} ({lightweight.get('id', '')})")
-                history_parts.append(f"   Brand: {lightweight.get('brand', '')}, Availability: {lightweight.get('availability', '')}")
-                description = lightweight.get('description', '')
-                if description:
-                    history_parts.append(f"   Description: {description}")
-    
-    return "\n\n".join(history_parts)
-    
-
 async def test_llm_response_with_history():
     
     repository = CosmosProductService()
     
-    history = await repository.get_conversation_history("ea046d27-bedc-4311-9769-baf8beb13227")
-    history_text = _format_history(history)
+    history = await repository.get_conversation_history("5061c45b-01d8-4725-92f5-a679bbeb2add")
+    history_text = FormatterUtils.format_history(history)
     
     print(f"\n🧩 Formatted History: {history_text}")
 
     history_prompts = [
         {
-            "prompt": "which one has Wi-Fi?",
+            "prompt": "which one has Wi-Fi connector?",
             "history": history_text,
             "expected_result": {
-                "is_sufficient": "Yes", #gaming engine info not present, so insufficient
-                "intent_query": "policy_question",
+                "is_sufficient": "Yes", # Based on history about laptops
+                "intent_query": "product_comparison",
                 "scope_retrieval_hint": None,
                 "query_retrieval_hint": None
             }

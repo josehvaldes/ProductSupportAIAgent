@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 
 from shopassist_api.application.interfaces.di_container import get_rag_service, get_repository_service
 from shopassist_api.application.interfaces.service_interfaces import RepositoryServiceInterface
+from shopassist_api.application.services.formaters import FormatterUtils
 from shopassist_api.application.services.rag_service import RAGService
 from shopassist_api.logging_config import get_logger
 
@@ -95,7 +96,11 @@ async def chat_message(request: ChatRequest,
             response=result['response'],
             sources=result['sources'],
             query_type=result['query_type'],
-            metadata=result['metadata']
+            metadata = {
+                "tokens": result['metadata'].get('tokens', {}),
+                "cost": result['metadata'].get('cost', 0.0),
+                "num_sources": result['metadata'].get('num_sources', 0),
+            }
         )
         
     except Exception as e:
@@ -103,14 +108,13 @@ async def chat_message(request: ChatRequest,
 
 @router.get("/history/{session_id}")
 async def get_chat_history(session_id: str,
-                           cosmos_service:RepositoryServiceInterface = Depends(get_repository_service),
-                           rag_service:RAGService = Depends(get_rag_service)):
+                           cosmos_service:RepositoryServiceInterface = Depends(get_repository_service)):
     """
     Get conversation history for a session
     """
     try:
         history = await cosmos_service.get_conversation_history(session_id)
-        history_text = rag_service._format_history(history)
+        history_text = FormatterUtils.format_history(history)
         return {"session_id": session_id, "messages": history, "formatted_history": history_text}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

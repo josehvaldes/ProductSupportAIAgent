@@ -43,38 +43,6 @@ TEST_QUERIES = [
     # },
     # Add more...
 ]
-
-async def evaluate_basic_prompt():
-    """
-      Evaluate basic prompt response"""
-    print("🧪 Evaluating Basic Prompt\n")    
-    llm = OpenAILLMService()
-    nano_llm = OpenAILLMService(model_name=settings.azure_openai_nano_model,
-                                   deployment_name=settings.azure_openai_nano_model_deployment)
-
-    print(f"Using LLM Service ready")
-    vector_service = MilvusService()
-    embedding_service = TransformersEmbeddingService(model_name=settings.transformers_embedding_model)
-    product_service = CosmosProductService()
-    
-    print(f"Using Product Service ready")
-    # Create retrieval service with injected dependencies
-    retrieval_service = RetrievalService(
-        vector_service=vector_service,
-        embedding_service=embedding_service,
-        repository_service=product_service
-    )
-    print(f"Using Retrieval Service ready")
-    rag = RAGService(llm_service=llm, nanolm_service=nano_llm, retrieval_service=retrieval_service)
-    print(f"\n📝 Query: rivers and mountains")
-    result = await rag.generate_test_answer(
-        query="rivers and mountains"
-    )
-    
-    response = result['response']
-    print(f"\n💬 Response:\n{response}\n")
-    print("End of basic prompt evaluation.")
-
 async def evaluate_prompts():
     """
     Evaluate prompt quality and response relevance
@@ -134,5 +102,4 @@ async def evaluate_prompts():
 if __name__ == "__main__":
     logger.warning("Starting prompt evaluation script")
     asyncio.run(evaluate_prompts())
-    #asyncio.run(evaluate_basic_prompt())
     print("All evaluations completed.")
