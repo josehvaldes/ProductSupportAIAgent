@@ -34,14 +34,14 @@ class OpenAILLMService(LLMServiceInterface):
     def _initialize_client(self):
         """Initialize the Azure OpenAI client as singleton."""
 
-        if self.model_name == "gpt-4o-mini":
-            logger.info("Configuring for GPT-4o-mini pricing")
+        if self.model_name == "gpt-4.1-mini":
+            logger.info("Configuring for gpt-4.1-mini pricing")
             self.input_cost = 0.40
             self.output_cost = 1.60
-        elif self.model_name == "gpt-4o":
-            logger.info("Configuring for GPT-4o pricing")
-            self.input_cost = 0.03
-            self.output_cost = 0.06
+        elif self.model_name == "gpt-4.1-nano":
+            logger.info("Configuring for gpt-4.1-nano pricing")
+            self.input_cost = 0.1
+            self.output_cost = 0.4
 
         if OpenAILLMService._client is None:
             with OpenAILLMService._client_lock:
@@ -91,8 +91,7 @@ class OpenAILLMService(LLMServiceInterface):
             input_text = "\n".join([m['content'] for m in messages])
             input_tokens = len(self.encoding.encode(input_text))
             
-            logger.info(f"Generating response (input tokens: {input_tokens})")
-            print(f" * Generating response from Azure OpenAI: {self.deployment}")
+            logger.info(f"Generating response (input tokens: {input_tokens}) for deployment {self.deployment}")
             # Call Azure OpenAI
             response = await self.client.chat.completions.create(
                 model=self.deployment,

@@ -22,14 +22,15 @@ class FormatterUtils:
             products = metadata.get('products', [])
 
             if products:
-                history_parts.append(f"\n   Sources:")
+                history_parts.append(f"\nSources:")
                 for index, product in enumerate(products):
-                    history_parts.append(f"Product [{index+1}] : {product.get('name', '')} ({product.get('id', '')})")
-                    history_parts.append(f"   Brand: {product.get('brand', '')}, Availability: {product.get('availability', '')}")
+                    text = f"  Product {index+1}: {product.get('name', '')} ({product.get('id', '')})\n"
+                    text += f"    Brand: {product.get('brand', '')}, Availability: {product.get('availability', '')} \n"
                     description = product.get('description', '')
                     if description:
-                        history_parts.append(f"   Description: {description}")
-        
+                        text += f"    Description: {description}"
+                    history_parts.append(text)
+
         return "\n\n".join(history_parts)
 
     @staticmethod

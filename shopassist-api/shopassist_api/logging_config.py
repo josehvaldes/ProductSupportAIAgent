@@ -32,6 +32,8 @@ def setup_logging(
     root_logger = logging.getLogger()
     root_logger.setLevel(getattr(logging, log_level.upper()))
     
+    logging.getLogger("azure").setLevel(logging.WARNING)
+    
     # Remove existing handlers
     root_logger.handlers.clear()
     

@@ -1332,215 +1332,31 @@ Intent classification, context management, frontend integration
 
 **Total Time This Week:** ___ hours
 
-**Week 4 Preview:**
-Gemma integration, model comparison, performance optimization
 
----
+### Week 4: Model Analysis & Cost Optimization
 
-## Week 4: Model Comparison & Optimization
-**Goal:** Gemma integration complete, performance baseline established  
-**Dates:** Nov 4 - Nov 10, 2025
-
-### Day 22 - Monday, Nov 4, 2025
-**Today's Focus:** 
+**Goal:** Cost analysis complete, realistic model comparison documented
 
 **Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+- [X] Analyzed Gemma 7B deployment options
+- [X] Calculated breakeven point: 31,000 requests/day
+- [X] Documented why GPT-41-mini is optimal for <1,000 req/day
+- [X] Created cost comparison dashboard
+- [X] Analyze Gemma-2b factibility.
 
-**Technical Decisions:**
-- 
+**Key Finding:**
+For low-volume applications (<1,000 requests/day), modern LLM APIs (GPT-4.1-mini, Claude Haiku) are 15-300× cheaper than self-hosting open-source models.
+The history and sufficiency uanalysis required more complex model. The requirements exceed Gemm-2b-it capabilities for how.
 
-**Challenges & Solutions:**
-- 
+**Deliverables:**
+- Cost analysis document: cost_analysis.dm (included in documentation/)
+- Architecture decision record: Why we use GPT-4.1-mini
 
-**Learnings:**
-- 
+**Technical decisions:
+- Stick to Azure Open AI models
+- Reduce scope of the project discarding gemma-7b implementation
+- Evaluate if low cost and uncritical tasks like greetings or chitchat can be done with gemma-2b-it.
 
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 23 - Tuesday, Nov 5, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 24 - Wednesday, Nov 6, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 25 - Thursday, Nov 7, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 26 - Friday, Nov 8, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 27 - Saturday, Nov 9, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 28 - Sunday, Nov 10, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### 📊 Week 4 Summary
-
-**Shipped:**
-- 
-- 
-- 
-
-**Key Technical Decisions:**
-1. 
-2. 
-3. 
-
-**Metrics:**
-- Azure OpenAI vs Gemma latency: ___ ms vs ___ ms
-- Cost per query: $____ vs $____
-- Response quality score: ___ vs ___
-- Cache hit rate: ___%
-
-**Blockers Resolved:**
-- 
-
-**Learnings:**
-- 
-
-**Total Time This Week:** ___ hours
 
 **Week 5 Preview:**
 Evaluation framework, metrics dashboard, automated testing

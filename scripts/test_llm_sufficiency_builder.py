@@ -28,11 +28,11 @@ setup_logging(
     )
 logger = get_logger(__name__)
 
-# llm_service = OpenAILLMService( model_name=settings.azure_openai_nano_model,
-#                                       deployment_name=settings.azure_openai_nano_model_deployment)
+llm_service = OpenAILLMService( model_name=settings.azure_openai_nano_model,
+                                       deployment_name=settings.azure_openai_nano_model_deployment)
 
-llm_service = OpenAILLMService( model_name=settings.azure_openai_model,
-                                     deployment_name=settings.azure_openai_model_deployment)
+# llm_service = OpenAILLMService( model_name=settings.azure_openai_model,
+#                                       deployment_name=settings.azure_openai_model_deployment)
 
 llm_context_builder = LLMSufficiencyBuilder(
     llm_service=llm_service

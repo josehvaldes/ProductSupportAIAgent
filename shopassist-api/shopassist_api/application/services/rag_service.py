@@ -29,7 +29,7 @@ class RAGService:
         self.retrieval = retrieval_service
         self.llm = llm_service
         self.nanolm = nanolm_service # Use nanolm for lightweight tasks
-        self.sufficiency_builder = LLMSufficiencyBuilder(llm_service=llm_service)
+        self.sufficiency_builder = LLMSufficiencyBuilder(llm_service=nanolm_service)
         self.query_processor = QueryProcessor()
         self.context_builder = ContextBuilder()
         

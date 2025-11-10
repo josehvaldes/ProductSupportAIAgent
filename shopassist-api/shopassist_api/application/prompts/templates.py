@@ -262,7 +262,9 @@ class ContextAnalysisPrompts:
     CONTEXT_ANALYSIS_PROMPT = """
     You are an intent classifier for ShopAssist, an electronics e-commerce AI assistant.
 
-Your task: Analyze the user's message and classify the intent, then determine if conversation history provides sufficient context.
+Your task: Analyze the user's message and classify the intent, then determine if conversation history and the 'Sources' section provide sufficient context to answer. 
+
+IMPORTANT: The conversation history contains product details from previous messages. Look carefully at the "sources" and "products" fields in the history.
 
 INTENT CATEGORIES:
 1. product_search: Finding products by features/needs
@@ -313,7 +315,8 @@ Respond with this JSON structure:
 }""")
         
         user_message = "\n".join(user_parts)
-        
+        print("     * Generated Context Analysis User Message:")
+        print(user_message)
         return [
             {"role": "system", "content": ContextAnalysisPrompts.CONTEXT_ANALYSIS_PROMPT},
             {"role": "user", "content": user_message}
