@@ -1,3 +1,4 @@
+import json
 import traceback
 from typing import Dict, List, Optional
 from shopassist_api.application.prompts.templates import PromptTemplates, TestPromptTemplates
@@ -23,7 +24,7 @@ class RAGService:
         self.retrieval = retrieval_service
         self.llm = llm_service
         self.nanolm = nanolm_service # Use nanolm for lightweight tasks
-        self.sufficiency_builder = LLMSufficiencyBuilder(llm_service=nanolm_service)
+        self.sufficiency_builder = LLMSufficiencyBuilder(llm_service=llm_service)
         self.query_processor = QueryProcessor()
         self.context_builder = ContextBuilder()
         
@@ -155,7 +156,8 @@ class RAGService:
             llm_query_type = suffic_data.get('intent_query', 'general_support')
             confidence = float(suffic_data.get('confidence', 0.0))
             logger.info(f"Query type: {llm_query_type}, confidence {confidence} Filters: {filters}, query: {cleaned_query}")
-            
+            logger.info(f" * Sufficiency data: {suffic_data}")
+
             # Step 3: Format conversation history
             data = {
                 "query": cleaned_query,
@@ -175,7 +177,8 @@ class RAGService:
                     messages, results = await self.handle_product_details(data)
                 case 'product_comparison':
                     logger.info("Handling product comparison intent")
-                    messages, results = await self.handle_product_comparison(data)
+                    #messages, results = await self.handle_product_comparison(data)
+                    messages, results = await self.handle_product_search(data)
                 case 'policy_question':
                     logger.info("Handling policy question intent")
                     messages, results = await self.handle_policy_question(data)
@@ -199,6 +202,8 @@ class RAGService:
 
             logger.info(f"LLM response generated for session: [{session_id}] with {llm_response['tokens']} tokens, cost: {llm_response['cost']}")
             
+            lightweight_sources = self._build_lightweight_sources(llm_query_type,results)
+
             # Step 6: Format sources
             return {
                 "response": llm_response['response'],
@@ -210,7 +215,9 @@ class RAGService:
                     "query_type_confidence": confidence,
                     "num_sources": len(results),
                     "tokens": llm_response['tokens'],
-                    "cost": llm_response['cost']
+                    "cost": llm_response['cost'],
+                    "lightweight_sources": lightweight_sources,
+                    "turn_index": len(conversation_history) + 1 if conversation_history else 1
                 }
             }
             
@@ -219,7 +226,7 @@ class RAGService:
             traceback.print_exc()
             raise
     
-
+    
     async def handle_product_details(self, data:dict ) -> tuple[List[Dict[str,str]], List[Dict]]:
         """
         handle product details queries
@@ -271,7 +278,7 @@ class RAGService:
             
         return messages, results
 
-    async def handle_product_comparison(self, query:str, data:dict ) -> tuple[List[Dict[str,str]], List[Dict]]:
+    async def handle_product_comparison(self, data:dict ) -> tuple[List[Dict[str,str]], List[Dict]]:
         """
         handle product comparison queries
         """
@@ -288,7 +295,7 @@ class RAGService:
         refined_query = sufficiency_data.get('query_retrieval_hint', '')
         refined_query = refined_query if refined_query else query
         
-        logger.info(f"  Query: [{refined_query}] History: [{history}]")
+        logger.info(f"  Query: [{refined_query}] History: [{history[0:50]}]")
 
         logger.warning("No results found for product comparison query")
         messages = PromptTemplates.no_results_prompt(refined_query)
@@ -372,7 +379,7 @@ class RAGService:
             # Step 2: Retrieve relevant documents
             results = await self.retrieval.retrieve_knowledge_base(
                 refined_query,
-                top_k=2
+                top_k=2 # retrieve top 2 knowledge base articles
             )
             
             if not results:
@@ -392,7 +399,7 @@ class RAGService:
             
         return messages, results
     
-    async def handle_product_search(self, query:str, data:dict)-> tuple[List[Dict[str,str]], List[Dict]]:
+    async def handle_product_search(self, data:dict)-> tuple[List[Dict[str,str]], List[Dict]]:
         """ 
         Handle product search queries
         """
@@ -407,11 +414,11 @@ class RAGService:
 
         refined_query = sufficiency_data.get('query_retrieval_hint', '')
         refined_query = refined_query if refined_query else query
+
+        logger.info(f"  Query: [{refined_query}]. Sufficiency [{sufficient_reasoning.lower()}]. History: [{history[0:100]}...]")
         
-        logger.info(f"  Query: [{refined_query}] History: [{history}]")
-
         if sufficient_reasoning.lower() == 'no':
-
+            logger.info("Context insufficient for product search")
             messages = []
             results = []
         
@@ -448,6 +455,7 @@ class RAGService:
         else:
             results = []
             context = "No relevant products needed to answer."
+            logger.info("Context sufficient, skipping retrieval.")
             messages = PromptTemplates.product_query_prompt(
                     refined_query, context, history)
         return messages, results
@@ -461,13 +469,47 @@ class RAGService:
             return ""
         
         history_parts = []
-        for msg in conversation_history[-5:]:  # Last 5 turns
+        for msg in conversation_history[-4:]:  # Last 4 turns
             role = msg.get('role', 'user')
             content = msg.get('content', '')
+            metadata = msg.get('metadata', {})
             history_parts.append(f"{role.title()}: {content}")
+            lightweight_meta = metadata.get('lightweight_sources', [])
+
+            if lightweight_meta:
+                history_parts.append(f"\n   Sources:")
+                for index, lightweight in enumerate(lightweight_meta):
+                    history_parts.append(f"Product [{index+1}] : {lightweight.get('name', '')} ({lightweight.get('id', '')})")
+                    history_parts.append(f"   Brand: {lightweight.get('brand', '')}, Availability: {lightweight.get('availability', '')}")
+                    description = lightweight.get('description', '')
+                    if description:
+                        history_parts.append(f"   Description: {description}")
         
-        return "\n".join(history_parts)
+        return "\n\n".join(history_parts)
     
+    
+    def _build_lightweight_sources(self, query_type:str, sources:List[Dict]) -> List[Dict[str,str]]:
+        """Build lightweight source info for response"""
+        lightweight_sources = []
+        
+        if query_type in ['chitchat', 'out_of_scope', 'general_support']:
+            return lightweight_sources  # No sources for these types
+        elif query_type in ['product_search', 'product_details', 'product_comparison']:
+            for src in sources:
+                lightweight_sources.append({
+                    "id": src.get('id', ''),
+                    "name": src.get('name', ''),
+                    "brand": src.get('brand', ''),
+                    "availability": src.get('availability', ''),
+                    "description": src.get('description', ''),
+                    #add more fields if needed later
+                })
+        elif query_type in ['policy_question']:
+            #not implemented yet
+            return lightweight_sources
+
+        return lightweight_sources
+
     async def health_check(self) -> dict:
         """Ping the service to check connectivity"""
         try:

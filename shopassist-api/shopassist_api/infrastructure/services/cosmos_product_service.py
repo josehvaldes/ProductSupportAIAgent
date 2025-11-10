@@ -63,7 +63,7 @@ class CosmosProductService(RepositoryServiceInterface):
 
     async def search_products_by_category(self, category: str)-> list[dict[str, any]]:
         """Search products by category from CosmosDB."""
-        if not self.client or not self.database_name:
+        if not self.client or not self.database:
             return []
 
         try:
@@ -153,7 +153,7 @@ class CosmosProductService(RepositoryServiceInterface):
             container = self.database.get_container_client("sessions")
             
             query = """
-            SELECT c.role, c.content, c.timestamp
+            SELECT c.role, c.content, c.timestamp, c.metadata
             FROM c
             WHERE c.session_id = @session_id
             ORDER BY c.timestamp ASC

@@ -81,5 +81,14 @@ async def evaluate_retrieval():
         print(f"  Category: {cat['name']}, Score: {cat['distance']}, full_name: {cat['full_name']}")
 
 
+
+    query = "Find me a smartphone with a good camera and long battery life."
+    print(f"\n🧪 Evaluating Top Category Retrieval for query: '{query}")
+    top_categories = await retrieval_service.retrieve_top_categories(query, top_k=3)
+    print(f"Top Categories Retrieved:")
+    for cat in top_categories:
+        print(f"  Category: {cat['name']}, Score: {cat['distance']}, full_name: {cat['full_name']}")
+
+    
 if __name__ == "__main__":
     asyncio.run(evaluate_retrieval())

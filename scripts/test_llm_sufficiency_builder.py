@@ -3,6 +3,7 @@ import json
 import sys
 import time
 from pathlib import Path
+from typing import Dict, List
 from dotenv import load_dotenv
 
 sys.path.append('../shopassist-api')
@@ -10,6 +11,8 @@ sys.path.append('../shopassist-api')
 script_dir = Path(__file__).parent
 env_path = script_dir.parent / 'shopassist-api' / '.env'
 load_dotenv(dotenv_path=env_path)
+from shopassist_api.application.services.rag_service import RAGService
+from shopassist_api.infrastructure.services.cosmos_product_service import CosmosProductService
 from shopassist_api.infrastructure.services.openai_llm_service import OpenAILLMService
 from shopassist_api.application.settings.config import settings
 from shopassist_api.application.services.llm_sufficiency_builder import LLMSufficiencyBuilder
@@ -24,17 +27,22 @@ setup_logging(
     )
 logger = get_logger(__name__)
 
+# llm_service = OpenAILLMService( model_name=settings.azure_openai_nano_model,
+#                                      deployment_name=settings.azure_openai_nano_model_deployment)
+
+llm_service = OpenAILLMService( model_name=settings.azure_openai_model,
+                                     deployment_name=settings.azure_openai_model_deployment)
+
+
+llm_context_builder = LLMSufficiencyBuilder(
+    llm_service=llm_service
+)
+
 async def test_llm_response():
     """
     🧪 Testing OpenAI LLM service...
     """
     logger.warning("🧪 Testing OpenAI LLM service...\n")
-
-    llm_service = OpenAILLMService( model_name=settings.azure_openai_nano_model,
-                                     deployment_name=settings.azure_openai_nano_model_deployment)
-    llm_context_builder = LLMSufficiencyBuilder(
-        llm_service=llm_service
-    )
 
     test_prompts = [
         {
@@ -69,5 +77,69 @@ async def test_llm_response():
         print(f"🧩 [{idx}] Built Context: {json.dumps(context, indent=4)}", flush=True)
 
 
+
+
+def _format_history(
+    conversation_history: List[Dict]
+) -> str:
+    """Format conversation history for prompt"""
+    if not conversation_history:
+        return ""
+    
+    history_parts = []
+    for msg in conversation_history[-5:]:  # Last 5 turns
+        role = msg.get('role', 'user')
+        content = msg.get('content', '')
+        metadata = msg.get('metadata', {})
+        history_parts.append(f"{role.title()}: {content}")
+        lightweight_meta = metadata.get('lightweight_sources', [])
+
+        if lightweight_meta:
+            history_parts.append(f"\n   Sources:")
+            for index, lightweight in enumerate(lightweight_meta):
+                history_parts.append(f"Product [{index+1}] : {lightweight.get('name', '')} ({lightweight.get('id', '')})")
+                history_parts.append(f"   Brand: {lightweight.get('brand', '')}, Availability: {lightweight.get('availability', '')}")
+                description = lightweight.get('description', '')
+                if description:
+                    history_parts.append(f"   Description: {description}")
+    
+    return "\n\n".join(history_parts)
+    
+
+async def test_llm_response_with_history():
+    
+    repository = CosmosProductService()
+    
+    history = await repository.get_conversation_history("ea046d27-bedc-4311-9769-baf8beb13227")
+    history_text = _format_history(history)
+    
+    print(f"\n🧩 Formatted History: {history_text}")
+
+    history_prompts = [
+        {
+            "prompt": "which one has Wi-Fi?",
+            "history": history_text,
+            "expected_result": {
+                "is_sufficient": "Yes", #gaming engine info not present, so insufficient
+                "intent_query": "policy_question",
+                "scope_retrieval_hint": None,
+                "query_retrieval_hint": None
+            }
+        }
+    ]
+
+    for idx, item in enumerate(history_prompts):
+        prompt = item['prompt']
+        
+        context = await llm_context_builder.analyze_sufficiency(
+            query=prompt,
+            history=item['history']
+        )
+        print(f"\n📝 Test[{idx}] Prompt: '{prompt}'")
+        print(f"🧩 [{idx}] Built Context: {json.dumps(context, indent=4)}")
+        expected = item.get('expected_result', {})
+        print(f" Expected sufficient: {expected.get('is_sufficient', '')} | Got: {context.get('is_sufficient', '')}")
+
 if __name__ == "__main__":
-    asyncio.run(test_llm_response())
+    #asyncio.run(test_llm_response())
+    asyncio.run(test_llm_response_with_history())

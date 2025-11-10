@@ -16,6 +16,7 @@ context_builder = ContextBuilder()
 
 class SearchRequest(BaseModel):
     query: str
+    query_type: str
     top_k: int = 5
     filters: Optional[Dict] = None
 
@@ -42,15 +43,14 @@ async def vector_search(request: SearchRequest,
         
         # Classify query type
         
-        llm_query_type = 'product_search'
-        confidence = 1.0
+        llm_query_type = request.query_type
         
-        logger.info(f"  Query classified as: {llm_query_type} with confidence {confidence}")
+        logger.info(f"  Query classified as: {llm_query_type}")
         logger.info(f"  Cleaned query: {cleaned_query}")
         # Retrieve
         if llm_query_type == 'product_search':
             # Get top categories to enhance filters            
-            top_categories = retrieval_service.retrieve_top_categories(cleaned_query, top_k=2)
+            top_categories = await retrieval_service.retrieve_top_categories(cleaned_query, top_k=2)
             logger.info(f"  Top categories: {top_categories}")
             if top_categories and len(top_categories) > 0:
                 category_names = []

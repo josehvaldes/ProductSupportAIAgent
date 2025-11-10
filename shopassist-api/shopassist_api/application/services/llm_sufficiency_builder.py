@@ -24,6 +24,7 @@ class LLMSufficiencyBuilder:
         }
         """
         try:
+            print(f"Generating context analysis prompt [{history[0:100]}...]", flush=True)
             messages = ContextAnalysisPrompts.context_analysis_prompt(query, history)
 
             llm_response = await self.llm_service.generate_response(messages=messages,

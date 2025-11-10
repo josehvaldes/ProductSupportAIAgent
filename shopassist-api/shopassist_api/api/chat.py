@@ -65,7 +65,6 @@ async def chat_message(request: ChatRequest,
         # Get conversation history
         logger.info(f"Fetching conversation history for session_id: {session_id}, user_id: {user_id}, message: {request.message}")
         history = await cosmos_service.get_conversation_history(session_id)
-        logger.info(f"Conversation history retrieved: {history}")        
         # Generate response using RAG
         result = await rag_service.generate_answer(
             query=request.message,
@@ -104,12 +103,14 @@ async def chat_message(request: ChatRequest,
 
 @router.get("/history/{session_id}")
 async def get_chat_history(session_id: str,
-                           cosmos_service:RepositoryServiceInterface = Depends(get_repository_service)):
+                           cosmos_service:RepositoryServiceInterface = Depends(get_repository_service),
+                           rag_service:RAGService = Depends(get_rag_service)):
     """
     Get conversation history for a session
     """
     try:
         history = await cosmos_service.get_conversation_history(session_id)
-        return {"session_id": session_id, "messages": history}
+        history_text = rag_service._format_history(history)
+        return {"session_id": session_id, "messages": history, "formatted_history": history_text}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
