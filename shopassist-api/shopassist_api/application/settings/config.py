@@ -53,15 +53,16 @@ class Settings(BaseSettings):
     azure_storage_container: str = "product-data"
     
     #Azure cosmosDB
-    cosmosdb_endpoint: Optional[str] = None
+    cosmosdb_endpoint: str = ""
     cosmosdb_database: str = "<shopassistdatabase>"
     cosmosdb_product_container: str = "products"
-    cosmosdb_chat_container: str = "chats"
+    cosmosdb_messages_container: str = "messages"
+    cosmosdb_session_container: str = "sessions"
 
-
-    # Database Configuration
-    database_url: Optional[str] = None
-    
+    # Cache Configuration
+    redis_endpoint: str = "redis://localhost:6379"
+    redis_password: Optional[str] = None
+        
     #Logging Configuration
     log_level: str = "INFO"
     log_file: str = "logs/shopassist_api.log"

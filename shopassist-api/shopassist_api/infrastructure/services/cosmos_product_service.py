@@ -3,8 +3,12 @@ from datetime import datetime
 from typing import List, Dict
 import uuid
 from azure.cosmos import CosmosClient
+from azure.cosmos.exceptions import CosmosResourceNotFoundError
 from shopassist_api.application.settings.config import settings
 from shopassist_api.application.interfaces.service_interfaces import RepositoryServiceInterface
+from shopassist_api.domain.models.message import Message
+from shopassist_api.domain.models.session_context import SessionContext
+from shopassist_api.domain.models.user_preferences import UserPreferences
 from shopassist_api.logging_config import get_logger
 from shopassist_api.infrastructure.services.azure_credential_manager import get_credential_manager
 
@@ -17,6 +21,7 @@ class CosmosProductService(RepositoryServiceInterface):
         self.database_name = None
         self.product_container = None
         self.chat_container = None
+        self.session_container = None
         self._initialize_client()
     
     def _initialize_client(self):
@@ -32,7 +37,8 @@ class CosmosProductService(RepositoryServiceInterface):
             )
             self.database_name = settings.cosmosdb_database
             self.product_container = settings.cosmosdb_product_container
-            self.chat_container = settings.cosmosdb_chat_container
+            self.messages_container = settings.cosmosdb_messages_container
+            self.session_container = settings.cosmosdb_session_container
 
             self.database = self.client.get_database_client(self.database_name)
 
@@ -150,7 +156,7 @@ class CosmosProductService(RepositoryServiceInterface):
         """Get conversation history for a session"""
         try:
             
-            container = self.database.get_container_client("sessions")
+            container = self.database.get_container_client(self.messages_container)
             
             query = """
             SELECT c.role, c.content, c.timestamp, c.metadata
@@ -182,7 +188,7 @@ class CosmosProductService(RepositoryServiceInterface):
     ):
         """Save a message to conversation history"""
         try:
-            container = self.database.get_container_client("sessions")
+            container = self.database.get_container_client(self.messages_container)
             
             message = {
                 "id": str(uuid.uuid4()),
@@ -222,3 +228,109 @@ class CosmosProductService(RepositoryServiceInterface):
             logger.error(f"Error connecting to CosmosDB: {e}")
             traceback.print_exc()
             return False
+    
+    async def create_session(self, data: SessionContext) -> str:
+        """Create a new session and return its ID"""
+        try:
+            if data is None:
+                raise ValueError("SessionContext data must be provided to create a session.")
+            
+            if data.id is None:
+                data.id = str(uuid.uuid4())
+
+            logger.info(f"Created new session with ID: {data.id}")
+            container = self.database.get_container_client(self.session_container)
+            safe_data = data.model_dump(mode='json') if data else {}
+            print(safe_data)
+            container.create_item(body=safe_data)
+            logger.info(f"Saved session context for session ID: {data.id}")
+            
+            return data.id
+        except Exception as e:
+            logger.error(f"Error creating session: {e}")
+            traceback.print_exc()
+            return None
+    
+    async def get_session(self, session_id: str) -> SessionContext:
+        """Retrieve session details by session ID"""
+        try:
+            logger.info(f"Retrieving session with ID: {session_id}")
+            container = self.database.get_container_client(self.session_container)
+            query = """
+            SELECT *
+            FROM c
+            WHERE c.id = @id
+            """
+            items = list(container.query_items(
+                query=query,
+                parameters=[{"name": "@id", "value": session_id}],
+                enable_cross_partition_query=True
+            ))
+            if items:
+                session_data = items[0]
+                # Convert to SessionContext model if needed
+                session = SessionContext(**session_data)
+
+                messages = await self.get_conversation_history(session_id)
+                session.messages = [ Message.model_validate(msg) for msg in messages ]
+                return session
+            else:
+                logger.info(f"No session found with ID: {session_id}")
+                return None
+        except Exception as e:
+            logger.error(f"Error retrieving session: {e}")
+            traceback.print_exc()
+            return None
+        
+    async def delete_session(self, user_id:str, session_id: str) -> None:
+        """Delete a session by session ID"""
+        try:
+            container = self.database.get_container_client(self.session_container)
+            # delete the session item without retrieving it first
+            container.delete_item(item=session_id, partition_key=user_id)
+        except CosmosResourceNotFoundError:
+            logger.warning(f"Session with ID: {session_id}, User Id {user_id}, not found for deletion.")
+        except Exception as e:
+            logger.error(f"Error deleting session: {e}")
+            traceback.print_exc()
+
+    async def get_preferences(
+        self, 
+        session_id: str
+    ) -> UserPreferences:
+        """Get user preferences for a session"""
+        try:
+            session = await self.get_session(session_id)
+            if session and session.user_preferences:
+                preferences = UserPreferences.model_validate(session.user_preferences)
+                return preferences
+            else:
+                logger.info(f"No user preferences found for session ID: {session_id}")
+                return None
+        except Exception as e:
+            logger.error(f"Error getting user preferences: {e}")
+            traceback.print_exc()
+            return None
+        
+    async def update_preferences(
+        self, 
+        session_id: str, 
+        preferences: UserPreferences
+    ) -> None:
+        """Update user preferences for a session"""
+        try:
+            container = self.database.get_container_client(self.session_container)
+            # Retrieve existing session
+            session = await self.get_session(session_id)
+            if not session:
+                logger.error(f"Session ID {session_id} not found for updating preferences.")
+                return
+            
+            # Update preferences
+            session.user_preferences = preferences
+            safe_data = SessionContext.model_dump(session)
+            container.upsert_item(body=safe_data)
+            logger.info(f"Updated user preferences for session ID: {session_id}")
+        except Exception as e:
+            logger.error(f"Error updating user preferences: {e}")
+            traceback.print_exc()

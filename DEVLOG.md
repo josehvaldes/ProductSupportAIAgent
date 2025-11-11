@@ -1156,28 +1156,39 @@ Intent classification, context management, frontend integration
 
 ---
 
-### Day 16 - Thursday, Nov 6, 2025
+### Day 16 - Thursday, Nov 1, 2025
 **Today's Focus:** Context manager and session storage
 
 **Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+- [X] Design Session Data Model 
+- [X] Create SessionManager Service 
+- [X] Implement Preference Extraction Logic 
+- [X] Add Redis Caching Layer 
+- [X] Update RAG Service to Use Context 
+- [X] Update API Endpoints for sessions management 
+- [] Test Multi-Turn Conversations 
+- [X] Documentation updated
+
+
 
 **Technical Decisions:**
-- 
+- use Redis cache container
+- Separate the session endpoints in a new API Route
+- Use dependecy injection and Singleton caching for Redis
+- Retake the use of pydantic objects for sessions
+- branch session manager to a new branch
 
 **Challenges & Solutions:**
-- 
+- write integration tests for all new endpoints. Solutions, User copilot
 
 **Learnings:**
-- 
+- How to serialize and convert pydantic object
 
 **Next Steps:**
 - [ ] 
 - [ ] 
 
-**Time Invested:** ___ hours
+**Time Invested:** 4 hours
 
 ---
 

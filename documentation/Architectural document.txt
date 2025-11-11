@@ -160,7 +160,7 @@ GET /api/chat/history/{session_id}
 - `retrieval_service.py`: Query vector DB + hybrid search
 - `llm_service.py`: Call Azure OpenAI/Gemma
 - `intent_classifier.py`: Classify user intent
-- `context_manager.py`: Manage conversation state
+- `session_manager.py`: Manage conversation state
 
 #### 3.2.3 RAG Pipeline
 

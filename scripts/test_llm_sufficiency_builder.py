@@ -12,7 +12,6 @@ script_dir = Path(__file__).parent
 env_path = script_dir.parent / 'shopassist-api' / '.env'
 load_dotenv(dotenv_path=env_path)
 from shopassist_api.application.services.formaters import FormatterUtils
-from shopassist_api.application.services.rag_service import RAGService
 from shopassist_api.infrastructure.services.cosmos_product_service import CosmosProductService
 from shopassist_api.infrastructure.services.openai_llm_service import OpenAILLMService
 from shopassist_api.application.settings.config import settings

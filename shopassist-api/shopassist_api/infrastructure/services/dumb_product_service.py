@@ -16,7 +16,6 @@ class DumbProductService(RepositoryServiceInterface):
         self.database_name = None
         self.cosmosdb_endpoint = None
         self.product_container = None
-        self.chat_container = None
         self.category_container = None
         self._initialize_client()
     

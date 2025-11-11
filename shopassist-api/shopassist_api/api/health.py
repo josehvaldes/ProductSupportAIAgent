@@ -3,8 +3,8 @@ Health check endpoint.
 """
 from fastapi import APIRouter, Depends
 from datetime import datetime, timezone
-from shopassist_api.application.interfaces.di_container import get_rag_service, get_repository_service
-from shopassist_api.application.interfaces.service_interfaces import RepositoryServiceInterface
+from shopassist_api.application.interfaces.di_container import get_cache_service, get_rag_service, get_repository_service
+from shopassist_api.application.interfaces.service_interfaces import CacheServiceInterface, RepositoryServiceInterface
 from shopassist_api.application.services.rag_service import RAGService
 from shopassist_api.application.settings.config import settings
 from shopassist_api.logging_config import get_logger
@@ -16,7 +16,8 @@ router = APIRouter()
 
 @router.get("/")
 async def health_check(cosmos_service:RepositoryServiceInterface = Depends(get_repository_service),
-                       rag_service:RAGService = Depends(get_rag_service)):
+                       rag_service:RAGService = Depends(get_rag_service),
+                       cache_service:CacheServiceInterface = Depends(get_cache_service)):
     """Health check endpoint."""
 
     repo_check ={}
@@ -32,11 +33,19 @@ async def health_check(cosmos_service:RepositoryServiceInterface = Depends(get_r
     except Exception as e:
         rag_check['rag_service'] = f"unhealthy: {str(e)}"
 
+    cache_check = {}
+    try:
+        is_healthy = await cache_service.health_check()
+        cache_check['cache_service'] = "healthy" if is_healthy else "unhealthy"
+    except Exception as e:
+        cache_check['cache_service'] = f"unhealthy: {str(e)}"
+
     return {
         "status": "healthy",
         "timestamp": datetime.now(timezone.utc),
         "service": settings.api_title,
         "version": settings.api_version,
         **repo_check,
-        **rag_check
+        **rag_check,
+        **cache_check
     }

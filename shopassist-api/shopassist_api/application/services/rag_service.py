@@ -3,6 +3,7 @@ import traceback
 from typing import Dict, List, Optional
 from shopassist_api.application.prompts.templates import PromptTemplates, TestPromptTemplates
 from shopassist_api.application.services.context_builder import ContextBuilder
+from shopassist_api.application.services.session_manager import SessionManager
 from shopassist_api.application.services.formaters import FormatterUtils
 from shopassist_api.application.services.llm_sufficiency_builder import LLMSufficiencyBuilder
 from shopassist_api.application.services.query_processor import QueryProcessor
@@ -25,18 +26,21 @@ class RAGService:
     def __init__(self,
                  llm_service: LLMServiceInterface,
                  nanolm_service: LLMServiceInterface,
-                 retrieval_service: RetrievalService):
+                 retrieval_service: RetrievalService,
+                 session_manager: SessionManager
+                 ):
         self.retrieval = retrieval_service
         self.llm = llm_service
         self.nanolm = nanolm_service # Use nanolm for lightweight tasks
+        self.session_manager = session_manager
         self.sufficiency_builder = LLMSufficiencyBuilder(llm_service=nanolm_service)
         self.query_processor = QueryProcessor()
         self.context_builder = ContextBuilder()
         
+        
     async def generate_dumb_answer(
         self,
         query: str,
-        conversation_history: Optional[List[Dict]] = None,
         session_id: Optional[str] = None
     ) -> Dict:
         """Generate dump answer for testing"""
@@ -90,8 +94,8 @@ class RAGService:
 
     async def generate_answer(
         self,
+        user_id:str,
         query: str,
-        conversation_history: Optional[List[Dict]] = None,
         session_id: Optional[str] = None
     ) -> Dict:
         """
@@ -115,7 +119,9 @@ class RAGService:
             logger.info(f"Processing. Session: {session_id}, Query: {query}")
             
             # Step 1: Format conversation history
-            history_text = FormatterUtils.format_history(conversation_history)
+            history = await self.session_manager.get_conversation_history(session_id=session_id)
+
+            history_text = FormatterUtils.format_message_history(history)
 
             # Step 2: Process query and get price filters
             cleaned_query, filters = self.query_processor.process_query(query)
@@ -125,7 +131,6 @@ class RAGService:
                 cleaned_query, history=history_text)
 
             logger.info(f"Sufficiency data: {sufficiency}")
-
             
             data = {
                 "query": cleaned_query,
@@ -174,21 +179,39 @@ class RAGService:
             
             product_sources = FormatterUtils.build_product_sources(llm_query_type,results)
 
-            # Step 6: Format sources
+            # Step 6: Save user and assistant messages
+            self.session_manager.add_message(
+                session_id=session_id,
+                user_id=user_id,
+                role="user",
+                content=query,
+            )
+
+            metadata = {
+                    "query_type_confidence": sufficiency.get('confidence', 0.0),
+                    "num_sources": len(results),
+                    "tokens": llm_response['tokens'],
+                    "cost": llm_response['cost'],
+                    "products": product_sources,
+                    "turn_index": len(history) + 1 if history else 1
+                }
+            
+            self.session_manager.add_message(
+                session_id=session_id,
+                user_id=user_id,
+                role="assistant",
+                content=llm_response['response'],
+                metadata=metadata
+            )
+
+            # return
             return {
                 "response": llm_response['response'],
                 "sources": results,
                 "query_type": llm_query_type,
                 "has_results": True,
                 "filters_applied": filters,
-                "metadata": {
-                    "query_type_confidence": sufficiency.get('confidence', 0.0),
-                    "num_sources": len(results),
-                    "tokens": llm_response['tokens'],
-                    "cost": llm_response['cost'],
-                    "products": product_sources,
-                    "turn_index": len(conversation_history) + 1 if conversation_history else 1
-                }
+                "metadata": metadata
             }
             
         except Exception as e:
@@ -247,7 +270,7 @@ class RAGService:
                     query, context, history)
         else:
             results = []
-            context = "No relevant products needed to answer."
+            context = ""
             logger.info("Context sufficient, skipping retrieval.")
             messages = PromptTemplates.product_query_prompt(
                     query, context, history)
@@ -284,7 +307,7 @@ class RAGService:
                         )
         else:
             results = []
-            context = "No documents retieved to answer"
+            context = ""
             messages = PromptTemplates.product_query_prompt(
                     query, context, history)
             
@@ -331,7 +354,7 @@ class RAGService:
                     query, context, data['history_text'])
         else:
             results = []
-            context = "No relevant products needed to answer."
+            context = ""
             messages = PromptTemplates.product_details_prompt(
                     query, context, data['history_text'])
             
@@ -376,7 +399,7 @@ class RAGService:
                     query, context, data['history_text'])
         else:
             results = []
-            context = "No relevant products needed to answer."
+            context = ""
             messages = PromptTemplates.product_comparison_prompt(
                     query, context, data['history_text'])
             
@@ -437,8 +460,9 @@ class RAGService:
         """Ping the service to check connectivity"""
         try:
             health = {}
-            is_healthy = await self.llm.health_check()
-            health['llm_service'] = "healthy" if is_healthy else "unhealthy"
+            is_llm_healthy = await self.llm.health_check()
+            
+            health['llm_service'] = "healthy" if is_llm_healthy else "unhealthy"
             health['retrieval_service'] = await self.retrieval.health_check()
             return health
         except Exception as e:
