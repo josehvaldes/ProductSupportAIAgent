@@ -372,12 +372,12 @@ class RAGService:
             else:
                 context = self.context_builder.build_product_context(results)
                 #TODO Use a different prompt for product comparison
-                messages = PromptTemplates.product_details_prompt(
+                messages = PromptTemplates.product_comparison_prompt(
                     query, context, data['history_text'])
         else:
             results = []
             context = "No relevant products needed to answer."
-            messages = PromptTemplates.product_details_prompt(
+            messages = PromptTemplates.product_comparison_prompt(
                     query, context, data['history_text'])
             
         return messages, results

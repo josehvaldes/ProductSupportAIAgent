@@ -134,6 +134,10 @@ Products to compare (Retrieved from database):
 
 {f"Conversation history:\n{conversation_history}" if conversation_history else ""}
 
+Based on the product information above, create a detailed comparison to answer the customer's query.
+
+If the Products to compare section is empty, look carefully at the "sources" and "products" fields in the history to infer what the customer might need.
+
 Create a helpful comparison focusing on:
 1. Key differences in features
 2. Price comparison
@@ -164,6 +168,9 @@ Product Details:
 {f"Conversation history:\n{conversation_history}" if conversation_history else ""}
 
 Based on the product details above, provide a comprehensive answer to the customer's query.
+
+If the product details is empty, look carefully at the "sources" and "products" fields in the history to infer what the customer might need.
+
 Format your response with:
 1. Detailed product information relevant to their question
 2. Key specifications or features (bullet points)
@@ -315,8 +322,6 @@ Respond with this JSON structure:
 }""")
         
         user_message = "\n".join(user_parts)
-        print("     * Generated Context Analysis User Message:")
-        print(user_message)
         return [
             {"role": "system", "content": ContextAnalysisPrompts.CONTEXT_ANALYSIS_PROMPT},
             {"role": "user", "content": user_message}

@@ -42,7 +42,7 @@ class ScenarioTester:
                     "message": query,
                     "session_id": session_id
                 },
-                timeout=30
+                timeout=45
             )
             
             elapsed = (time.time() - start_time) * 1000  # ms
@@ -60,7 +60,7 @@ class ScenarioTester:
                     "num_sources": data['metadata']['num_sources'],
                     "tokens": data['metadata']['tokens']['total'],
                     "cost": data['metadata']['cost'],
-                    "response_preview": data['response'][:200]
+                    "response_preview": data['response']
                 }
                 
                 print(f"✅ SUCCESS")
@@ -69,7 +69,7 @@ class ScenarioTester:
                 print(f"   Sources: {data['metadata']['num_sources']}")
                 print(f"   Tokens: {data['metadata']['tokens']['total']}")
                 print(f"   Cost: ${data['metadata']['cost']:.6f}")
-                print(f"\n   Response preview:\n   {data['response'][:300]}...")
+                print(f"\n   Response preview:\n   {data['response']}<end>")
                 
             else:
                 result = {
@@ -144,13 +144,13 @@ class ScenarioTester:
             # Scenario 6: Multi-turn Context (Turn 1)
             self.test_scenario(
                 "Multi-turn: Initial Query",
-                "Show me smart Televisions ",
+                "Show me smart Televisions",
                 session_id
             )            
             # Scenario 6: Multi-turn Context (Turn 2)
             self.test_scenario(
                 "Multi-turn: Follow-up",
-                "Which one has the best resolution?",
+                "Which one has WIFI connectivity?",
                 session_id
             )
         

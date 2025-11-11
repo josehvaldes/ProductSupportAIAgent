@@ -1,0 +1,753 @@
+# Product Support AI Agent - Technical Architecture Document
+
+## 1. Executive Summary
+
+**Project**: ShopAssist - AI-Powered Product Knowledge & Support Agent  
+**Goal**: Build a production-ready RAG-based conversational AI for e-commerce product support  
+**Timeline**: 6 weeks  
+**Tech Stack**: React, FastAPI, Milvus, Azure OpenAI, Gemma (optional), Azure Cloud
+
+---
+
+## 2. System Requirements
+
+### 2.1 Functional Requirements
+
+#### Core Features (MVP)
+- **FR-1**: Answer product-related questions using natural language
+- **FR-2**: Search and recommend products based on user queries
+- **FR-3**: Provide accurate product specifications, pricing, and availability
+- **FR-4**: Handle return policies, shipping information, and FAQs
+- **FR-5**: Maintain conversation context across multiple turns
+- **FR-6**: Escalate to human support when needed
+
+#### Advanced Features (Post-MVP)
+- **FR-7**: Compare multiple products side-by-side
+- **FR-8**: Process and answer questions about product images
+- **FR-9**: Track user preferences within a session
+- **FR-10**: Provide personalized recommendations based on conversation history
+
+### 2.2 Non-Functional Requirements
+
+- **NFR-1**: Response time < 3 seconds for 95% of queries
+- **NFR-2**: 95% factual accuracy on product information
+- **NFR-3**: Handle 100 concurrent users
+- **NFR-4**: System uptime 99.5%
+- **NFR-5**: Token cost < $0.05 per conversation
+- **NFR-6**: Support mobile and desktop browsers
+
+### 2.3 Data Requirements
+
+**Sample Product Catalog** (Start with 100-200 products):
+- Electronics (laptops, phones, headphones)
+- Home & Garden (furniture, appliances)
+- Fashion (clothing, accessories)
+
+**Required Data Fields**:
+- Product ID, Name, Description (short & detailed)
+- Category, Subcategory, Brand
+- Price, Currency, Availability status
+- Specifications (JSON format)
+- Images (URLs)
+- Reviews summary
+- Related products
+
+**Knowledge Base Documents**:
+- Return & refund policy
+- Shipping & delivery information
+- Warranty information
+- Size guides
+- Care instructions
+- FAQ document (20-30 common questions)
+
+---
+
+## 3. System Architecture
+
+### 3.1 High-Level Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                     User Interface                      │
+│              React SPA + TailwindCSS                    │
+└─────────────────┬───────────────────────────────────────┘
+                  │ HTTPS/WebSocket
+┌─────────────────▼───────────────────────────────────────┐
+│                   API Gateway Layer                      │
+│                FastAPI (Python 3.11+)                    │
+│  ┌──────────────┬──────────────┬─────────────────────┐  │
+│  │ Chat API     │ Product API  │ Analytics API       │  │
+│  └──────────────┴──────────────┴─────────────────────┘  │
+└─────────────────┬───────────────────────────────────────┘
+                  │
+┌─────────────────▼───────────────────────────────────────┐
+│              AI Processing Layer                        │
+│  ┌──────────────────────────────────────────────────┐   │
+│  │  Intent Classifier  │  Context Manager           │   │
+│  └──────────────────────────────────────────────────┘   │
+│  ┌──────────────────────────────────────────────────┐   │
+│  │  Query Processor    │  Response Generator        │   │
+│  └──────────────────────────────────────────────────┘   │
+└─────────────────┬───────────────────────────────────────┘
+                  │
+┌─────────────────▼───────────────────────────────────────┐
+│              Retrieval Layer (RAG)                      │
+│  ┌────────────────┐  ┌─────────────────────────────┐    │
+│  │ Milvus Vector  │  │ Azure AI Search             │    │
+│  │ Database       │  │ (Hybrid Search)             │    │
+│  └────────────────┘  └─────────────────────────────┘    │
+└─────────────────┬───────────────────────────────────────┘
+                  │
+┌─────────────────▼───────────────────────────────────────┐
+│              LLM Layer                                  │
+│  ┌────────────────┐  ┌─────────────────────────────┐    │
+│  │ Azure OpenAI   │  │ Gemma 2B (Local/Optional)   │    │
+│  │ GPT-4o-mini    │  │                             │    │
+│  └────────────────┘  └─────────────────────────────┘    │
+└─────────────────┬───────────────────────────────────────┘
+                  │
+┌─────────────────▼───────────────────────────────────────┐
+│              Data & Storage Layer                       │
+│  ┌────────────────┐  ┌──────────────┐  ┌────────────┐   │
+│  │ Azure Blob     │  │ CosmosDB     │  │ Redis      │   │
+│  │ Storage        │  │ (Products,   │  │ (Cache)    │   │
+│  │ (images, docs) │  │  sessions,   │  │            │   │
+│  │                │  │  feedback )  │  │            │   │
+│  └────────────────┘  └──────────────┘  └────────────┘   │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 3.2 Component Details
+
+#### 3.2.1 Frontend (React)
+**Components**:
+- ChatInterface: Main conversation UI
+- ProductCard: Display product details
+- ComparisonView: Side-by-side product comparison
+- FeedbackWidget: Thumbs up/down for responses
+
+**State Management**: React Context API or Zustand
+**Key Libraries**: 
+- axios for API calls
+- markdown-to-jsx for formatted responses
+- react-markdown for rich text
+
+#### 3.2.2 Backend API (FastAPI)
+
+**Endpoints**:
+```python
+POST /api/chat/message
+  - Input: { session_id, message, context }
+  - Output: { response, sources, products, confidence }
+
+GET /api/products/search
+  - Input: { query, filters, limit }
+  - Output: { products[], total_count }
+
+GET /api/products/{product_id}
+  - Output: { product_details }
+
+POST /api/feedback
+  - Input: { message_id, rating, comment }
+
+GET /api/chat/history/{session_id}
+  - Output: { messages[] }
+```
+
+**Core Modules**:
+- `chat_service.py`: Orchestrates RAG pipeline
+- `embedding_service.py`: Generate embeddings
+- `retrieval_service.py`: Query vector DB + hybrid search
+- `llm_service.py`: Call Azure OpenAI/Gemma
+- `intent_classifier.py`: Classify user intent
+- `context_manager.py`: Manage conversation state
+
+#### 3.2.3 RAG Pipeline
+
+**Step 1: Intent Classification**
+```python
+Intents:
+- product_search
+- product_comparison
+- specification_query
+- policy_question (return/shipping/warranty)
+- general_support
+- out_of_scope
+```
+
+**Step 2: Retrieval Strategy**
+```python
+if intent == "product_search":
+    # Hybrid search: Vector + metadata filters
+    vector_results = milvus.search(query_embedding, top_k=10)
+    filtered_results = apply_filters(vector_results, price, category)
+    
+elif intent == "specification_query":
+    # Precise retrieval from structured data
+    product_docs = get_product_by_id(extracted_product_id)
+    
+elif intent == "policy_question":
+    # Dense retrieval from FAQ/policy docs
+    policy_chunks = milvus.search(query_embedding, collection="policies")
+```
+
+**Step 3: Context Augmentation**
+```python
+context = {
+    "retrieved_docs": relevant_chunks,
+    "conversation_history": last_5_turns,
+    "user_preferences": session_data,
+    "metadata": {
+        "current_products_in_view": [...],
+        "price_range_mentioned": (min, max)
+    }
+}
+```
+
+**Step 4: Prompt Engineering**
+```python
+system_prompt = """
+You are ShopAssist, a knowledgeable product support agent.
+
+Guidelines:
+- Provide accurate information based on the context provided
+- If unsure, say so and offer to connect to human support
+- Never make up product specifications or prices
+- Be concise but helpful
+- Format product details clearly
+- Suggest alternatives when appropriate
+
+Current Context:
+{retrieved_information}
+
+Conversation History:
+{last_n_turns}
+"""
+```
+
+#### 3.2.4 Vector Database (Milvus)
+
+**Collections**:
+
+1. **products_collection**
+   - Fields: product_id, embedding[768], category, price, brand, in_stock
+   - Index: HNSW for fast ANN search
+   - Embedding: text-embedding-3-small (OpenAI) or all-MiniLM-L6-v2
+
+2. **product_descriptions_collection**
+   - Fields: chunk_id, product_id, embedding[768], text, chunk_type
+   - Chunking strategy: 300 tokens with 50 token overlap
+   - Metadata: section (overview, specs, reviews)
+
+3. **knowledge_base_collection**
+   - Fields: doc_id, embedding[768], text, doc_type, category
+   - Documents: FAQ, policies, guides
+
+**Embedding Strategy**:
+- Product titles + short descriptions: Single embedding
+- Long descriptions: Chunk and embed separately
+- Specifications: Convert to natural language then embed
+
+#### 3.2.5 Azure AI Search (Hybrid Fallback)
+
+**Use Cases**:
+- Exact keyword matching (product IDs, brand names)
+- Structured filters (price range, category, availability)
+- Fallback when vector search confidence is low
+
+**Index Schema**:
+```json
+{
+  "name": "products-index",
+  "fields": [
+    {"name": "id", "type": "Edm.String", "key": true},
+    {"name": "name", "type": "Edm.String", "searchable": true},
+    {"name": "description", "type": "Edm.String", "searchable": true},
+    {"name": "category", "type": "Edm.String", "filterable": true},
+    {"name": "price", "type": "Edm.Double", "filterable": true},
+    {"name": "embedding", "type": "Collection(Edm.Single)", "searchable": true}
+  ]
+}
+```
+
+#### 3.2.6 LLM Integration
+
+**Primary: Azure OpenAI**
+- Model: gpt-4o-mini (cost-effective, fast)
+- Temperature: 0.3 (balanced between creativity and consistency)
+- Max tokens: 500 (concise responses)
+- Streaming: Yes (better UX)
+
+**Secondary: Gemma 2B (Local)**
+- Deployment: Docker container on Azure Container Apps
+- Use case: Cost comparison, edge deployment demo
+- Inference: HuggingFace Transformers or vLLM
+
+---
+
+## 4. Key User Scenarios
+
+### Scenario 1: Product Discovery
+**User**: "I need a laptop for video editing under $1500"
+
+**System Flow**:
+1. Intent: product_search
+2. Extract: category=laptops, use_case=video_editing, max_price=1500
+3. Retrieval: Vector search + price filter
+4. Response: "Here are 3 laptops suitable for video editing under $1500:
+   - [Product Card 1] MacBook Air M2, $1299...
+   - [Product Card 2] Dell XPS 15, $1449...
+   - [Product Card 3] ASUS ProArt, $1399..."
+
+### Scenario 2: Specification Query
+**User**: "Does the MacBook Air M2 have 16GB RAM?"
+
+**System Flow**:
+1. Intent: specification_query
+2. Entity extraction: product="MacBook Air M2", spec="RAM"
+3. Retrieval: Get exact product document
+4. Response: "The MacBook Air M2 comes in two RAM configurations: 8GB (base model) and 16GB (upgraded). The 16GB version costs $1,499. Would you like to see both options?"
+
+### Scenario 3: Comparison
+**User**: "Compare the MacBook Air M2 and Dell XPS 15"
+
+**System Flow**:
+1. Intent: product_comparison
+2. Retrieve both products
+3. Generate comparison table
+4. Response: [Comparison table with specs, prices, pros/cons]
+
+### Scenario 4: Policy Question
+**User**: "What's your return policy?"
+
+**System Flow**:
+1. Intent: policy_question
+2. Retrieval: Query knowledge_base_collection for return policy
+3. Response: "We offer a 30-day return policy for most items. Products must be in original condition with tags attached. Free return shipping for orders over $50..."
+
+### Scenario 5: Out of Stock
+**User**: "I want to buy the Sony WH-1000XM5"
+
+**System Flow**:
+1. Check inventory: out_of_stock=true
+2. Response: "The Sony WH-1000XM5 is currently out of stock. Would you like me to:
+   - Notify you when it's back in stock
+   - Show similar alternatives (Sony WH-1000XM4, Bose 700)
+   - Check availability at nearby stores"
+
+### Scenario 6: Multi-turn Context
+**Turn 1**: "Show me running shoes"  
+**Turn 2**: "Under $100"  
+**Turn 3**: "Do they come in size 10?"
+
+**System Flow**:
+- Context manager tracks: category=running_shoes, max_price=100, current_products=[...]
+- Turn 3 uses context to check size availability for previously shown products
+
+### Scenario 7: Escalation
+**User**: "I want to cancel my order #12345"
+
+**System Flow**:
+1. Intent: out_of_scope (order management)
+2. Response: "I'm unable to cancel orders directly. Let me connect you with our customer service team who can help you right away. [Connect to human agent button]"
+
+---
+
+## 5. Data Preparation Strategy
+
+### 5.1 Sample Dataset Creation
+
+**Week 1 Task**: Create realistic sample data
+
+**Product Data Sources**:
+1. Use public datasets (Kaggle e-commerce datasets)
+2. Scrape product info from open-source catalogs
+3. Generate synthetic data with GPT-4
+
+**Recommended Approach**:
+```python
+# Generate 200 products across categories
+categories = {
+    "Electronics": 80 products,
+    "Home & Garden": 60 products,
+    "Fashion": 60 products
+}
+
+# For each product generate:
+- Detailed description (200-500 words)
+- Specifications (structured JSON)
+- 5-10 customer review summaries
+- Related products (3-5)
+```
+
+### 5.2 Knowledge Base Documents
+
+Create the following documents:
+
+1. **Return Policy** (500 words)
+2. **Shipping Information** (400 words)
+3. **Warranty Guide** (600 words)
+4. **Size Guide** (300 words per category)
+5. **FAQ Document** (30 Q&A pairs)
+
+### 5.3 Chunking Strategy
+
+```python
+# Product descriptions
+chunk_size = 300 tokens
+overlap = 50 tokens
+method = "recursive_character_split"
+
+# Knowledge base
+chunk_size = 500 tokens
+overlap = 100 tokens
+method = "semantic_chunking"  # Split on topic boundaries
+```
+
+---
+
+## 6. Evaluation Framework
+
+### 6.1 Metrics
+
+**Accuracy Metrics**:
+- Factual accuracy: % of responses with correct product info
+- Retrieval precision: Relevant docs in top-5 results
+- Intent classification accuracy
+
+**Performance Metrics**:
+- Response latency (p50, p95, p99)
+- Tokens per response
+- Cost per conversation
+
+**User Experience Metrics**:
+- Thumbs up/down ratio
+- Conversation completion rate
+- Escalation rate
+
+### 6.2 Test Dataset
+
+Create 50 test queries covering:
+- 15 product search queries
+- 10 specification questions
+- 10 policy questions
+- 10 comparison queries
+- 5 edge cases (out of stock, unclear intent)
+
+**Ground Truth**:
+- Expected product IDs to be retrieved
+- Expected facts in response
+- Acceptable response templates
+
+### 6.3 Evaluation Pipeline
+
+```python
+def evaluate_response(query, response, ground_truth):
+    scores = {
+        "retrieval_precision": check_retrieved_docs(response.sources, ground_truth.expected_docs),
+        "factual_accuracy": verify_facts(response.text, ground_truth.facts),
+        "hallucination_rate": detect_hallucinations(response.text, context),
+        "response_time": response.latency_ms
+    }
+    return scores
+```
+
+---
+
+## 7. Project Roadmap
+
+### Week 1: Foundation & Data Preparation
+**Milestone**: Data ready, infrastructure deployed
+
+- [ ] Set up Azure resource group and services
+- [ ] Deploy Milvus on Azure Container Instances
+- [ ] Create CosmosDB database schema
+- [ ] Generate/collect 200 product dataset
+- [ ] Write knowledge base documents (policies, FAQ)
+- [ ] Set up Azure OpenAI service
+- [ ] Initialize Git repository and project structure
+- [ ] Create FastAPI project skeleton
+- [ ] Create React app with basic UI
+
+**Deliverables**:
+- Azure infrastructure provisioned
+- 200 products in CosmosDB
+- 5 knowledge base documents
+- Project repositories initialized
+
+---
+
+### Week 2: Core RAG Pipeline
+**Milestone**: Basic question-answering working
+
+- [ ] Implement embedding service (text-embedding-3-small)
+- [ ] Create Milvus collections and indexes
+- [ ] Chunk and embed product descriptions
+- [ ] Chunk and embed knowledge base
+- [ ] Build retrieval service (vector search)
+- [ ] Implement LLM service (Azure OpenAI integration)
+- [ ] Create prompt templates
+- [ ] Build chat API endpoint
+- [ ] Test basic Q&A flow (no UI yet, use Postman)
+
+**Deliverables**:
+- Working RAG pipeline via API
+- 50+ test queries with responses
+- Initial prompt engineering
+
+---
+
+### Week 3: Intent & Context Management
+**Milestone**: Multi-turn conversations working
+
+- [ ] Implement intent classifier
+- [ ] Build context manager (session management)
+- [ ] Add conversation history storage
+- [ ] Implement hybrid search (Milvus + Azure AI Search)
+- [ ] Add metadata filtering
+- [ ] Create product comparison logic
+- [ ] Build structured output parser
+- [ ] Frontend: Chat interface component
+- [ ] Frontend: Product card display
+- [ ] Connect frontend to backend
+
+**Deliverables**:
+- Multi-turn conversations
+- Context-aware responses
+- Working web interface
+
+---
+
+### Week 4: Model Comparison & Optimization
+
+# Current Implementation (GPT-4.1-mini)
+- Production-ready
+- $10.20/month for 100 requests/day
+- Handles all query types
+
+### Future Optimization (Concept Demo)
+Demonstrated with Gemma 2B-it running locally:
+- 30% of queries are simple (greetings, basic policy questions)
+- Could be handled by smaller local model
+- Would reduce API costs by 30%
+
+For production scale (>30,000 requests/day), hosting Gemma 7B
+becomes cost-effective at $379/month vs $360/month for GPT-4.1-mini.
+
+
+**Breakeven analysis included in documentation/cost_analysis.md**
+
+GPT-4.1 Mini Global:
+Pricing (as of Nov 2025):
+
+Input: $0.40 per 1M tokens
+Output: $1.4 per 1M tokens
+
+Your Usage (100 requests/day):
+
+Assumptions per request:
+- Input: ~1,500 tokens (query + context + history)
+- Output: ~300 tokens (response)
+
+Daily cost:
+- Input: 100 × 1,500 tokens = 150,000 tokens
+  → $0.40 × 0.15 = $0.06/day
+- Output: 100 × 300 tokens = 30,000 tokens
+  → $1.4 × 0.03 = $0.42/day
+
+Total month cost GPT-4-mini:
+ ~$0.48/day = $14.20/month
+
+
+GPT-4.1 Nano Global:
+Pricing (as of Nov 2025):
+
+Input: $0.10 per 1M tokens
+Output: $0.40 per 1M tokens
+
+Your Usage (100 requests/day):
+
+Assumptions per request:
+- Input: ~1,500 tokens (query + context + history)
+- Output: ~300 tokens (response)
+
+Daily cost:
+- Input: 100 × 1,500 tokens = 150,000 tokens
+  → $0.1 × 0.15 = $0.015/day
+- Output: 100 × 300 tokens = 30,000 tokens
+  → $0.4 × 0.03 = $0.12/day
+
+Total Monthly cost for GPt-4.1 nano: 
+~$0.135/day = $4.20/month
+
+
+
+
+
+
+
+"""
+
+### Week 5: Evaluation & Analytics
+**Milestone**: Metrics dashboard, test coverage
+
+- [ ] Create 50-query test dataset with ground truth
+- [ ] Implement automated evaluation pipeline
+- [ ] Build metrics calculation (accuracy, precision)
+- [ ] Create analytics dashboard (FastAPI + React)
+- [ ] Add feedback collection (thumbs up/down)
+- [ ] Implement logging (Azure Application Insights)
+- [ ] Run full evaluation suite
+- [ ] Generate evaluation report
+- [ ] Fix top 5 issues found in evaluation
+
+**Deliverables**:
+- Automated evaluation pipeline
+- Metrics dashboard
+- Evaluation report with scores
+
+---
+
+### Week 6: Polish & Deployment
+**Milestone**: Production-ready, documented, deployed
+
+- [ ] Improve UI/UX (responsive design, animations)
+- [ ] Add error handling and retry logic
+- [ ] Implement rate limiting
+- [ ] Security review (API keys, CORS, input validation)
+- [ ] Write comprehensive README
+- [ ] Create architecture diagrams
+- [ ] Record demo video
+- [ ] Deploy to Azure App Service
+- [ ] Set up CI/CD pipeline (GitHub Actions)
+- [ ] Write blog post about the project
+
+**Deliverables**:
+- Live demo URL
+- GitHub repository with documentation
+- Demo video
+- Blog post/case study
+
+---
+
+## 8. Technology Stack Details
+
+### 8.1 Frontend
+- **Framework**: React 18+ with TypeScript
+- **Styling**: TailwindCSS
+- **State**: Zustand or React Context
+- **HTTP Client**: Axios
+- **Markdown**: react-markdown
+- **Icons**: Lucide React
+
+### 8.2 Backend
+- **Framework**: FastAPI (Python 3.11+)
+- **ASGI Server**: Uvicorn
+- **ORM**: SQLAlchemy
+- **Validation**: Pydantic v2
+- **Async**: httpx for async HTTP calls
+
+### 8.3 AI/ML
+- **Embeddings**: OpenAI text-embedding-3-small (1536 dims)
+- **LLM Primary**: Azure OpenAI GPT-4o-mini
+- **LLM Secondary**: Gemma 2B via HuggingFace Transformers
+- **Vector DB**: Milvus 2.3+
+- **Search**: Azure AI Search
+
+### 8.4 Data & Storage
+- **Database**: Cosmos DB Core (SQL API)
+- **Cache**: Redis (Azure Cache for Redis)
+- **Object Storage**: Azure Blob Storage
+- **Secrets**: Azure Key Vault
+
+### 8.5 Infrastructure
+- **Hosting**: Azure App Service (Frontend + Backend)
+- **Containers**: Azure Container Instances (Milvus, Gemma)
+- **Monitoring**: Azure Application Insights
+- **CI/CD**: GitHub Actions
+
+### 8.6 Development Tools
+- **API Testing**: Postman / Thunder Client
+- **Code Quality**: Black, Flake8, Pylint
+- **Git**: GitHub with branch protection
+- **Documentation**: Swagger (auto-generated by FastAPI)
+
+---
+
+## 9. Cost Estimation
+
+**Azure Services** (Monthly, assuming 1000 test queries):
+- Azure OpenAI (GPT-4o-mini): $5-10
+- Azure OpenAI (Embeddings): $2-3
+- Cosmos DB Core (SQL API) Basic tier: $24/month minimun
+- Redis Basic tier: $15
+- Blob Storage: $1
+- Container Instances (Milvus): $20
+- App Service Basic tier: $15
+- **Total**: ~$90-100/month
+
+**Development Cost Savings**:
+- Use free tiers where available
+- Deallocate resources when not testing
+- Implement aggressive caching
+
+---
+
+## 10. Risk Mitigation
+
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| LLM hallucinations | High | Strict prompt engineering, fact verification, confidence scoring |
+| Slow response times | Medium | Implement caching, streaming, optimize retrieval |
+| High API costs | Medium | Use GPT-4o-mini, cache responses, implement rate limiting |
+| Milvus deployment issues | Medium | Use managed Zilliz Cloud alternative, or Azure AI Search only |
+| Scope creep | High | Stick to roadmap, document "nice-to-haves" for future |
+| Data quality issues | High | Manual review of dataset, create validation scripts |
+
+---
+
+## 11. Success Criteria
+
+**Technical**:
+- [ ] 95%+ factual accuracy on test dataset
+- [ ] <3s response time for 95% of queries
+- [ ] Successfully handle all 7 key scenarios
+- [ ] Both Azure OpenAI and Gemma working
+
+**Portfolio**:
+- [ ] Live demo accessible via public URL
+- [ ] GitHub repo with >80% code documentation
+- [ ] Professional README with architecture diagrams
+- [ ] Demo video showing all key features
+- [ ] Blog post explaining technical decisions
+
+**Learning**:
+- [ ] Understand RAG pipeline end-to-end
+- [ ] Experience with vector databases
+- [ ] Model comparison and evaluation
+- [ ] Azure cloud deployment
+
+---
+
+## 12. Next Steps
+
+1. **Review this document** and adjust based on your preferences
+2. **Set up Azure account** and provision initial resources
+3. **Start Week 1 tasks** - focus on data preparation
+4. **Create daily progress log** - track blockers and learnings
+5. **Join communities** - FastAPI Discord, Milvus Slack for help
+
+## 13. References & Resources
+
+- FastAPI Documentation: https://fastapi.tiangolo.com
+- Milvus Documentation: https://milvus.io/docs
+- Azure OpenAI Documentation: https://learn.microsoft.com/azure/ai-services/openai
+- LangChain RAG Tutorial: https://python.langchain.com/docs/use_cases/question_answering
+- Prompt Engineering Guide: https://www.promptingguide.ai
+
+---
+
+**Document Version**: 1.0  
+**Last Updated**: October 14, 2025  
+**Author**: AI Portfolio Project  
+**Status**: Ready for Implementation
