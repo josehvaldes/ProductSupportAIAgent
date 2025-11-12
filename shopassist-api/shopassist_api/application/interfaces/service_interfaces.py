@@ -144,7 +144,9 @@ class VectorServiceInterface(ABC):
         pass
 
     def search_categories(
-        self,query_embedding: List[float],
+        self,
+        query_embedding: List[float],
+        field: str,
         top_k: int = 5) -> List[Dict]:
         """Search categories by vector similarity."""
         pass

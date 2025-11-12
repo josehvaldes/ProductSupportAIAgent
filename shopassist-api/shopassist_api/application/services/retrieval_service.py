@@ -2,6 +2,8 @@ from typing import List, Dict, Optional
 from shopassist_api.application.interfaces.service_interfaces import EmbeddingServiceInterface, RepositoryServiceInterface, VectorServiceInterface
 from shopassist_api.logging_config import get_logger
 import traceback
+from numpy import dot
+from numpy.linalg import norm
 
 logger = get_logger(__name__)
 
@@ -18,6 +20,9 @@ class RetrievalService:
         self.cosmos = repository_service
         self.category_embedder = category_embedder_service
 
+    def cosine_sim(self, a, b):
+        return dot(a, b) / (norm(a) * norm(b))
+
     async def retrieve_top_categories(self, query:str, top_k=5) -> List[Dict]:
         """Retrieve product categories"""
         try:
@@ -25,11 +30,50 @@ class RetrievalService:
             query_embedding = self.category_embedder.generate_embedding(query)
             categories = self.milvus.search_categories(
                 query_embedding=query_embedding,
+                field="embedding",
                 top_k=top_k) # Get top category
             
-            logger.info(f"Retrieved categories: {len(categories)}")
+            categories_sim = []
+            for cat in categories:
+                sim_short = self.cosine_sim(query_embedding, cat['embedding'])
+                sim_full = self.cosine_sim(query_embedding, cat['full_embedding'])
+                val = {
+                    "id": cat['id'],
+                    "name": cat['name'],
+                    "full_name": cat['full_name'],
+                    "distance": cat['distance'],
+                    "sim_short": sim_short,
+                    "sim_full": sim_full,
+                    "score": 0.7*sim_short + 0.3*sim_full # Weighted score
+                }
+                categories_sim.append(val)
+
+
+            categories_with_full = self.milvus.search_categories(
+                query_embedding=query_embedding,
+                field="full_embedding",
+                top_k=top_k) # Get top category            
+            
+            categories_sim_full = []
+            for cat in categories_with_full:
+                sim_short = self.cosine_sim(query_embedding, cat['embedding'])
+                sim_full = self.cosine_sim(query_embedding, cat['full_embedding'])
+                val = {
+                    "id": cat['id'],
+                    "name": cat['name'],
+                    "full_name": cat['full_name'],
+                    "distance": cat['distance'],
+                    "sim_short": sim_short,
+                    "sim_full": sim_full,
+                    "score": 0.7*sim_short + 0.3*sim_full # Weighted score
+                }
+                categories_sim_full.append(val)
+
+            #merge and deduplicate categories
+            categories = self.merge_deduplicate_categories(categories_sim, categories_sim_full)
+
             if categories:
-                return categories
+                return categories[:top_k]
             else:
                 return {}
             
@@ -37,6 +81,22 @@ class RetrievalService:
             logger.error(f"Error retrieving categories: {e}")
             traceback.print_exc()
             return ""
+
+    def merge_deduplicate_categories(self, categories1: List[Dict], categories2: List[Dict]) -> List[Dict]:
+        """Merge and deduplicate categories from two lists"""
+        category_map = {}
+        for cat in categories1 + categories2:
+            cat_id = cat['id']
+            if cat_id not in category_map:
+                category_map[cat_id] = cat
+            else:
+                # Keep the one with better score
+                if cat['distance'] > category_map[cat_id]['score']:
+                    category_map[cat_id] = cat
+        #sorted by distance
+        sorted_categories = sorted(category_map.values(), key=lambda x: x['score'], reverse=True)
+        return sorted_categories
+
 
     async def retrieve_products(
             self,
@@ -58,7 +118,7 @@ class RetrievalService:
         """
         try:
             # Generate query embedding
-            logger.info(f"  Generating embedding for query: {query}")
+            logger.info(f"Generating embedding for query: {query}")
             query_embedding = self.embedder.generate_embedding(query)
             
             # Build filter expression for Milvus
@@ -67,7 +127,7 @@ class RetrievalService:
             # Search in Milvus
             results = self.milvus.search_products(
                 query_embedding=query_embedding,
-                top_k=top_k, # * 2,  # Get more to deduplicate
+                top_k=top_k,
                 filters=filter_expr
             )            
             # Deduplicate by product_id and aggregate scores

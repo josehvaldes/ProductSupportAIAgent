@@ -17,12 +17,16 @@ class QueryProcessor:
         r'cheaper than \$?(\d+)',
         r'between \$?(\d+) and \$?(\d+)',
         r'\$?(\d+) to \$?(\d+)',
-    ]
-    
-    # Policy keywords
-    POLICY_KEYWORDS = [
-        'return', 'refund', 'shipping', 'delivery',
-        'warranty', 'guarantee', 'policy', 'exchange'
+
+        r'around \$?(\d+)',
+        r'about \$?(\d+)',
+        r'max \$?(\d+)',
+        r'maximum \$?(\d+)',
+        r'up to \$?(\d+)',
+        r'not more than \$?(\d+)',
+        r'budget of \$?(\d+)',
+        r'afford \$?(\d+)',
+        r'within \$?(\d+)',
     ]
     
     def process_query(self, query: str) -> Tuple[str, Dict]:

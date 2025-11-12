@@ -18,6 +18,17 @@ from shopassist_api.infrastructure.services.milvus_service import MilvusService
 from shopassist_api.infrastructure.services.transformers_embedding_service import TransformersEmbeddingService
 from shopassist_api.infrastructure.services.cosmos_product_service import CosmosProductService
 
+from shopassist_api.logging_config import setup_logging
+from shopassist_api.logging_config import get_logger
+
+setup_logging(
+        log_level=settings.log_level,
+        log_file=settings.log_file,
+        log_to_console=settings.log_to_console
+    )
+logger = get_logger(__name__)
+
+
 # Instantiate services
 vector_service = MilvusService()
 embedder_service = TransformersEmbeddingService(model_name=settings.transformers_embedding_model)
@@ -34,61 +45,40 @@ retrieval_service = RetrievalService(
 )
 
 async def evaluate_retrieval():
-    query = "printer canon inkjet"
-    print(f"🧪 Evaluating Top Category Retrieval for query: '{query}'\n")
-    top_categories = await retrieval_service.retrieve_top_categories(query, top_k=2)
-    print(f"Top Categories Retrieved:")
-    for cat in top_categories:
-        print(f"  Category: {cat['name']}, Score: {cat['distance']}, full_name: {cat['full_name']}")
 
-    query = "smartphone with good camera"
-    print(f"\n🧪 Evaluating Top Category Retrieval for query: '{query}")
-    top_categories = await retrieval_service.retrieve_top_categories(query, top_k=2)
-    print(f"Top Categories Retrieved:")
-    for cat in top_categories:
-        print(f"  Category: {cat['name']}, Score: {cat['distance']}, full_name: {cat['full_name']}")
+    queries = [
+        "printer canon inkjet",
+        "smartphone with good camera",
+        "cellphones with good camera",
+        "I need an smarttv with at least 32 inches screen",
+        "I need an smart tv with at least 32 inches screen",
+        "I need an smart television with at least 32 inches screen",
+        "Find me a smartphone with a good camera and long battery life."
+    ]
 
-
-    query = "cellphones with good camera"
-    print(f"\n🧪 Evaluating Top Category Retrieval for query: '{query}")
-    top_categories = await retrieval_service.retrieve_top_categories(query, top_k=2)
-    print(f"Top Categories Retrieved:")
-    for cat in top_categories:
-        print(f"  Category: {cat['name']}, Score: {cat['distance']}, full_name: {cat['full_name']}")
-
-    #query with smarttv
-    query = "I need an smarttv with at least 32 inches screen"
-    print(f"\n🧪 Evaluating Top Category Retrieval for query: '{query}")
-    top_categories = await retrieval_service.retrieve_top_categories(query, top_k=3)
-    print(f"Top Categories Retrieved:")
-    for cat in top_categories:
-        print(f"  Category: {cat['name']}, Score: {cat['distance']}, full_name: {cat['full_name']}")
-
-    #query with smart tv
-    query = "I need an smart tv with at least 32 inches screen"
-    print(f"\n🧪 Evaluating Top Category Retrieval for query: '{query}")
-    top_categories = await retrieval_service.retrieve_top_categories(query, top_k=3)
-    print(f"Top Categories Retrieved:")
-    for cat in top_categories:
-        print(f"  Category: {cat['name']}, Score: {cat['distance']}, full_name: {cat['full_name']}")
-
-    #query with smart television
-    query = "I need an smart television with at least 32 inches screen"
-    print(f"\n🧪 Evaluating Top Category Retrieval for query: '{query}")
-    top_categories = await retrieval_service.retrieve_top_categories(query, top_k=3)
-    print(f"Top Categories Retrieved:")
-    for cat in top_categories:
-        print(f"  Category: {cat['name']}, Score: {cat['distance']}, full_name: {cat['full_name']}")
+    for query in queries:
+        print(f"\n🧪 Evaluating Top Category Retrieval for query: '{query}'")
+        top_categories = await retrieval_service.retrieve_top_categories(query, top_k=3)
+        print(f"Top Categories Retrieved: [{len(top_categories)}]")
+        for cat in top_categories:
+            print(f"  Score: {cat['score']}, Category: {cat['name']} , full_name: {cat['full_name']}")
 
 
+async def evaluate_ambiguous_queries():
 
-    query = "Find me a smartphone with a good camera and long battery life."
-    print(f"\n🧪 Evaluating Top Category Retrieval for query: '{query}")
-    top_categories = await retrieval_service.retrieve_top_categories(query, top_k=3)
-    print(f"Top Categories Retrieved:")
-    for cat in top_categories:
-        print(f"  Category: {cat['name']}, Score: {cat['distance']}, full_name: {cat['full_name']}")
+    queries = [
+        "I need a cellphones with good camera",
+        "I need to edit videos with a smartphone, which options do I have?",
+        "looking for a selfie stick for my iPhone",
+        "looking for a selfie stick and a backup battery pack for my iPhone",
+    ]
 
-    
+    for query in queries:
+        print(f"\n🧪 Evaluating Top Category Retrieval for query: '{query}")
+        top_categories = await retrieval_service.retrieve_top_categories(query, top_k=3)
+        print(f"Top Categories Retrieved: [{len(top_categories)}]")
+        for cat in top_categories:
+            print(f"  Score: {cat['score']}, Category: {cat['name']} , full_name: {cat['full_name']}")
+
 if __name__ == "__main__":
-    asyncio.run(evaluate_retrieval())
+    asyncio.run(evaluate_ambiguous_queries())
