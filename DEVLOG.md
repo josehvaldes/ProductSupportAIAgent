@@ -1156,7 +1156,7 @@ Intent classification, context management, frontend integration
 
 ---
 
-### Day 16 - Thursday, Nov 1, 2025
+### Day 16 - Tuesday, Nov 11, 2025
 **Today's Focus:** Context manager and session storage
 
 **Completed:**
@@ -1166,7 +1166,7 @@ Intent classification, context management, frontend integration
 - [X] Add Redis Caching Layer 
 - [X] Update RAG Service to Use Context 
 - [X] Update API Endpoints for sessions management 
-- [] Test Multi-Turn Conversations 
+- [X] Test Multi-Turn Conversations 
 - [X] Documentation updated
 
 
@@ -1185,20 +1185,24 @@ Intent classification, context management, frontend integration
 - How to serialize and convert pydantic object
 
 **Next Steps:**
-- [ ] 
+- [ ] Advanced Query Processing & Retrieval Polish
 - [ ] 
 
 **Time Invested:** 4 hours
 
 ---
 
-### Day 17 - Wednesday, Oct 30, 2025
+### Day 17 - Wednesday, Nov 12, 2025
 **Today's Focus:** Hybrid search implementation
 
 **Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+- [ ] Query Preprocessing Enhancement 
+- [ ] Multi-Strategy Retrieval Router (1.5 hours)
+- [ ] Advanced Milvus Filtering (1 hour)
+- [ ] Result Post-Processing & Ranking (1 hour)
+- [ ] Streaming Response Implementation (1.5 hours)
+- [ ] Add Query Suggestions (1 hour)
+- [ ] Testing & Documentation (1.5 hours)
 
 **Technical Decisions:**
 - 

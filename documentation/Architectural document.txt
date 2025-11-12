@@ -503,8 +503,7 @@ def evaluate_response(query, response, ground_truth):
 - [ ] Implement intent classifier
 - [ ] Build context manager (session management)
 - [ ] Add conversation history storage
-- [ ] Implement hybrid search (Milvus + Azure AI Search)
-- [ ] Add metadata filtering
+- [ ] Polish Retrieval & Query Processing (NEW FOCUS)
 - [ ] Create product comparison logic
 - [ ] Build structured output parser
 - [ ] Frontend: Chat interface component
@@ -581,35 +580,15 @@ Total Monthly cost for GPt-4.1 nano:
 ~$0.135/day = $4.20/month
 
 
-
-
-
-
+- [ ] Response quality evaluation framework
+- [ ] A/B testing different prompts
+- [ ] Performance benchmarking
+- [ ] Create metrics dashboard
 
 """
 
-### Week 5: Evaluation & Analytics
-**Milestone**: Metrics dashboard, test coverage
-
-- [ ] Create 50-query test dataset with ground truth
-- [ ] Implement automated evaluation pipeline
-- [ ] Build metrics calculation (accuracy, precision)
-- [ ] Create analytics dashboard (FastAPI + React)
-- [ ] Add feedback collection (thumbs up/down)
-- [ ] Implement logging (Azure Application Insights)
-- [ ] Run full evaluation suite
-- [ ] Generate evaluation report
-- [ ] Fix top 5 issues found in evaluation
-
-**Deliverables**:
-- Automated evaluation pipeline
-- Metrics dashboard
-- Evaluation report with scores
-
----
-
-### Week 6: Polish & Deployment
-**Milestone**: Production-ready, documented, deployed
+### Week 5: Polish & Deployment
+**Milestone**: documented, deployed
 
 - [ ] Improve UI/UX (responsive design, animations)
 - [ ] Add error handling and retry logic
@@ -618,17 +597,26 @@ Total Monthly cost for GPt-4.1 nano:
 - [ ] Write comprehensive README
 - [ ] Create architecture diagrams
 - [ ] Record demo video
+
+**Deliverables**:
+- GitHub repository with documentation
+- Blog post/case study
+
+---
+
+### Week 6 (Dec 2-8)
+**Milstone**: Deployment + V2 Planning
+
 - [ ] Deploy to Azure App Service
 - [ ] Set up CI/CD pipeline (GitHub Actions)
 - [ ] Write blog post about the project
 
-**Deliverables**:
-- Live demo URL
-- GitHub repository with documentation
-- Demo video
-- Blog post/case study
+- [ ] V2 Architecture Document 📋
+- [ ] Azure AI Projects migration plan
+- [ ] LangGraph/LangChain evaluation
+- [ ] Feature roadmap
+- [ ] Cost projections
 
----
 
 ## 8. Technology Stack Details
 
