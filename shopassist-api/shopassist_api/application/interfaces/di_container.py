@@ -14,6 +14,7 @@ from shopassist_api.infrastructure.services.transformers_embedding_service impor
 from shopassist_api.application.interfaces.service_interfaces import CacheServiceInterface, LLMServiceInterface, RepositoryServiceInterface, VectorServiceInterface
 from shopassist_api.application.interfaces.service_interfaces import EmbeddingServiceInterface
 from shopassist_api.application.services.retrieval_service import RetrievalService
+from shopassist_api.application.services.comparison_service import ComparisonService
 from shopassist_api.application.services.rag_service import RAGService
 from shopassist_api.application.settings.config import settings
 
@@ -136,3 +137,9 @@ def get_session_manager():
     repository = get_repository_service()
     cache = get_cache_service()
     return SessionManager( repository_service=repository, cache_service=cache)
+
+def get_comparison_service():
+    """Dependency injection function for comparison service."""
+    repository = get_repository_service()
+    llm_service = get_llm_service()
+    return ComparisonService(repository_service=repository, llm_service=llm_service)

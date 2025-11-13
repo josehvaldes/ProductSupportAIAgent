@@ -1,7 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Optional
+from pydantic import BaseModel
 from shopassist_api.application.interfaces.service_interfaces import RepositoryServiceInterface
-from shopassist_api.application.interfaces.di_container import get_repository_service
+from shopassist_api.application.interfaces.di_container import get_comparison_service, get_repository_service
+from shopassist_api.application.services.comparison_service import ComparisonService
 from shopassist_api.domain.models.product import Product
 from shopassist_api.logging_config import get_logger
 
@@ -16,7 +18,15 @@ router = APIRouter()
 #     description: Optional[str] = None
 #     category: Optional[str] = None
 
+class ComparisonRequest(BaseModel):
+    """Request model for product comparison."""
+    product_ids: List[str]
+    comparison_aspects: List[str]  # e.g., ["price", "features", "ratings"]
 
+class ComparisonResponse(BaseModel):
+    """Response model for product comparison."""
+    products: List[Product]
+    summary: str
 
 @router.get("/{product_id}", response_model=Product)
 async def get_product(
@@ -101,3 +111,29 @@ async def search_products_general(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error in product search: {str(e)}")
+    
+@router.post("/compare", response_model=ComparisonResponse)
+async def compare_products(
+    request: ComparisonRequest,
+    comparison_service: ComparisonService = Depends(get_comparison_service)
+):
+    """
+    Compare multiple products based on specified aspects.
+    """
+    try:
+        product_ids = request.product_ids
+        comparison_aspects = request.comparison_aspects
+        logger.info(f"Comparing products with IDs: {product_ids} on aspects: {comparison_aspects}")
+        comparison_result = await comparison_service.get_products_for_comparison(
+            product_ids=product_ids,
+            comparison_aspects=comparison_aspects
+        )
+        return ComparisonResponse(
+            products=comparison_result["products"],
+            summary=comparison_result["summary"],
+        )       
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error comparing products: {str(e)}")

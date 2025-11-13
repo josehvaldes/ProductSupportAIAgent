@@ -1193,25 +1193,30 @@ Intent classification, context management, frontend integration
 ---
 
 ### Day 17 - Wednesday, Nov 12, 2025
-**Today's Focus:** Hybrid search implementation
+**Today's Focus:** Advanced Query Processing & Retrieval Polish
 
 **Completed:**
-- [ ] Query Preprocessing Enhancement 
-- [ ] Multi-Strategy Retrieval Router (1.5 hours)
-- [ ] Advanced Milvus Filtering (1 hour)
-- [ ] Result Post-Processing & Ranking (1 hour)
-- [ ] Streaming Response Implementation (1.5 hours)
-- [ ] Add Query Suggestions (1 hour)
-- [ ] Testing & Documentation (1.5 hours)
+- [X] Query Preprocessing Enhancement 
+	- Price filtering
+- [X] Multi-Strategy Retrieval Router (1.5 hours)
+- [X] Advanced Milvus Filtering (1 hour)
+     Category filtering
+- [X] Result Post-Processing & Ranking (1 hour)
+- [X] Streaming Response Implementation (1.5 hours)
+- [X] Add Query Suggestions (1 hour)
+- [X] Testing & Documentation (1.5 hours)
 
 **Technical Decisions:**
-- 
+- Add a full_embedding field in the Categories collection 
+- Implement a cosine similatiry score that combines category and full_category embeddings
+- Add more complex queries to the test set
 
 **Challenges & Solutions:**
-- 
+- Review several alternatives of price and category filtering. Choose the RegExp for prices and cosine similarity for categories.
+- Exclude other product fields from filtering for simplicity purposes
 
 **Learnings:**
-- 
+- How to make cosine similatiry with different vector and weight them into a single score
 
 **Next Steps:**
 - [ ] 
@@ -1221,32 +1226,37 @@ Intent classification, context management, frontend integration
 
 ---
 
-### Day 18 - Thursday, Oct 31, 2025
+### Day 18 - Thursday, Nov 13, 2025
 **Today's Focus:** Product comparison logic
 
 **Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+- [X] Design Comparison Data Model
+- [X] Build Comparison Retrieval Logic
+- [X] Implement Comparison Table Generation
+- [X] Generate natural language comparison and recommendation
+- [X] Implement Comparison API Endpoint
+- [X] Integrate Comparison into RAG Flow
+- [X] Test Comparison End-to-End
+
 
 **Technical Decisions:**
-- 
+- Simplify comparison logic to retrieve products, and send a query to the LLM
 
 **Challenges & Solutions:**
 - 
 
 **Learnings:**
-- 
+- reuse current code to simply process
 
 **Next Steps:**
 - [ ] 
 - [ ] 
 
-**Time Invested:** ___ hours
+**Time Invested:** 2 hours
 
 ---
 
-### Day 19 - Friday, Nov 1, 2025
+### Day 19 - Friday, Nov 14, 2025
 **Today's Focus:** Chat interface component (Mantine)
 
 **Completed:**

@@ -14,6 +14,10 @@
 - Custom agents for specialized tasks
 - Better observability with LangSmith
 
+## Option C: Milvus + Neoj4 graph database
+- Review Neo4j capabilities and feasibility
+- create a POC for RAG retrieval and Neo4j refinement and extension
+
 ## Comparison Matrix
 | Feature | Azure AI | LangGraph |
 |---------|----------|-----------|

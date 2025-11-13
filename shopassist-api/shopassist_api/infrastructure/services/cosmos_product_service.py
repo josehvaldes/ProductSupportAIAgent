@@ -67,6 +67,28 @@ class CosmosProductService(RepositoryServiceInterface):
             traceback.print_exc()
             return None
 
+    async def get_products_by_ids(self, product_ids: List[str]) -> list[dict[str, any]]:
+        """Retrieve multiple products by their IDs from CosmosDB."""
+        if not self.client or not self.database_name:
+            return []
+
+        try:
+            # Get the product container
+            container = self.database.get_container_client(self.product_container)
+
+            # Query for products by IDs
+            ids_string = ",".join([f"'{pid}'" for pid in product_ids])
+            query = f"SELECT * FROM c WHERE c.id IN ({ids_string})"
+            items = list(container.query_items(
+                query=query,
+                enable_cross_partition_query=True
+                ))
+            return items
+        except Exception as e:
+            logger.error(f"Error retrieving products by IDs: {e}")
+            traceback.print_exc()
+            return []
+
     async def search_products_by_category(self, category: str)-> list[dict[str, any]]:
         """Search products by category from CosmosDB."""
         if not self.client or not self.database:

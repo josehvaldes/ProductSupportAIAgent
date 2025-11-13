@@ -15,6 +15,11 @@ class RepositoryServiceInterface(ABC):
     async def get_product_by_id(self, product_id: str) -> dict[str, any]:
         """Retrieve a product by its ID."""
         pass
+
+    @abstractmethod
+    async def get_products_by_ids(self, product_ids: List[str]) -> List[dict[str, any]]:
+        """Retrieve multiple products by their IDs."""
+        pass
     
     @abstractmethod
     async def search_products_by_category(self, category: str) -> List[dict[str, any]]:
