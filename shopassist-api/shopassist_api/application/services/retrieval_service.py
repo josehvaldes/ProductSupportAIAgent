@@ -294,12 +294,10 @@ class RetrievalService:
         try:
             vector_healthy = await self.milvus.health_check()
             embedding_healthy = await self.embedder.health_check()
-            repository_healthy = await self.cosmos.health_check()
             
             return {
                 "vector_service": "healthy" if vector_healthy else "unhealthy",
                 "embedding_service": "healthy" if embedding_healthy else "unhealthy",
-                "repository_service": "healthy" if repository_healthy else "unhealthy"
             }
         except Exception as e:
             return {

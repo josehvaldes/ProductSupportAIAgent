@@ -35,28 +35,29 @@ class ComparisonService:
             products = await self.repository.get_products_by_ids(product_ids)
 
             if not products or len(products) < 2:
+                logger.info(f"Not enough products found for comparison: found {len(products)} products.")
                 return {
                     "products": products,
                     "summary": "Not enough products found for comparison.",
                 }
 
             #compare categories
-            categories = {product.category for product in products}
+            categories = {product["category"] for product in products}
             if len(categories) > 1:
+                logger.info(f"Products belong to different categories: {categories}. Cannot compare.")
                 return {
                     "products": products,
                     "summary": "Products belong to different categories and cannot be compared.",
                 }
 
             # Build context for LLM
-            context = self.context_builder.build_product_context(products, comparison_aspects)
-
+            
+            context = self.context_builder.build_product_context(products)
             comparison_query = f"Compare the following products based on: {', '.join(comparison_aspects)}."
 
             messages = PromptTemplates.product_comparison_prompt(
                     comparison_query, context, "")
             
-            logger.info(f"Generating LLM response for comparison of products: {product_ids}")
             llm_response = await self.llm.generate_response(messages)
 
             return {
@@ -67,4 +68,5 @@ class ComparisonService:
         except Exception as e:
             logger.error(f"Error in get_products_for_comparison: {str(e)}")
             logger.debug(traceback.format_exc())
+            traceback.print_exc()
             raise e

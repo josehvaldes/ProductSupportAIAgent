@@ -1,7 +1,6 @@
-import json
 import traceback
 from typing import Dict, List, Optional
-from shopassist_api.application.prompts.templates import PromptTemplates, TestPromptTemplates
+from shopassist_api.application.prompts.templates import PromptTemplates
 from shopassist_api.application.services.context_builder import ContextBuilder
 from shopassist_api.application.services.session_manager import SessionManager
 from shopassist_api.application.services.formaters import FormatterUtils
