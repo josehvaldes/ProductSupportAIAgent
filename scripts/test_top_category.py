@@ -80,5 +80,30 @@ async def evaluate_ambiguous_queries():
         for cat in top_categories:
             print(f"  Score: {cat['score']}, Category: {cat['name']} , full_name: {cat['full_name']}")
 
+async def one_word_query_test():
+
+    queries = [
+        "headphones",
+        "smartphone",
+        "printer",
+        "television",
+        "laptop",
+        "camera",
+        "tablet",
+        "lightstick",
+        "monitor",
+        "router",
+        "selfie stick"
+    ]
+
+    for query in queries:
+        print(f"\n🧪 Evaluating Top Category Retrieval for query:: '{query}'")
+        top_categories = await retrieval_service.retrieve_top_categories(query, top_k=3)
+        print(f"Top Categories Retrieved: [{len(top_categories)}]")
+        for cat in top_categories:
+            print(f"  Score: {cat['score']}, Category: {cat['name']} , full_name: {cat['full_name']}")
+
+
 if __name__ == "__main__":
-    asyncio.run(evaluate_ambiguous_queries())
+    #asyncio.run(evaluate_ambiguous_queries())
+    asyncio.run(one_word_query_test())

@@ -1261,12 +1261,11 @@ Intent classification, context management, frontend integration
 
 **Completed:**
 - [X] Clean up ChatContainerExt component
-- [ ] Improve message display 
-- [ ] Improve message display
-- [ ] Add error handling UI 
-- [ ] Add session management UI 
-- [ ] Users can start fresh conversations
-- [ ] Final tests and polish UI
+- [X] Improve message display 
+- [X] Add error handling UI 
+- [X] Users can start fresh conversations
+- [] Add session management UI 
+- [] Final tests and polish UI
 
 
 **Technical Decisions:**

@@ -18,9 +18,9 @@ class RAGService:
     Orchestrates the entire RAG pipeline
     """
     
-    TOP_K_PRODUCTS = 2
-    TOP_K_KB_ARTICLES = 2
-    TOP_K_CATEGORIES = 2
+    TOP_K_PRODUCTS = 3
+    TOP_K_KB_ARTICLES = 3
+    TOP_K_CATEGORIES = 3
 
     def __init__(self,
                  llm_service: LLMServiceInterface,
@@ -54,16 +54,19 @@ class RAGService:
         if query_type == 'product_search':
 
             categories = await self.retrieval.retrieve_top_categories(query, top_k)
+            
             if categories and len(categories) > 0:
-                name = categories[0]['name']
-                logger.info(f"  Extracted category filter: {name}")
-                filters = {**filters, **{'category': name}}
+                category_names = []
+                for cat in categories:
+                    category_names.append(cat['name'])
+                    
+                filters = {**filters, **{'categories': category_names}}
 
             logger.info(f"  Final filters applied: {filters}")
             results = await self.retrieval.retrieve_products(
                 cleaned_query,
                 enriched=True,
-                top_k=RAGService.TOP_K_PRODUCTS, # reduce the number of products to retrieve
+                top_k=top_k, # reduce the number of products to retrieve
                 filters=filters
             )
             context = self.context_builder.build_product_context(results)

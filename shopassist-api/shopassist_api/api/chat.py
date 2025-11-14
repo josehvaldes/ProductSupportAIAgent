@@ -19,6 +19,7 @@ router = APIRouter()
 class ChatRequest(BaseModel):
     message: str
     session_id: Optional[str] = None
+    top_k: Optional[int] = 3
 
 class ChatResponse(BaseModel):
     session_id: str

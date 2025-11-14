@@ -1,3 +1,4 @@
+import json
 from typing import List, Dict, Optional
 from shopassist_api.application.interfaces.service_interfaces import EmbeddingServiceInterface, RepositoryServiceInterface, VectorServiceInterface
 from shopassist_api.logging_config import get_logger
@@ -44,10 +45,9 @@ class RetrievalService:
                     "distance": cat['distance'],
                     "sim_short": sim_short,
                     "sim_full": sim_full,
-                    "score": 0.7*sim_short + 0.3*sim_full # Weighted score
+                    "score": 0.7*sim_full + 0.3*sim_short # Weighted score
                 }
                 categories_sim.append(val)
-
 
             categories_with_full = self.milvus.search_categories(
                 query_embedding=query_embedding,
@@ -65,7 +65,7 @@ class RetrievalService:
                     "distance": cat['distance'],
                     "sim_short": sim_short,
                     "sim_full": sim_full,
-                    "score": 0.7*sim_short + 0.3*sim_full # Weighted score
+                    "score": 0.7*sim_full + 0.3*sim_short # Weighted score
                 }
                 categories_sim_full.append(val)
 
