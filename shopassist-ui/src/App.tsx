@@ -37,10 +37,9 @@ export default function App() {
     <AppShell
       padding="md"
       navbar={{
-        width: 200,
+        width: 250,
         breakpoint: "sm",
-        collapsed: { mobile: false },
-      }}
+      }}    
     >
       <AppShell.Navbar p="md" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <Notifications position="top-right" />

@@ -81,6 +81,7 @@ export const chatApi = {
           body: JSON.stringify({
           message,
           session_id: sessionId,
+          top_k: 3
         })
       });
 
@@ -91,7 +92,7 @@ export const chatApi = {
    */
     getChatHistory: async (sessionId: string): Promise<ChatHistoryResponse> => {
       const response = await apiRequest<ChatHistoryResponse>(
-        `/chat/history/${sessionId}`
+        `/session/history/${sessionId}`
       );
       return response;
     },

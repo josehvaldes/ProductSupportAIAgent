@@ -28,9 +28,12 @@ export function ChatContainerExt() {
     }
     initialized.current = true;
 
-    // Get session from localStorage or create new
-    let storedSessionId = localStorage.getItem('chat_session_id');
+    // For testing, use fixed session ID
+    let storedSessionId = "58ca3bbb-1fbc-4cfa" 
+    setSessionId(storedSessionId );   
 
+    // Get session from localStorage or create new
+    // localStorage.getItem('chat_session_id');
     if (!storedSessionId) {
       storedSessionId = uuidv4();
       localStorage.setItem('chat_session_id', storedSessionId);
@@ -80,7 +83,7 @@ export function ChatContainerExt() {
         sources: response.sources,  // ← Store sources here
         query_type: response.query_type,
       };
-
+      logger.info("Received assistant message:", assistantMessage);
       setMessages((prev) => [...prev, assistantMessage]);
 
     } catch (error: any) {
@@ -130,7 +133,12 @@ export function ChatContainerExt() {
 
 
   return (
-    <Paper shadow="sm" p="md" style={{ height: '600px', display: 'flex', flexDirection: 'column' }}>
+    <Paper shadow="sm" p="md" 
+          style={{ height: '100%', 
+              display: 'flex', 
+              flexDirection: 'column', 
+              width: '100%'
+              }}>
       <Stack style={{ flex: 1, overflow: 'hidden' }}>
         {/* ... header ... */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -165,7 +173,7 @@ export function ChatContainerExt() {
                 key={index} 
                 message={msg}
                 sources={msg.sources || []}
-                query_type={msg.query_type || 'question'}
+                query_type={msg.query_type || 'default_type'}
               />
             ))}
 

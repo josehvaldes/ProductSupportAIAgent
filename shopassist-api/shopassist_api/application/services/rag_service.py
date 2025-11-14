@@ -40,19 +40,20 @@ class RAGService:
     async def generate_dumb_answer(
         self,
         query: str,
-        session_id: Optional[str] = None
+        session_id: Optional[str] = None,
+        top_k: int = 3
     ) -> Dict:
         """Generate dump answer for testing"""
 
         # Step 1: Process query
         cleaned_query, filters = self.query_processor.process_query(query)
-        query_type = "product_search"  if session_id == '1' else 'policy_question' # Dummy query type for testing
+        query_type = "product_search"  if session_id == '58ca3bbb-1fbc-4cfa' else 'policy_question' # Dummy query type for testing
         
         logger.info(f"Query type: {query_type}, Filters: {filters}, query: {cleaned_query}")
         # Step 2: Retrieve relevant documents
         if query_type == 'product_search':
 
-            categories = await self.retrieval.retrieve_top_categories(query, 1)
+            categories = await self.retrieval.retrieve_top_categories(query, top_k)
             if categories and len(categories) > 0:
                 name = categories[0]['name']
                 logger.info(f"  Extracted category filter: {name}")
@@ -69,7 +70,7 @@ class RAGService:
         else:
             results = await self.retrieval.retrieve_knowledge_base(
                 cleaned_query,
-                top_k=3
+                top_k=top_k
             )
             context = self.context_builder.build_knowledge_base_context(results)
         
@@ -80,7 +81,7 @@ class RAGService:
         return {
                 "response": response,
                 "sources": results,
-                "query_type": query_type,
+                "query_type": "product_comparison",
                 "has_results": True,
                 "filters_applied": filters,
                 "metadata": {
