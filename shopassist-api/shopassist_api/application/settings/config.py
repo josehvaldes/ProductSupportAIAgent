@@ -74,6 +74,11 @@ class Settings(BaseSettings):
     milvus_product_collection: str = "products_collection"
     milvus_knowledge_base_collection: str = "knowledge_base_collection"
 
+    # Similarity Thresholds
+    threshold_product_similarity: float = 0.8
+    threshold_knowledge_base_similarity: float = 0.75
+    threshold_category_similarity: float = 0.8
+
     class Config:
         env_file = ".env"
         case_sensitive = False

@@ -8,6 +8,7 @@ from shopassist_api.application.services.llm_sufficiency_builder import LLMSuffi
 from shopassist_api.application.services.query_processor import QueryProcessor
 from shopassist_api.application.services.retrieval_service import RetrievalService
 from shopassist_api.application.interfaces.service_interfaces import LLMServiceInterface
+from shopassist_api.application.settings.config import settings
 from shopassist_api.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -58,7 +59,8 @@ class RAGService:
             if categories and len(categories) > 0:
                 category_names = []
                 for cat in categories:
-                    category_names.append(cat['name'])
+                    if cat['score'] > settings.threshold_category_similarity:
+                        category_names.append(cat['name'])
                     
                 filters = {**filters, **{'categories': category_names}}
 
@@ -250,7 +252,8 @@ class RAGService:
             if categories and len(categories) > 0:
                 category_names = []
                 for cat in categories:
-                    category_names.append(cat['name'])
+                    if cat['score'] > settings.threshold_category_similarity:
+                        category_names.append(cat['name'])
                     
                 filters = {**filters, **{'categories': category_names}}
         
@@ -376,7 +379,7 @@ class RAGService:
 
         if sufficient_reasoning == 'no':
             
-            refined_query = sufficiency_data.get('query_retrieval_hint', '')
+            refined_query = sufficiency_data['query_retrieval_hint']
             refined_query = refined_query if refined_query else query
             logger.info(f"  Query: [{refined_query}]")    
             filters = data['filters']
