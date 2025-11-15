@@ -123,7 +123,7 @@ class RetrievalService:
             
             # Build filter expression for Milvus
             filter_expr = self._build_filter_expression(filters)
-            
+            logger.info(f"Filter expression sent to Milvus: {filter_expr}")
             # Search in Milvus
             results = self.milvus.search_products(
                 query_embedding=query_embedding,
@@ -232,8 +232,9 @@ class RetrievalService:
 
         if "categories" in filters:
             category_list = filters['categories']
-            category_expr = " or ".join([f"category == '{cat}'" for cat in category_list])
-            expressions.append(f"({category_expr})")
+            if category_list and isinstance(category_list, list) and len(category_list) > 0:
+                category_expr = " or ".join([f"category == '{cat}'" for cat in category_list])
+                expressions.append(f"({category_expr})")
         
         if "brand" in filters:
             expressions.append(f"brand == '{filters['brand']}'")
@@ -296,6 +297,7 @@ class RetrievalService:
             embedding_healthy = await self.embedder.health_check()
             
             return {
+                "is_healthy": "healthy" if vector_healthy and embedding_healthy else "unhealthy",
                 "vector_service": "healthy" if vector_healthy else "unhealthy",
                 "embedding_service": "healthy" if embedding_healthy else "unhealthy",
             }

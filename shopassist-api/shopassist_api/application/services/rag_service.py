@@ -245,7 +245,7 @@ class RAGService:
             filters = data['filters']
             refined_query = sufficiency_data.get('query_retrieval_hint', '')
             refined_query = refined_query if refined_query else query
-            logger.info(f"  Query: [{refined_query}]")
+            logger.info(f" Search Query: [{refined_query}]")
         
             # retrieve top categories to enhance filters
             categories = await self.retrieval.retrieve_top_categories(refined_query, RAGService.TOP_K_CATEGORIES) 
@@ -468,9 +468,15 @@ class RAGService:
             health = {}
             is_llm_healthy = await self.llm.health_check()
             
-            health['llm_service'] = "healthy" if is_llm_healthy else "unhealthy"
-            health['retrieval_service'] = await self.retrieval.health_check()
-            return health
+            retrieval_healthy = await self.retrieval.health_check()
+            is_retrieval_healthy = "healthy" if retrieval_healthy["is_healthy"] == "healthy" else "unhealthy"
+            health = {
+                "is_healthy": "is_healthy" if is_llm_healthy and is_retrieval_healthy == "healthy" else "unhealthy",
+                "llm_service": "healthy" if is_llm_healthy else "unhealthy",
+                "retrieval_service": retrieval_healthy
+            }
+            return health 
         except Exception as e:
-            logger.error(f"Health check failed: {e}")
+            logger.error(f"Rag Service Health check failed: {e}")
+            traceback.print_exc()
             return False

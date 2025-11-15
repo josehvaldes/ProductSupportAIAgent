@@ -76,7 +76,7 @@ export const chatApi = {
         sessionId?: string
       ): Promise<ChatResponse> => {
 
-      const response = await apiRequest<ChatResponse>('/chat/dumbmessage', {
+      const response = await apiRequest<ChatResponse>('/chat/message', {
           method: 'POST',
           body: JSON.stringify({
           message,
