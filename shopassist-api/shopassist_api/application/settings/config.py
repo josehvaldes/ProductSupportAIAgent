@@ -1,6 +1,7 @@
 """
 Core configuration settings for the Shop Assistant API.
 """
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 from typing import Optional
 
@@ -14,7 +15,7 @@ class Settings(BaseSettings):
     api_version: str = "0.1.0"
     debug: bool = False
 
-    use_dumb_service: bool = True
+    use_dumb_service: bool = False
 
     # Embedding Configuration
     embedding_provider: str = "azure_openai"  # Options: 'azure_openai', 'transformers'
@@ -79,9 +80,10 @@ class Settings(BaseSettings):
     threshold_knowledge_base_similarity: float = 0.75
     threshold_category_similarity: float = 0.8
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    # class Config:
+    #     env_file = ".env"
+    #     case_sensitive = False
+    model_config = ConfigDict(str_max_length=100)
 
 
 settings = Settings()
