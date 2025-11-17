@@ -5,12 +5,20 @@ from abc import ABC, abstractmethod
 from typing import List, Dict, Generator
 from datetime import datetime
 
+from shopassist_api.domain.models.session_context import SessionContext
+from shopassist_api.domain.models.user_preferences import UserPreferences
+
 class RepositoryServiceInterface(ABC):
     """Abstract base class for product service implementations."""
     
     @abstractmethod
     async def get_product_by_id(self, product_id: str) -> dict[str, any]:
         """Retrieve a product by its ID."""
+        pass
+
+    @abstractmethod
+    async def get_products_by_ids(self, product_ids: List[str]) -> List[dict[str, any]]:
+        """Retrieve multiple products by their IDs."""
         pass
     
     @abstractmethod
@@ -36,7 +44,35 @@ class RepositoryServiceInterface(ABC):
     async def get_conversation_history(self, session_id: str) -> List[Dict]:
         """Get conversation history for a session"""
         pass
+    
+    async def create_session(self, data: SessionContext = None) -> str:
+        """Create a new session and return its ID"""
+        pass
 
+    async def get_session(self, session_id: str) -> SessionContext:
+        """Retrieve session details by session ID"""
+        pass
+
+    async def delete_session(self, user_id:str, session_id: str) -> None:
+        """Delete a session by session ID"""
+        pass
+
+    async def update_preferences(
+        self, 
+        session_id: str, 
+        preferences: dict
+    ) -> None:
+        """Update user preferences for a session"""
+        pass
+
+    async def get_preferences(
+        self, 
+        session_id: str
+    ) -> UserPreferences:
+        """Get user preferences for a session"""
+        pass
+
+    
     @abstractmethod
     async def save_message(
         self,
@@ -113,7 +149,9 @@ class VectorServiceInterface(ABC):
         pass
 
     def search_categories(
-        self,query_embedding: List[float],
+        self,
+        query_embedding: List[float],
+        field: str,
         top_k: int = 5) -> List[Dict]:
         """Search categories by vector similarity."""
         pass
@@ -147,6 +185,29 @@ class LLMServiceInterface(ABC):
     @abstractmethod
     def get_stats(self) -> Dict:
         """Get usage statistics"""
+        pass
+
+    async def health_check(self) -> bool:
+        """Ping the service to check connectivity"""
+        pass
+
+
+class CacheServiceInterface(ABC):
+    """Abstract base class for Cache service implementations."""
+    
+    @abstractmethod
+    async def get(self, key: str) -> str:
+        """Retrieve a value from the cache by key."""
+        pass
+    
+    @abstractmethod
+    async def set(self, key: str, value: str, ttl: int = None) -> None:
+        """Set a value in the cache with an optional expiration time."""
+        pass
+    
+    @abstractmethod
+    async def delete(self, key: str) -> None:
+        """Delete a value from the cache by key."""
         pass
 
     async def health_check(self) -> bool:

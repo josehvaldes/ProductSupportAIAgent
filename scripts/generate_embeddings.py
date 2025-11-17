@@ -121,17 +121,22 @@ def process_category_file(source_file: str, output_file: str, embedding_service:
         data = json.load(f)
         for record in data:  # Process each category record
             category_name = record.get("name", "")
+            full_category_name = record.get("full_name", "")
+            #improve formatting for embedding generation
+            formatted_category = full_category_name.replace(" > ", " , ") if full_category_name else category_name
+            print(f".Formatted category for embedding: {category_name}")
             if not category_name:
                 print(f"Skipping record ID: {record.get('id', 'N/A')} as it has no name.")
                 continue
             
-            print(f"Generating embedding for category ID: {record.get('id', 'N/A')}.")
             embedding = embedding_service.generate_embedding(category_name)
+            full_embedding = embedding_service.generate_embedding(formatted_category)
             output.append({
                 "id": record.get("id", "N/A"),
                 "name": category_name,
-                "full_name": record.get("full_name", ""),
-                "embedding": embedding
+                "full_name": full_category_name,
+                "embedding": embedding,
+                "full_embedding": full_embedding
             })
     print(f"Saving category embeddings to: {output_file}")   
     with jsonlines.open(output_file, mode='w') as writer:

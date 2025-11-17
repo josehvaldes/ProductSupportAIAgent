@@ -53,15 +53,16 @@ class Settings(BaseSettings):
     azure_storage_container: str = "product-data"
     
     #Azure cosmosDB
-    cosmosdb_endpoint: Optional[str] = None
+    cosmosdb_endpoint: str = ""
     cosmosdb_database: str = "<shopassistdatabase>"
     cosmosdb_product_container: str = "products"
-    cosmosdb_chat_container: str = "chats"
+    cosmosdb_messages_container: str = "messages"
+    cosmosdb_session_container: str = "sessions"
 
-
-    # Database Configuration
-    database_url: Optional[str] = None
-    
+    # Cache Configuration
+    redis_endpoint: str = "redis://localhost:6379"
+    redis_password: Optional[str] = None
+        
     #Logging Configuration
     log_level: str = "INFO"
     log_file: str = "logs/shopassist_api.log"
@@ -72,6 +73,11 @@ class Settings(BaseSettings):
     milvus_port: str = "19530"
     milvus_product_collection: str = "products_collection"
     milvus_knowledge_base_collection: str = "knowledge_base_collection"
+
+    # Similarity Thresholds
+    threshold_product_similarity: float = 0.8
+    threshold_knowledge_base_similarity: float = 0.75
+    threshold_category_similarity: float = 0.8
 
     class Config:
         env_file = ".env"

@@ -76,11 +76,12 @@ export const chatApi = {
         sessionId?: string
       ): Promise<ChatResponse> => {
 
-      const response = await apiRequest<ChatResponse>('/chat/dumbmessage', {
+      const response = await apiRequest<ChatResponse>('/chat/message', {
           method: 'POST',
           body: JSON.stringify({
           message,
           session_id: sessionId,
+          top_k: 3
         })
       });
 
@@ -91,7 +92,7 @@ export const chatApi = {
    */
     getChatHistory: async (sessionId: string): Promise<ChatHistoryResponse> => {
       const response = await apiRequest<ChatHistoryResponse>(
-        `/chat/history/${sessionId}`
+        `/session/history/${sessionId}`
       );
       return response;
     },

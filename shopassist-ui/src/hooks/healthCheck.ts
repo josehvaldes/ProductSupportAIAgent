@@ -25,7 +25,7 @@ export function healthCheck(): HealthCheckState {
       // Now you can access the properties directly
       if (res.status !== 'healthy') {
         setError(`Service is not healthy. Status: ${res.status}`);
-        return `Agent not is healthy. V: ${res.version}`;
+        return `Agent not healthy. V: ${res.version}`;
       }
 
       log.info(`Service is healthy. Version: ${res.version}, Timestamp: ${res.timestamp}`);
@@ -37,7 +37,7 @@ export function healthCheck(): HealthCheckState {
         : 'An unexpected error occurred';
       setError(errorMessage);
       console.error('Health check API error:', err);
-      return "Agent not is Healthy. Internal Error";
+      return "Agent not Healthy. Internal Error";
     } finally {
       setIsLoading(false);
     }

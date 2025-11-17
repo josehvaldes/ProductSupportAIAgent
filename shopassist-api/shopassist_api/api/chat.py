@@ -4,10 +4,12 @@ from typing import List, Dict, Optional
 import uuid
 from datetime import datetime, timezone
 
-from shopassist_api.application.interfaces.di_container import get_rag_service, get_repository_service
+from shopassist_api.application.interfaces.di_container import get_session_manager, get_rag_service, get_repository_service
 from shopassist_api.application.interfaces.service_interfaces import RepositoryServiceInterface
 from shopassist_api.application.services.formaters import FormatterUtils
 from shopassist_api.application.services.rag_service import RAGService
+from shopassist_api.application.services.session_manager import SessionManager
+
 from shopassist_api.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -17,6 +19,7 @@ router = APIRouter()
 class ChatRequest(BaseModel):
     message: str
     session_id: Optional[str] = None
+    top_k: Optional[int] = 3
 
 class ChatResponse(BaseModel):
     session_id: str
@@ -27,7 +30,6 @@ class ChatResponse(BaseModel):
 
 @router.post("/dumbmessage", response_model=ChatResponse)
 async def chat_dump_message(request: ChatRequest,
-                       cosmos_service:RepositoryServiceInterface = Depends(get_repository_service),
                        rag_service:RAGService = Depends(get_rag_service)):
     """
     Process a chat message and return AI response
@@ -36,10 +38,8 @@ async def chat_dump_message(request: ChatRequest,
     user_id = "default_user"  # Placeholder for user identification
     # Get conversation history
     logger.info(f"Fetching conversation history for session_id: {session_id}, user_id: {user_id}, message: {request.message}")
-    history = await cosmos_service.get_conversation_history(session_id)
     result = await rag_service.generate_dumb_answer(
         query=request.message,
-        conversation_history=history,
         session_id=session_id
     )    
 
@@ -54,7 +54,6 @@ async def chat_dump_message(request: ChatRequest,
 
 @router.post("/message", response_model=ChatResponse)
 async def chat_message(request: ChatRequest,
-                       cosmos_service:RepositoryServiceInterface = Depends(get_repository_service),
                        rag_service:RAGService = Depends(get_rag_service)):
     """
     Process a chat message and return AI response
@@ -65,32 +64,13 @@ async def chat_message(request: ChatRequest,
         user_id = "default_user"  # Placeholder for user identification
         # Get conversation history
         logger.info(f"Fetching conversation history for session_id: {session_id}, user_id: {user_id}, message: {request.message}")
-        history = await cosmos_service.get_conversation_history(session_id)
         # Generate response using RAG
         result = await rag_service.generate_answer(
+            user_id=user_id,
             query=request.message,
-            conversation_history=history,
             session_id=session_id
         )
-        
-        # Save conversation
-        _ = await cosmos_service.save_message(
-            session_id=session_id,
-            user_id=user_id,
-            role="user",
-            content=request.message,
-            timestamp=datetime.now(timezone.utc)
-        )
-        
-        _ = await cosmos_service.save_message(
-            session_id=session_id,
-            role="assistant",
-            user_id=user_id,
-            content=result['response'],
-            timestamp=datetime.now(timezone.utc),
-            metadata=result['metadata']
-        )
-        
+
         return ChatResponse(
             session_id=session_id,
             response=result['response'],
@@ -106,7 +86,7 @@ async def chat_message(request: ChatRequest,
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/history/{session_id}")
+@router.get("/history_raw/{session_id}")
 async def get_chat_history(session_id: str,
                            cosmos_service:RepositoryServiceInterface = Depends(get_repository_service)):
     """
@@ -118,3 +98,4 @@ async def get_chat_history(session_id: str,
         return {"session_id": session_id, "messages": history, "formatted_history": history_text}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    

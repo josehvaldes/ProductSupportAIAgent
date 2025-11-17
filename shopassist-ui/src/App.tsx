@@ -4,7 +4,6 @@ import {
 } from "@mantine/core";
 import { NavBar } from "./components/NavBar";
 import { TestConnectionSection } from "./components/TestConnectionSection";
-import { ChatContainer } from "./components/ChatContainer";
 
 import { ChatContainerExt } from "./components/chat/ChatContainerExt";
 
@@ -12,10 +11,10 @@ import { SearchContainer } from "./components/SearchContainer";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { Notifications } from '@mantine/notifications';
 
-type ActiveView = 'chat' | 'search' | 'settings' | 'help' | 'chat-ext';
+type ActiveView = 'search' | 'settings' | 'help' | 'chat-ext';
 
 export default function App() {
-  const [activeView, setActiveView] = useLocalStorage<ActiveView>('shopassist-active-view', 'chat');
+  const [activeView, setActiveView] = useLocalStorage<ActiveView>('shopassist-active-view', 'chat-ext');
 
   const renderMainContent = () => {
     switch (activeView) {
@@ -25,8 +24,6 @@ export default function App() {
         return <div>Settings Container</div>;
       case 'help':
         return <div>Help Container</div>;
-      case 'chat':
-        return <ChatContainer />;
       case 'chat-ext':
         return <ChatContainerExt />;
       
@@ -37,10 +34,9 @@ export default function App() {
     <AppShell
       padding="md"
       navbar={{
-        width: 200,
+        width: 250,
         breakpoint: "sm",
-        collapsed: { mobile: false },
-      }}
+      }}    
     >
       <AppShell.Navbar p="md" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <Notifications position="top-right" />

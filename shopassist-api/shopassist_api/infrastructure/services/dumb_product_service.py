@@ -1,9 +1,12 @@
 import traceback
+import uuid
 from azure.cosmos import CosmosClient
 from azure.identity import DefaultAzureCredential
 from shopassist_api.application.settings.config import settings
 from shopassist_api.application.interfaces.service_interfaces import RepositoryServiceInterface
 from shopassist_api.domain.models.product import Product
+from shopassist_api.domain.models.session_context import SessionContext
+from shopassist_api.domain.models.user_preferences import UserPreferences
 from shopassist_api.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -16,7 +19,6 @@ class DumbProductService(RepositoryServiceInterface):
         self.database_name = None
         self.cosmosdb_endpoint = None
         self.product_container = None
-        self.chat_container = None
         self.category_container = None
         self._initialize_client()
     
@@ -39,7 +41,9 @@ class DumbProductService(RepositoryServiceInterface):
                     "image_url": f"https://m.media-amazon.com/images/I/41gikeSuhAL._SY300_SX300_QL70_FMwebp_.jpg",
                     "category_full": "Smartphones > Testing > Unit Tests", 
                     "availability": "In Stock" }
-        
+    
+    async def get_products_by_ids(self, product_ids):
+        return [await self.get_product_by_id(pid) for pid in product_ids]
     
     async def search_products_by_category(self, category: str)-> list[dict[str, any]]:
         """Search products by category."""
@@ -126,18 +130,26 @@ class DumbProductService(RepositoryServiceInterface):
         if session_id == "58ca3bbb-1fbc-4cfa":
             history = [
             {
+                "id": "msg1",
+                "user_id": "default_user",
+                "session_id": session_id,
                 "role": "user",
                 "content": ".I need a printer under 100 USD",
-                "timestamp": "2025-10-30T20:44:28.195142+00:00"
+                "timestamp": "2025-10-30T20:44:28.195142+00:00",
+                "metadata": {}
             },
             {
+                "id": "msg1",
+                "user_id": "default_user",
+                "session_id": session_id,
                 "role": "assistant",
-                "content": ".You can find good printers under $100. Here are two options:\n\n1. **HP Deskjet 2723 AIO Printer**  \n   - Price: $77.05  \n   - Features: Print, copy, scan with WiFi and Bluetooth connectivity; Up to 1200 x 1200 DPI resolution; 60-sheet input tray, ideal for home use.\n\n2. **Canon PIXMA E477 All-in-One Wireless Ink Efficient Colour Printer**  \n   - Price: $69.91  \n   - Features: Print, scan, copy with WiFi and USB; High print resolution up to 4800 x 600 dpi; Supports various paper sizes, suitable for home and small office.\n\nWould you like details on warranty, ink cartridges, or setup for either printer?",
-                "timestamp": "2025-10-30T20:44:28.441405+00:00"
+                "content": ".You can find good printers under $100. Here are two options:\n\n1. **HP Deskjet 2723 AIO Printer**  \n   - Price: $77.05  \n   - Features: Print, copy, scan with WiFi and Bluetooth connectivity; Up to 1200 x 1200 DPI resolution; 60-sheet input tray, ideal for home use.\n\n2. **Canon PIXMA E477 All-in-One Wireless Ink Efficient Colour Printer**  \n   - Price: $69.91  \n   - Features: Print, scan, copy with WiFi and USB; High print resolution up to 4800 x 600 dpi; \n\nWould you like details on warranty, ink cartridges, or setup for either printer?",
+                "timestamp": "2025-10-30T20:44:28.441405+00:00",
+                "metadata": {}
             }
         ]
-
         return history
+    
     async def save_message(
         self,
         session_id: str,
@@ -154,4 +166,55 @@ class DumbProductService(RepositoryServiceInterface):
     async def health_check(self) -> bool:
         """Ping the service to check connectivity"""
         return True
-   
+    
+    async def create_session(self, data = None):
+        return str(uuid.uuid4())
+    
+    async def get_session(self, session_id: str)-> SessionContext:
+        return SessionContext( **{"id": session_id, 
+                                  "user_id": "test_user",
+                                    "created_at": "2025-10-30T20:44:28.195142+00:00",
+                                    "updated_at": "2025-10-30T20:44:28.195142+00:00",
+                                    "messages": [],
+                                    "user_preferences": None,
+                                    "current_intent": None,
+                                    "metadata": {
+                                        "user_agent": "DumbAgent/1.0",
+                                        "products": [
+                                            {
+                                                "id": "prod123",
+                                                "name": "Test Product 123",
+                                                "category": "Testing",
+                                                "price": 99.99,
+                                                "description": "A sample product for testing purposes."
+                                            },
+                                            {
+                                                "id": "prod456",
+                                                "name": "Test Product 456",
+                                                "category": "Testing",
+                                                "price": 149.99,
+                                                "description": "Another sample product for testing purposes."
+                                            }
+                                        ]
+                                    }
+                                  } )
+    
+    async def delete_session(self, user_id:str, session_id: str) -> None:
+        """Delete a session by session ID"""
+        logger.info(f"Deleting session {session_id} for user {user_id}")
+        return None
+    
+    async def get_preferences(self, session_id)-> UserPreferences:
+        return UserPreferences( **{"session_id": session_id, 
+                                   "preferences": {
+                                        "price_range": (50.0, 150.0),
+                                        "preferred_categories": ["Electronics", "Books"],
+                                        "preferred_brands": ["BrandA", "BrandB"],
+                                        "mentioned_products": ["prod123", "prod456"]
+
+        }} )
+    
+    async def update_preferences(self, session_id: str, preferences: dict) -> None:
+        """Update user preferences for a session"""
+        logger.info(f"Updating preferences for session {session_id}: {preferences}")
+        return None

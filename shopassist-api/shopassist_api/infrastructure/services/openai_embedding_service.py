@@ -6,7 +6,7 @@ from shopassist_api.application.settings.config import settings
 from shopassist_api.application.interfaces.service_interfaces import EmbeddingServiceInterface
 from shopassist_api.infrastructure.services.azure_credential_manager import get_credential_manager
 from shopassist_api.logging_config import get_logger
-from threading import Lock
+from threading import RLock
 
 logger = get_logger(__name__)
 
@@ -14,7 +14,7 @@ class OpenAIEmbeddingService(EmbeddingServiceInterface):
     
     # Class-level singleton for Azure OpenAI client
     _client = None
-    _client_lock = Lock()
+    _client_lock = RLock()
     
     def __init__(self, model_name: str = None):
         self.model_name = model_name or settings.embedding_model or "text-embedding-3-small"

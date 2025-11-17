@@ -273,6 +273,8 @@ Your task: Analyze the user's message and classify the intent, then determine if
 
 IMPORTANT: The conversation history contains product details from previous messages. Look carefully at the "sources" and "products" fields in the history.
 
+IMPORTANT: If the user's message talks about products or features not in the history, list those products or features in the query_retrieval_hint response".
+
 INTENT CATEGORIES:
 1. product_search: Finding products by features/needs
 2. product_details: Asking about specific product specs
@@ -285,7 +287,7 @@ INTENT CATEGORIES:
 CONTEXT ANALYSIS:
 - is_sufficient = "yes": Context history contains enough info to answer
 - is_sufficient = "no": Need to retrieve products/policies from database
-- query_retrieval_hint: Refined search query (only if is_sufficient="no")
+- query_retrieval_hint: new products or features to look up, comma-separated
 
 OUTPUT FORMAT: Valid JSON only, no markdown or extra text.
 """
@@ -318,7 +320,7 @@ Respond with this JSON structure:
     "is_sufficient": "<yes or no>",
     "reason": "<brief explanation in 1-2 sentences>",
     "confidence": <float 0.0-1.0>,
-    "query_retrieval_hint": "<refined search query or empty string>"
+    "query_retrieval_hint": "<new products to look up, comma-separated, or empty string>"
 }""")
         
         user_message = "\n".join(user_parts)

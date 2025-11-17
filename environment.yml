@@ -13,6 +13,7 @@ dependencies:
   - langchain
   - openai
   - pandas
+  - redis-py
   # Pip-only dependencies
   - pip:
     # FastAPI and web server

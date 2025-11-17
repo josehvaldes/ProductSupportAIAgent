@@ -83,7 +83,8 @@ class MilvusService(VectorServiceInterface):
             [c["id"] for c in categories],
             [c["name"] for c in categories],
             [c["full_name"] for c in categories],
-            [c["embedding"] for c in categories]
+            [c["embedding"] for c in categories],
+            [c["full_embedding"] for c in categories]
         ]
         
         mr = collection.insert(data)
@@ -167,7 +168,9 @@ class MilvusService(VectorServiceInterface):
         return formatted
     
     def search_categories(
-        self,query_embedding: List[float],
+        self,
+        query_embedding: List[float],
+        field: str = "embedding",
         top_k: int = 5) -> List[Dict]:
         """Search categories by vector similarity"""
         collection = Collection("categories_collection")
@@ -178,10 +181,10 @@ class MilvusService(VectorServiceInterface):
         }
         results = collection.search(
             data=[query_embedding],
-            anns_field="embedding",
+            anns_field=field,
             param=search_params,
             limit=top_k,
-            output_fields=["name", "full_name"]
+            output_fields=["name", "full_name", "embedding", "full_embedding"]
         )
         formatted = []
         for hits in results:
@@ -190,7 +193,9 @@ class MilvusService(VectorServiceInterface):
                     "id": hit.id,
                     "distance": hit.distance,
                     "name": hit.entity.get("name"),
-                    "full_name": hit.entity.get("full_name")
+                    "full_name": hit.entity.get("full_name"),
+                    "embedding": hit.entity.get("embedding"),
+                    "full_embedding": hit.entity.get("full_embedding")
                 })
 
         return formatted

@@ -10,6 +10,7 @@ script_dir = Path(__file__).parent
 env_path = script_dir.parent / 'shopassist-api' / '.env'
 load_dotenv(dotenv_path=env_path)
 
+from shopassist_api.application.services.session_manager import SessionManager
 from shopassist_api.application.settings.config import settings
 from shopassist_api.infrastructure.services.openai_llm_service import OpenAILLMService
 from shopassist_api.infrastructure.services.milvus_service import MilvusService
@@ -67,7 +68,14 @@ async def evaluate_prompts():
         category_embedder_service=category_embedder_service
     )
 
-    rag = RAGService(llm_service=llm, nanolm_service=nano_llm, retrieval_service=retrieval_service)
+    session_manager = SessionManager(
+        repository_service=product_service,
+        cache_service=None  # Assuming no cache for testing
+    )
+
+    rag = RAGService(llm_service=llm, nanolm_service=nano_llm,
+                     retrieval_service=retrieval_service,
+                     session_manager=session_manager)
     results = []
     
     for test in TEST_QUERIES:

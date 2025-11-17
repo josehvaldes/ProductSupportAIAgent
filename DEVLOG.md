@@ -1156,88 +1156,117 @@ Intent classification, context management, frontend integration
 
 ---
 
-### Day 16 - Thursday, Nov 6, 2025
+### Day 16 - Tuesday, Nov 11, 2025
 **Today's Focus:** Context manager and session storage
 
 **Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+- [X] Design Session Data Model 
+- [X] Create SessionManager Service 
+- [X] Implement Preference Extraction Logic 
+- [X] Add Redis Caching Layer 
+- [X] Update RAG Service to Use Context 
+- [X] Update API Endpoints for sessions management 
+- [X] Test Multi-Turn Conversations 
+- [X] Documentation updated
+
+
 
 **Technical Decisions:**
-- 
+- use Redis cache container
+- Separate the session endpoints in a new API Route
+- Use dependecy injection and Singleton caching for Redis
+- Retake the use of pydantic objects for sessions
+- branch session manager to a new branch
 
 **Challenges & Solutions:**
-- 
+- write integration tests for all new endpoints. Solutions, User copilot
 
 **Learnings:**
-- 
+- How to serialize and convert pydantic object
 
 **Next Steps:**
-- [ ] 
+- [ ] Advanced Query Processing & Retrieval Polish
 - [ ] 
 
-**Time Invested:** ___ hours
+**Time Invested:** 4 hours
 
 ---
 
-### Day 17 - Wednesday, Oct 30, 2025
-**Today's Focus:** Hybrid search implementation
+### Day 17 - Wednesday, Nov 12, 2025
+**Today's Focus:** Advanced Query Processing & Retrieval Polish
 
 **Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+- [X] Query Preprocessing Enhancement 
+	- Price filtering
+- [X] Multi-Strategy Retrieval Router (1.5 hours)
+- [X] Advanced Milvus Filtering (1 hour)
+     Category filtering
+- [X] Result Post-Processing & Ranking (1 hour)
+- [X] Streaming Response Implementation (1.5 hours)
+- [X] Add Query Suggestions (1 hour)
+- [X] Testing & Documentation (1.5 hours)
 
 **Technical Decisions:**
-- 
+- Add a full_embedding field in the Categories collection 
+- Implement a cosine similatiry score that combines category and full_category embeddings
+- Add more complex queries to the test set
 
 **Challenges & Solutions:**
-- 
+- Review several alternatives of price and category filtering. Choose the RegExp for prices and cosine similarity for categories.
+- Exclude other product fields from filtering for simplicity purposes
 
 **Learnings:**
-- 
+- How to make cosine similatiry with different vector and weight them into a single score
 
 **Next Steps:**
 - [ ] 
 - [ ] 
 
-**Time Invested:** ___ hours
+**Time Invested:** 7 hours
 
 ---
 
-### Day 18 - Thursday, Oct 31, 2025
+### Day 18 - Thursday, Nov 13, 2025
 **Today's Focus:** Product comparison logic
 
 **Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+- [X] Design Comparison Data Model
+- [X] Build Comparison Retrieval Logic
+- [X] Implement Comparison Table Generation
+- [X] Generate natural language comparison and recommendation
+- [X] Implement Comparison API Endpoint
+- [X] Integrate Comparison into RAG Flow
+- [X] Test Comparison End-to-End
+
 
 **Technical Decisions:**
-- 
+- Simplify comparison logic to retrieve products, and send a query to the LLM
 
 **Challenges & Solutions:**
 - 
 
 **Learnings:**
-- 
+- reuse current code to simply process
 
 **Next Steps:**
 - [ ] 
 - [ ] 
 
-**Time Invested:** ___ hours
+**Time Invested:** 2 hours
 
 ---
 
-### Day 19 - Friday, Nov 1, 2025
+### Day 19 - Friday, Nov 14, 2025
 **Today's Focus:** Chat interface component (Mantine)
 
 **Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+- [X] Clean up ChatContainerExt component
+- [X] Improve message display 
+- [X] Add error handling UI 
+- [X] Users can start fresh conversations
+- [X] Add session management UI 
+- [X] Final tests and polish UI
+
 
 **Technical Decisions:**
 - 
@@ -1252,45 +1281,20 @@ Intent classification, context management, frontend integration
 - [ ] 
 - [ ] 
 
-**Time Invested:** ___ hours
+**Time Invested:** 4 hours
 
----
 
-### Day 20 - Saturday, Nov 2, 2025
-**Today's Focus:** Product card display
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 21 - Sunday, Nov 3, 2025
+### Day 20 - Sunday, Nov 3, 2025
 **Today's Focus:** Frontend-backend integration
 
 **Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+- [X] Remove useless code 
+- [X] COmplete end-to-end tests
+
 
 **Technical Decisions:**
-- 
+- Keep UI minimal 
+- Remove Chat History from the scope of this MVP
 
 **Challenges & Solutions:**
 - 
@@ -1302,35 +1306,28 @@ Intent classification, context management, frontend integration
 - [ ] 
 - [ ] 
 
-**Time Invested:** ___ hours
+**Time Invested:** 1 hour
 
 ---
 
 ### 📊 Week 3 Summary
 
 **Shipped:**
-- 
-- 
-- 
+- Functional API with Minimal endpoints to start chat session and continue conversations
+- Clean and functional UI to start chat sessions, and display products.
+- Integration Test scripts.
+- Cache services in docket container.
+- Updated Cost Analysis
+- Update Architecture document and Roadmap for Version 2
+
 
 **Key Technical Decisions:**
-1. 
-2. 
-3. 
+1. Reduce the scope of the UI.
+2. Add minimal threshold scores for Products and Category searches.
+3. Keep unit test minimal since functionality is heavy dependad in LLM responses.
+4. Keep integration tests mininal and limited to test*.py scripts
 
-**Metrics:**
-- Multi-turn conversations handled: ___
-- Intent classification accuracy: ___%
-- Average context window size: ___ messages
-- UI components built: ___
-
-**Blockers Resolved:**
-- 
-
-**Learnings:**
-- 
-
-**Total Time This Week:** ___ hours
+**Total Time This Week:** 26 hours
 
 
 ### Week 4: Model Analysis & Cost Optimization
@@ -1359,222 +1356,11 @@ The history and sufficiency uanalysis required more complex model. The requireme
 
 
 **Week 5 Preview:**
-Evaluation framework, metrics dashboard, automated testing
-
----
-
-## Week 5: Evaluation & Analytics
-**Goal:** Metrics dashboard live, automated evaluation running  
-**Dates:** Nov 11 - Nov 17, 2025
-
-### Day 29 - Monday, Nov 11, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 30 - Tuesday, Nov 12, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 31 - Wednesday, Nov 13, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 32 - Thursday, Nov 14, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 33 - Friday, Nov 15, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 34 - Saturday, Nov 16, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 35 - Sunday, Nov 17, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### 📊 Week 5 Summary
-
-**Shipped:**
-- 
-- 
-- 
-
-**Key Technical Decisions:**
-1. 
-2. 
-3. 
-
-**Metrics:**
-- Test queries evaluated: ___
-- Factual accuracy: ___%
-- Retrieval precision: ___%
-- Average response time: ___ ms
-- Thumbs up rate: ___%
-
-**Blockers Resolved:**
-- 
-
-**Learnings:**
-- 
-
-**Total Time This Week:** ___ hours
-
-**Week 6 Preview:**
 Polish, deployment, documentation, demo video
 
 ---
 
-## Week 6: Polish & Deployment
+## Week 5: Polish & Deployment
 **Goal:** Production deployment, comprehensive documentation, demo ready  
 **Dates:** Nov 18 - Nov 25, 2025
 
@@ -1601,132 +1387,6 @@ Polish, deployment, documentation, demo video
 
 **Time Invested:** ___ hours
 
----
-
-### Day 37 - Tuesday, Nov 19, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 38 - Wednesday, Nov 20, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 39 - Thursday, Nov 21, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 40 - Friday, Nov 22, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 41 - Saturday, Nov 23, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
 
 ### Day 42 - Sunday, Nov 24, 2025
 **Today's Focus:** Final review and launch preparation

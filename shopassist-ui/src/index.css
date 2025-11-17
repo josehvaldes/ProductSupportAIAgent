@@ -8,7 +8,8 @@ body {
 
 /* Remove any default centering/max-width from the Vite starter */
 #root {
-  max-width: none;
+  /* max-width: 90%; */
+  width: 100%;
   margin: 0;
   padding: 0;
   text-align: initial;

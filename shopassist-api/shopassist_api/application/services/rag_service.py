@@ -1,13 +1,14 @@
-import json
 import traceback
 from typing import Dict, List, Optional
-from shopassist_api.application.prompts.templates import PromptTemplates, TestPromptTemplates
+from shopassist_api.application.prompts.templates import PromptTemplates
 from shopassist_api.application.services.context_builder import ContextBuilder
+from shopassist_api.application.services.session_manager import SessionManager
 from shopassist_api.application.services.formaters import FormatterUtils
 from shopassist_api.application.services.llm_sufficiency_builder import LLMSufficiencyBuilder
 from shopassist_api.application.services.query_processor import QueryProcessor
 from shopassist_api.application.services.retrieval_service import RetrievalService
 from shopassist_api.application.interfaces.service_interfaces import LLMServiceInterface
+from shopassist_api.application.settings.config import settings
 from shopassist_api.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -18,55 +19,63 @@ class RAGService:
     Orchestrates the entire RAG pipeline
     """
     
-    TOP_K_PRODUCTS = 2
-    TOP_K_KB_ARTICLES = 2
-    TOP_K_CATEGORIES = 2
+    TOP_K_PRODUCTS = 3
+    TOP_K_KB_ARTICLES = 3
+    TOP_K_CATEGORIES = 3
 
     def __init__(self,
                  llm_service: LLMServiceInterface,
                  nanolm_service: LLMServiceInterface,
-                 retrieval_service: RetrievalService):
+                 retrieval_service: RetrievalService,
+                 session_manager: SessionManager
+                 ):
         self.retrieval = retrieval_service
         self.llm = llm_service
         self.nanolm = nanolm_service # Use nanolm for lightweight tasks
+        self.session_manager = session_manager
         self.sufficiency_builder = LLMSufficiencyBuilder(llm_service=nanolm_service)
         self.query_processor = QueryProcessor()
         self.context_builder = ContextBuilder()
         
+        
     async def generate_dumb_answer(
         self,
         query: str,
-        conversation_history: Optional[List[Dict]] = None,
-        session_id: Optional[str] = None
+        session_id: Optional[str] = None,
+        top_k: int = 3
     ) -> Dict:
         """Generate dump answer for testing"""
 
         # Step 1: Process query
         cleaned_query, filters = self.query_processor.process_query(query)
-        query_type = "product_search"  if session_id == '1' else 'policy_question' # Dummy query type for testing
+        query_type = "product_search"  if session_id == '58ca3bbb-1fbc-4cfa' else 'policy_question' # Dummy query type for testing
         
         logger.info(f"Query type: {query_type}, Filters: {filters}, query: {cleaned_query}")
         # Step 2: Retrieve relevant documents
         if query_type == 'product_search':
 
-            categories = await self.retrieval.retrieve_top_categories(query, 1)
+            categories = await self.retrieval.retrieve_top_categories(query, top_k)
+            
             if categories and len(categories) > 0:
-                name = categories[0]['name']
-                logger.info(f"  Extracted category filter: {name}")
-                filters = {**filters, **{'category': name}}
+                category_names = []
+                for cat in categories:
+                    if cat['score'] > settings.threshold_category_similarity:
+                        category_names.append(cat['name'])
+                    
+                filters = {**filters, **{'categories': category_names}}
 
             logger.info(f"  Final filters applied: {filters}")
             results = await self.retrieval.retrieve_products(
                 cleaned_query,
                 enriched=True,
-                top_k=RAGService.TOP_K_PRODUCTS, # reduce the number of products to retrieve
+                top_k=top_k, # reduce the number of products to retrieve
                 filters=filters
             )
             context = self.context_builder.build_product_context(results)
         else:
             results = await self.retrieval.retrieve_knowledge_base(
                 cleaned_query,
-                top_k=3
+                top_k=top_k
             )
             context = self.context_builder.build_knowledge_base_context(results)
         
@@ -77,7 +86,7 @@ class RAGService:
         return {
                 "response": response,
                 "sources": results,
-                "query_type": query_type,
+                "query_type": "product_comparison",
                 "has_results": True,
                 "filters_applied": filters,
                 "metadata": {
@@ -90,8 +99,8 @@ class RAGService:
 
     async def generate_answer(
         self,
+        user_id:str,
         query: str,
-        conversation_history: Optional[List[Dict]] = None,
         session_id: Optional[str] = None
     ) -> Dict:
         """
@@ -115,7 +124,9 @@ class RAGService:
             logger.info(f"Processing. Session: {session_id}, Query: {query}")
             
             # Step 1: Format conversation history
-            history_text = FormatterUtils.format_history(conversation_history)
+            history = await self.session_manager.get_conversation_history(session_id=session_id)
+
+            history_text = FormatterUtils.format_message_history(history)
 
             # Step 2: Process query and get price filters
             cleaned_query, filters = self.query_processor.process_query(query)
@@ -125,7 +136,6 @@ class RAGService:
                 cleaned_query, history=history_text)
 
             logger.info(f"Sufficiency data: {sufficiency}")
-
             
             data = {
                 "query": cleaned_query,
@@ -174,21 +184,39 @@ class RAGService:
             
             product_sources = FormatterUtils.build_product_sources(llm_query_type,results)
 
-            # Step 6: Format sources
+            # Step 6: Save user and assistant messages
+            self.session_manager.add_message(
+                session_id=session_id,
+                user_id=user_id,
+                role="user",
+                content=query,
+            )
+
+            metadata = {
+                    "query_type_confidence": sufficiency.get('confidence', 0.0),
+                    "num_sources": len(results),
+                    "tokens": llm_response['tokens'],
+                    "cost": llm_response['cost'],
+                    "products": product_sources,
+                    "turn_index": len(history) + 1 if history else 1
+                }
+            
+            self.session_manager.add_message(
+                session_id=session_id,
+                user_id=user_id,
+                role="assistant",
+                content=llm_response['response'],
+                metadata=metadata
+            )
+
+            # return
             return {
                 "response": llm_response['response'],
                 "sources": results,
                 "query_type": llm_query_type,
                 "has_results": True,
                 "filters_applied": filters,
-                "metadata": {
-                    "query_type_confidence": sufficiency.get('confidence', 0.0),
-                    "num_sources": len(results),
-                    "tokens": llm_response['tokens'],
-                    "cost": llm_response['cost'],
-                    "products": product_sources,
-                    "turn_index": len(conversation_history) + 1 if conversation_history else 1
-                }
+                "metadata": metadata
             }
             
         except Exception as e:
@@ -217,14 +245,15 @@ class RAGService:
             filters = data['filters']
             refined_query = sufficiency_data.get('query_retrieval_hint', '')
             refined_query = refined_query if refined_query else query
-            logger.info(f"  Query: [{refined_query}]")
+            logger.info(f" Search Query: [{refined_query}]")
         
             # retrieve top categories to enhance filters
             categories = await self.retrieval.retrieve_top_categories(refined_query, RAGService.TOP_K_CATEGORIES) 
             if categories and len(categories) > 0:
                 category_names = []
                 for cat in categories:
-                    category_names.append(cat['name'])
+                    if cat['score'] > settings.threshold_category_similarity:
+                        category_names.append(cat['name'])
                     
                 filters = {**filters, **{'categories': category_names}}
         
@@ -247,7 +276,7 @@ class RAGService:
                     query, context, history)
         else:
             results = []
-            context = "No relevant products needed to answer."
+            context = ""
             logger.info("Context sufficient, skipping retrieval.")
             messages = PromptTemplates.product_query_prompt(
                     query, context, history)
@@ -284,7 +313,7 @@ class RAGService:
                         )
         else:
             results = []
-            context = "No documents retieved to answer"
+            context = ""
             messages = PromptTemplates.product_query_prompt(
                     query, context, history)
             
@@ -331,7 +360,7 @@ class RAGService:
                     query, context, data['history_text'])
         else:
             results = []
-            context = "No relevant products needed to answer."
+            context = ""
             messages = PromptTemplates.product_details_prompt(
                     query, context, data['history_text'])
             
@@ -350,7 +379,7 @@ class RAGService:
 
         if sufficient_reasoning == 'no':
             
-            refined_query = sufficiency_data.get('query_retrieval_hint', '')
+            refined_query = sufficiency_data['query_retrieval_hint']
             refined_query = refined_query if refined_query else query
             logger.info(f"  Query: [{refined_query}]")    
             filters = data['filters']
@@ -376,7 +405,7 @@ class RAGService:
                     query, context, data['history_text'])
         else:
             results = []
-            context = "No relevant products needed to answer."
+            context = ""
             messages = PromptTemplates.product_comparison_prompt(
                     query, context, data['history_text'])
             
@@ -437,10 +466,17 @@ class RAGService:
         """Ping the service to check connectivity"""
         try:
             health = {}
-            is_healthy = await self.llm.health_check()
-            health['llm_service'] = "healthy" if is_healthy else "unhealthy"
-            health['retrieval_service'] = await self.retrieval.health_check()
-            return health
+            is_llm_healthy = await self.llm.health_check()
+            
+            retrieval_healthy = await self.retrieval.health_check()
+            is_retrieval_healthy = "healthy" if retrieval_healthy["is_healthy"] == "healthy" else "unhealthy"
+            health = {
+                "is_healthy": "is_healthy" if is_llm_healthy and is_retrieval_healthy == "healthy" else "unhealthy",
+                "llm_service": "healthy" if is_llm_healthy else "unhealthy",
+                "retrieval_service": retrieval_healthy
+            }
+            return health 
         except Exception as e:
-            logger.error(f"Health check failed: {e}")
+            logger.error(f"Rag Service Health check failed: {e}")
+            traceback.print_exc()
             return False

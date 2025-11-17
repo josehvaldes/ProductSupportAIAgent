@@ -90,12 +90,12 @@ export function SearchContainer(){
                     <RangeSlider className="price-range-slider"
                         color="violet"
                         min={0}
-                        max={500}
+                        max={2000}
                         defaultValue={value}
                         marks={[
-                            { value: 100, label: '100' },
                             { value: 200, label: '200' },
-                            { value: 400, label: '400' },
+                            { value: 1000, label: '1000' },
+                            { value: 1500, label: '1500' },
                         ]}
                         w={200}
                         onChange={(val) => {
