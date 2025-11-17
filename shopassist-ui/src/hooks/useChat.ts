@@ -24,8 +24,8 @@ export function useChat(): UseChatState {
       const response = await chatApi.sendMessage(message);
       // do any transformation if needed
       const transformedResponse = {
-        reply: response.reply, // example transformation
-        products: response.suggestions || [],
+        reply: response.response, // example transformation
+        products: response.sources || [],
       }
       return transformedResponse;
     } catch (err) {

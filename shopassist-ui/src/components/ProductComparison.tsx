@@ -1,4 +1,4 @@
-import { Card, Image, Text, Badge, Button, Group, SimpleGrid, Modal, Stack, Grid, Space } from '@mantine/core';
+import { Image, Text, Button, Modal, Grid } from '@mantine/core';
 import type { Product } from "../types/Product";
 import { useState } from 'react';
 import { ProductDetails } from './ProductDetails';

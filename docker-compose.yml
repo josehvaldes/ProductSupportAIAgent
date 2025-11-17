@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  shopassist-api:
+    build:
+      context: ./shopassist-api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./shopassist-api/.env
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - shopassist-network
+
+  shopassist-ui:
+    build:
+      context: ./shopassist-ui
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - shopassist-api
+    networks:
+      - shopassist-network
+
+networks:
+  shopassist-network:
+    driver: bridge

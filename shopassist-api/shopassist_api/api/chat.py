@@ -4,11 +4,10 @@ from typing import List, Dict, Optional
 import uuid
 from datetime import datetime, timezone
 
-from shopassist_api.application.interfaces.di_container import get_session_manager, get_rag_service, get_repository_service
+from shopassist_api.application.interfaces.di_container import get_rag_service, get_repository_service
 from shopassist_api.application.interfaces.service_interfaces import RepositoryServiceInterface
 from shopassist_api.application.services.formaters import FormatterUtils
 from shopassist_api.application.services.rag_service import RAGService
-from shopassist_api.application.services.session_manager import SessionManager
 
 from shopassist_api.logging_config import get_logger
 
