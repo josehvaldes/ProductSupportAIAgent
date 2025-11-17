@@ -1222,7 +1222,7 @@ Intent classification, context management, frontend integration
 - [ ] 
 - [ ] 
 
-**Time Invested:** ___ hours
+**Time Invested:** 7 hours
 
 ---
 
@@ -1281,19 +1281,20 @@ Intent classification, context management, frontend integration
 - [ ] 
 - [ ] 
 
-**Time Invested:** ___ hours
+**Time Invested:** 4 hours
 
 
 ### Day 20 - Sunday, Nov 3, 2025
 **Today's Focus:** Frontend-backend integration
 
 **Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
+- [X] Remove useless code 
+- [X] COmplete end-to-end tests
+
 
 **Technical Decisions:**
-- 
+- Keep UI minimal 
+- Remove Chat History from the scope of this MVP
 
 **Challenges & Solutions:**
 - 
@@ -1305,35 +1306,28 @@ Intent classification, context management, frontend integration
 - [ ] 
 - [ ] 
 
-**Time Invested:** ___ hours
+**Time Invested:** 1 hour
 
 ---
 
 ### 📊 Week 3 Summary
 
 **Shipped:**
-- 
-- 
-- 
+- Functional API with Minimal endpoints to start chat session and continue conversations
+- Clean and functional UI to start chat sessions, and display products.
+- Integration Test scripts.
+- Cache services in docket container.
+- Updated Cost Analysis
+- Update Architecture document and Roadmap for Version 2
+
 
 **Key Technical Decisions:**
-1. 
-2. 
-3. 
+1. Reduce the scope of the UI.
+2. Add minimal threshold scores for Products and Category searches.
+3. Keep unit test minimal since functionality is heavy dependad in LLM responses.
+4. Keep integration tests mininal and limited to test*.py scripts
 
-**Metrics:**
-- Multi-turn conversations handled: ___
-- Intent classification accuracy: ___%
-- Average context window size: ___ messages
-- UI components built: ___
-
-**Blockers Resolved:**
-- 
-
-**Learnings:**
-- 
-
-**Total Time This Week:** ___ hours
+**Total Time This Week:** 26 hours
 
 
 ### Week 4: Model Analysis & Cost Optimization
@@ -1362,148 +1356,11 @@ The history and sufficiency uanalysis required more complex model. The requireme
 
 
 **Week 5 Preview:**
-Evaluation framework, metrics dashboard, automated testing
-
----
-
-## Week 5: Evaluation & Analytics
-**Goal:** Metrics dashboard live, automated evaluation running  
-**Dates:** Nov 11 - Nov 17, 2025
-
-### Day 21 - Monday, Nov 11, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 22 - Tuesday, Nov 12, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 23 - Wednesday, Nov 13, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 23 - Thursday, Nov 14, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-
-### 📊 Week 5 Summary
-
-**Shipped:**
-- 
-- 
-- 
-
-**Key Technical Decisions:**
-1. 
-2. 
-3. 
-
-**Metrics:**
-- Test queries evaluated: ___
-- Factual accuracy: ___%
-- Retrieval precision: ___%
-- Average response time: ___ ms
-- Thumbs up rate: ___%
-
-**Blockers Resolved:**
-- 
-
-**Learnings:**
-- 
-
-**Total Time This Week:** ___ hours
-
-**Week 6 Preview:**
 Polish, deployment, documentation, demo video
 
 ---
 
-## Week 6: Polish & Deployment
+## Week 5: Polish & Deployment
 **Goal:** Production deployment, comprehensive documentation, demo ready  
 **Dates:** Nov 18 - Nov 25, 2025
 
@@ -1530,132 +1387,6 @@ Polish, deployment, documentation, demo video
 
 **Time Invested:** ___ hours
 
----
-
-### Day 37 - Tuesday, Nov 19, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 38 - Wednesday, Nov 20, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 39 - Thursday, Nov 21, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 40 - Friday, Nov 22, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
-
-### Day 41 - Saturday, Nov 23, 2025
-**Today's Focus:** 
-
-**Completed:**
-- [ ] 
-- [ ] 
-- [ ] 
-
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
-**Time Invested:** ___ hours
-
----
 
 ### Day 42 - Sunday, Nov 24, 2025
 **Today's Focus:** Final review and launch preparation
