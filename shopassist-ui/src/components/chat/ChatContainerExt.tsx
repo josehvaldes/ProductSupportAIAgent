@@ -172,7 +172,7 @@ export function ChatContainerExt() {
                 key={index} 
                 message={msg}
                 sources={msg.sources || []}
-                query_type={msg.query_type || 'default_type'}
+                query_type={msg.query_type || 'user'}
               />
             ))}
 
