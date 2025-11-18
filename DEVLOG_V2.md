@@ -1,11 +1,11 @@
-#DEVLOG v1
+#DEVLOG v2
 
 ## Week 1 LangGraph Basics (POC)
 
 **Tasks:**
-- [] Migrate your simplest flow (policy questions) to LangGraph
+- [] Migrate simplest flow (policy questions) to LangGraph
 - [] Add LangSmith for observability
-- [] Compare response times vs your current implementation
+- [] Compare response times vs current implementation
 - [] Deliverable: Single-node graph working
 
 

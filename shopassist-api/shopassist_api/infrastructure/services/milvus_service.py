@@ -2,14 +2,16 @@ from typing import List, Dict, Optional
 from pymilvus import connections, Collection
 from shopassist_api.application.interfaces.service_interfaces import VectorServiceInterface
 from shopassist_api.logging_config import get_logger
+from shopassist_api.application.settings.config import settings
 
 logger = get_logger(__name__)
 
 class MilvusService(VectorServiceInterface):
     """Service to interact with Milvus vector database."""
-    def __init__(self, host: str = "localhost", port: str = "19530"):
-        self.host = host
-        self.port = port
+    def __init__(self, host: str = None, port: str = None):
+        self.host = host or settings.milvus_host
+        self.port = port or settings.milvus_port
+        logger.info(f"Connecting to Milvus at {self.host}:{self.port}")
         self.connected = False
         self._connect()
 
