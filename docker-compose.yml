@@ -1,0 +1,55 @@
+services:
+  shopassist-api:
+    build:
+      context: ./shopassist-api
+      dockerfile: Dockerfile
+    env_file:
+      - ./shopassist-api/.env
+      - .env
+    environment:
+      - MILVUS_HOST=milvus-standalone
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID}
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - shopassist-network
+    container_name: shopassist-api
+    image: shopassist-api:latest
+
+  shopassist-ui:
+    build:
+      context: ./shopassist-ui
+      dockerfile: Dockerfile
+    env_file:
+      - ./shopassist-ui/.env             
+    environment:
+      - REACT_APP_API_URL=http://shopassist-api:8000 # Use container name
+    ports:
+      - "8080:80"
+    depends_on:
+      - shopassist-api
+    networks:
+      - shopassist-network
+    container_name: shopassist-ui
+    image: shopassist-ui:latest
+  
+  redis:
+    image: redis:alpine
+    container_name: shopassist-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - shopassist-network
+    volumes:
+      - redis-data:/data
+
+networks:
+  shopassist-network:
+    external: true
+
+volumes:
+  redis-data:

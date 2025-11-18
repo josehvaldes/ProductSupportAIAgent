@@ -62,12 +62,16 @@ CRITICAL: Never fabricate information. If you don't know, admit it."""
         """
         Prompt for product-related queries
         """
+
+        history_section = f"""Conversation history:
+        {conversation_history}""" if conversation_history else ""
+
         user_message = f"""Customer query: {query}
 
 Product Information (Retrieved from database):
 {context}
 
-{f"Conversation history:\n{conversation_history}" if conversation_history else ""}
+{history_section}
 
 Based on the product information above, provide a helpful response to the customer's query.
 
@@ -79,8 +83,8 @@ Format your response with:
    - Key features (2-3 bullets)
 3. Ask if they need more information
 
-Keep your response concise (max 200 words) and friendly."""
-
+Keep your response concise (max 200 words) and friendly.
+"""
         return [
             {"role": "system", "content": PromptTemplates.SYSTEM_PROMPT},
             {"role": "user", "content": user_message}
@@ -95,12 +99,15 @@ Keep your response concise (max 200 words) and friendly."""
         """
         Prompt for policy-related queries
         """
+        history_section = f"""Conversation history:
+        {conversation_history}""" if conversation_history else ""
+
         user_message = f"""Customer query: {query}
 
 Policy Information (Retrieved from knowledge base):
 {context}
 
-{f"Conversation history:\n{conversation_history}" if conversation_history else ""}
+{history_section}
 
 Based on the policy information above, provide a clear and concise answer to the customer's question.
 
@@ -110,8 +117,8 @@ Format your response:
 3. Any relevant exceptions or conditions
 4. Contact information if they need more help
 
-Keep it concise and easy to understand."""
-
+Keep it concise and easy to understand.
+"""
         return [
             {"role": "system", "content": PromptTemplates.SYSTEM_PROMPT},
             {"role": "user", "content": user_message}
@@ -126,13 +133,15 @@ Keep it concise and easy to understand."""
         """
         Prompt for product comparison
         """
-        
+        history_section = f"""Conversation history:
+        {conversation_history}""" if conversation_history else ""
+
         user_message = f"""Customer wants to compare products: {query}
 
 Products to compare (Retrieved from database):
 {context}
 
-{f"Conversation history:\n{conversation_history}" if conversation_history else ""}
+{history_section}
 
 Based on the product information above, create a detailed comparison to answer the customer's query.
 
@@ -145,7 +154,6 @@ Create a helpful comparison focusing on:
 4. Your recommendation based on their needs
 
 Use a table or bullet points for clarity."""
-
         return [
             {"role": "system", "content": PromptTemplates.SYSTEM_PROMPT},
             {"role": "user", "content": user_message}
@@ -160,12 +168,14 @@ Use a table or bullet points for clarity."""
         """
         Prompt for detailed product information
         """
+        history_section = f"""Conversation history:
+        {conversation_history}""" if conversation_history else ""
         
         user_message = f"""Customer query: {query}
 Product Details:
 {context}
 
-{f"Conversation history:\n{conversation_history}" if conversation_history else ""}
+{history_section}
 
 Based on the product details above, provide a comprehensive answer to the customer's query.
 
@@ -241,10 +251,14 @@ You do NOT handle:
         """
         Prompt for chitchat queries
         """
-        user_message = f"""User message: "{query}"
-Context: \n {context}
+        history_section = f"""Conversation history:
+        {conversation_history}""" if conversation_history else ""
 
-{f"Conversation history:\n{conversation_history}" if conversation_history else ""}
+        user_message = f"""User message: "{query}"
+Context: 
+{context}
+
+{history_section}
 
 Respond appropriately based on the information about. 
 If this is a greeting or first interaction, welcome them and briefly mention you can 
