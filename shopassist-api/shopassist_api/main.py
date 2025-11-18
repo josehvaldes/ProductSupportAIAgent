@@ -55,7 +55,10 @@ async def log_requests(request: Request, call_next):
     return response
 
 # CORS settings
-origins = ["http://localhost:5173"]  # React dev server
+origins = ["http://localhost:5173", 
+           "http://localhost:8080",
+           "http://shopassist-api:8080" # internal access from shopassist-ui container
+           ]  # React dev servers
 
 # CORS middleware
 app.add_middleware(

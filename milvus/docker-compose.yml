@@ -15,6 +15,8 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+    networks:
+      - milvus-internal
 
   minio:
     container_name: milvus-minio
@@ -33,6 +35,8 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+    networks:
+      - milvus-internal
 
   standalone:
     container_name: milvus-standalone
@@ -58,6 +62,9 @@ services:
     depends_on:
       - "etcd"
       - "minio"
+    networks:
+      - milvus-internal
+      - shopassist-network
 
   attu:
     container_name: milvus-attu
@@ -68,7 +75,11 @@ services:
       - "3000:3000"
     depends_on:
       - standalone
+    networks:
+      - milvus-internal
 
 networks:
-  default:
-    name: milvus
+  milvus-internal:
+    driver: bridge
+  shopassist-network:
+    external: true

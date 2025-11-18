@@ -12,6 +12,8 @@ RUN npm ci
 # Copy application code
 COPY . .
 
+#internal API URL for Docker environment
+ENV REACT_APP_API_URL=http://shopassist-api:8000
 # Build the application
 RUN npm run build:docker
 
