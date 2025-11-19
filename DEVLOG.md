@@ -157,9 +157,7 @@ Decomposed Tasks:
 - learn techniques to reduce ADF costs
 - ADF benefits as orchestraitor
 
-**Next Steps:**
-- [ ] 
-- [ ] 
+ 
 
 **Time Invested:** 8 hours
 
@@ -689,9 +687,7 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
 **Learnings:**
 - How to add texts in bicep scripts.
 
-**Next Steps:**
-- [ ] 
-- [ ] 
+ 
 
 **Time Invested:** 4 hours
 
@@ -770,9 +766,7 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
 - Milvus API and queries.
 - Milvus metrics and distance meaning
 
-**Next Steps:**
-- [ ] 
-- [ ] 
+ 
 
 **Time Invested:** 3 hours
 
@@ -862,9 +856,7 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
 - RLock vs Lock for multithreading
 - better ways to handle azure credentials.
 
-**Next Steps:**
-- [ ] 
-- [ ] 
+ 
 
 **Time Invested:** 6 hours
 
@@ -950,9 +942,7 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
 **Learnings:**
 - Build UI components with Mantine
 
-**Next Steps:**
-- [ ] 
-- [ ] 
+ 
 
 **Time Invested:** 4 hours
 
@@ -1026,39 +1016,10 @@ Core RAG pipeline implementation - embedding service, Milvus integration, Azure 
 **Learnings:**
 - How to implement class based vs Module based singleton pattern in python
 
-**Next Steps:**
-- [ ] 
-- [ ] 
 
-**Time Invested:** ___ hours
+**Time Invested:** 5 hours
 
 ---
-
-### 📊 Week 2 Summary
-
-**Shipped:**
-- 
-- 
-- 
-
-**Key Technical Decisions:**
-1. 
-2. 
-3. 
-
-**Metrics:**
-- Total embeddings generated: ___
-- Average retrieval latency: ___ ms
-- Milvus collection size: ___ MB
-- Test queries answered: ___
-
-**Blockers Resolved:**
-- 
-
-**Learnings:**
-- 
-
-**Total Time This Week:** ___ hours
 
 **Week 3 Preview:**
 Intent classification, context management, frontend integration
@@ -1148,10 +1109,6 @@ Intent classification, context management, frontend integration
 - Different models can be used for different purposes
 - Specific class for Asynchrouns calls to Azure Open AI
 
-**Next Steps:**
-- [ ] 
-- [ ] 
-
 **Time Invested:** 8 hours
 
 ---
@@ -1218,10 +1175,6 @@ Intent classification, context management, frontend integration
 **Learnings:**
 - How to make cosine similatiry with different vector and weight them into a single score
 
-**Next Steps:**
-- [ ] 
-- [ ] 
-
 **Time Invested:** 7 hours
 
 ---
@@ -1242,16 +1195,6 @@ Intent classification, context management, frontend integration
 **Technical Decisions:**
 - Simplify comparison logic to retrieve products, and send a query to the LLM
 
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- reuse current code to simply process
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
 **Time Invested:** 2 hours
 
 ---
@@ -1268,19 +1211,6 @@ Intent classification, context management, frontend integration
 - [X] Final tests and polish UI
 
 
-**Technical Decisions:**
-- 
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
-
 **Time Invested:** 4 hours
 
 
@@ -1295,16 +1225,6 @@ Intent classification, context management, frontend integration
 **Technical Decisions:**
 - Keep UI minimal 
 - Remove Chat History from the scope of this MVP
-
-**Challenges & Solutions:**
-- 
-
-**Learnings:**
-- 
-
-**Next Steps:**
-- [ ] 
-- [ ] 
 
 **Time Invested:** 1 hour
 
@@ -1359,28 +1279,19 @@ The history and sufficiency uanalysis required more complex model. The requireme
 ### 📊 Week 5 Summary
 
 **Shipped:**
-- 
-- 
-- 
+- Documentation update
+- Dockerfiles for UI and API containers 
+- docker compose file for UAT testing
 
 **Key Technical Decisions:**
-1. 
-2. 
-3. 
-
-**Metrics:**
-- GitHub stars: ___
-- Demo video views: ___
-- Blog post reads: ___
-- Portfolio site visits: ___
-
-**Blockers Resolved:**
-- 
+1. Containarize the API and UI in one compose file
+2. Keep Milvus separated
+3. Keep documentation minimum and sufficient
 
 **Learnings:**
-- 
+- How to use the Default Azure Credential inside docker containers.
 
-**Total Time This Week:** ___ hours
+**Total Time This Week:** 4 hours
 
 ---
 
@@ -1389,65 +1300,27 @@ The history and sufficiency uanalysis required more complex model. The requireme
 ### Final Metrics
 
 **Technical:**
-- Total products in catalog: ___
-- Total embeddings: ___
-- Average query latency: ___ ms
-- Factual accuracy: ___%
-- System uptime: ___%
-- Total API calls: ___
-- Azure monthly cost: $___
+- Total products in catalog: 200
+- Total embeddings: 250
+- Average query latency: 4.5 ms
+- Factual accuracy: 0.80%
+- Total API endpoints: 15
+- Azure monthly cost: $18
 
 **Development:**
-- Total time invested: ___ hours
-- Lines of code: ___
-- Commits: ___
-- Issues opened/closed: ___/___
-- Documentation pages: ___
+- Total time invested: 140 hours
+- Lines of code API: 4495
+- Lines of code UI: 1604
+- Commits: 50
+- Documentation pages: 10
 
 **Portfolio:**
-- Live demo URL: ___
-- GitHub repo: ___
-- Blog post URL: ___
-- Video demo URL: ___
+- GitHub repo: https://github.com/josehvaldes/ProductSupportAIAgent
 
-### Key Achievements
-
-1. 
-2. 
-3. 
-4. 
-5. 
-
-### Most Valuable Learnings
-
-1. **Technical:**
-   - 
-   - 
-   - 
-
-2. **Process:**
-   - 
-   - 
-   - 
-
-3. **Career:**
-   - 
-   - 
-   - 
-
-### What I Would Do Differently
-
-1. 
-2. 
-3. 
 
 ### Next Steps
 
-- [ ] Apply to AI Engineer positions
-- [ ] Share project on LinkedIn
-- [ ] Post to Reddit/HackerNews
-- [ ] Create presentation for portfolio
-- [ ] Plan next portfolio project
+- [ ] Plan next V2 version
 
 ---
 
@@ -1473,22 +1346,5 @@ az consumption usage list --start-date 2025-10-14 --end-date 2025-10-21
 ### Important Links
 - Azure Portal: https://portal.azure.com
 - GitHub Repo: [YOUR_REPO_URL]
-- Live Demo: [YOUR_DEMO_URL]
 - Milvus Dashboard: [YOUR_MILVUS_URL]:9091
 - Cosmos DB: [YOUR_COSMOS_URL]
-
-### Key Contacts
-- Mentor/Advisor: [NAME]
-- Azure Support: [TICKET_URL]
-- Community Discord: [DISCORD_LINK]
-
----
-
-**Legend:**
-- ✅ Completed
-- 🚧 In Progress
-- 🚫 Blocked
-- 📝 Need to Document
-- 🐛 Bug Found
-- 💡 Idea/Enhancement
-
