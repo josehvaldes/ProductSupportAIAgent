@@ -1,3 +1,4 @@
+from langsmith import traceable
 from sentence_transformers import SentenceTransformer
 from shopassist_api.application.interfaces.service_interfaces import EmbeddingServiceInterface
 from shopassist_api.application.settings.config import settings
@@ -40,11 +41,13 @@ class TransformersEmbeddingService(EmbeddingServiceInterface):
         # Note: This is a rough approximation
         return len(text.split())
 
+    @traceable(name="llm.generate_embedding", tags=["embedding", "sentence_transformer"], metadata={"version": "1.0"})
     def generate_embedding(self, text: str) -> list[float]:
         """Generate embedding for single text using Transformers model."""
         embedding = self.model.encode(text, convert_to_tensor=False)
         return embedding.tolist()
 
+    @traceable(name="llm.generate_embedding_batch", tags=["embedding", "sentence_transformer"], metadata={"version": "1.0"})
     def generate_embedding_batch(self, input_texts: list[str], batch_size: int = 50) -> list[dict]:
         """Generate embeddings for a list of input texts."""
         all_embeddings = []

@@ -1,4 +1,5 @@
 from typing import List, Dict, Optional
+from langsmith import traceable
 from pymilvus import connections, Collection
 from shopassist_api.application.interfaces.service_interfaces import VectorServiceInterface
 from shopassist_api.logging_config import get_logger
@@ -94,6 +95,7 @@ class MilvusService(VectorServiceInterface):
         logger.info(f"Inserted {len(categories)} categories")
         return mr.insert_count
 
+    @traceable(name="milvus.search_products", tags=["retrieval", "products", "embedding", "milvus"], metadata={"version": "1.0"})
     def search_products(
         self,
         query_embedding: List[float],
@@ -133,7 +135,8 @@ class MilvusService(VectorServiceInterface):
                 })
         
         return formatted
-    
+
+    @traceable(name="milvus.search_knowledge_base", tags=["retrieval", "knowledge_base", "embedding", "milvus"], metadata={"version": "1.0"})
     def search_knowledge_base(
         self,
         query_embedding: List[float],
@@ -168,7 +171,8 @@ class MilvusService(VectorServiceInterface):
                 })
         
         return formatted
-    
+
+    @traceable(name="milvus.search_categories", tags=["retrieval", "categories", "embedding", "milvus"], metadata={"version": "1.0"})
     def search_categories(
         self,
         query_embedding: List[float],

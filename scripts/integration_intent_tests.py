@@ -9,7 +9,6 @@ import sys
 import argparse
 from pathlib import Path
 from dotenv import load_dotenv
-from typing import Dict, List
 
 sys.path.append('../shopassist-api')
 # Load .env file from the correct location
@@ -193,7 +192,8 @@ if __name__ == "__main__":
     parser.add_argument("scenario", type=str, help="scenario to run: all or comma-separated list of scenario numbers (1-7)")
     args = parser.parse_args()
     if args.scenario == "all":
-        print("Running all scenarios is not implemented yet.")
+        for i in range(1, 8):
+            tester.run_scenario(i)
     else:
         scenarios = args.scenario.split(",")
         for arg in scenarios:

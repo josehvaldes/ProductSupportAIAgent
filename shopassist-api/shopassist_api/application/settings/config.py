@@ -83,7 +83,13 @@ class Settings(BaseSettings):
     # class Config:
     #     env_file = ".env"
     #     case_sensitive = False
-    model_config = ConfigDict(str_max_length=100)
+    model_config = ConfigDict(
+        str_max_length=100,
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore"
+        )
 
 
 settings = Settings()

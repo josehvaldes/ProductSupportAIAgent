@@ -1,4 +1,5 @@
 from typing import List, Dict, Generator
+from langsmith import traceable
 from openai import AsyncAzureOpenAI
 import tiktoken
 from shopassist_api.application.interfaces.service_interfaces import LLMServiceInterface
@@ -52,7 +53,7 @@ class OpenAILLMService(LLMServiceInterface):
                     # Use shared credential manager
                     credential_manager = get_credential_manager()
                     token_provider = credential_manager.get_openai_token_provider()
-                    
+                    logger.info(f"Using Azure OpenAI endpoint: {settings.azure_openai_endpoint}")
                     OpenAILLMService._client = AsyncAzureOpenAI(
                         api_version=settings.azure_openai_api_version or "2024-02-01",
                         azure_endpoint=settings.azure_openai_endpoint,
@@ -61,7 +62,7 @@ class OpenAILLMService(LLMServiceInterface):
                 else:
                     logger.info("Using existing singleton Azure OpenAI client")
     
-   
+    @traceable(name="llm.generate_response", tags=["llm", "openai", "azure"], metadata={"version": "1.0"})
     async def generate_response(
         self,
         messages: List[Dict[str, str]],
@@ -139,7 +140,8 @@ class OpenAILLMService(LLMServiceInterface):
         except Exception as e:
             logger.error(f"Error generating response: {e}")
             raise
-    
+
+    @traceable(name="llm.streaming_response", tags=["llm", "openai", "azure"], metadata={"version": "1.0"})    
     def streaming_response(
         self,
         messages: List[Dict[str, str]],

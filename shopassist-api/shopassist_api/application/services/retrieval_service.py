@@ -1,5 +1,6 @@
 import json
 from typing import List, Dict, Optional
+from langsmith import traceable
 from shopassist_api.application.interfaces.service_interfaces import EmbeddingServiceInterface, RepositoryServiceInterface, VectorServiceInterface
 from shopassist_api.logging_config import get_logger
 import traceback
@@ -24,6 +25,7 @@ class RetrievalService:
     def cosine_sim(self, a, b):
         return dot(a, b) / (norm(a) * norm(b))
 
+    @traceable(name="retrieval.retrieve_top_categories", tags=["retrieval", "category", "milvus"], metadata={"version": "1.0"})
     async def retrieve_top_categories(self, query:str, top_k=5) -> List[Dict]:
         """Retrieve product categories"""
         try:
@@ -97,7 +99,7 @@ class RetrievalService:
         sorted_categories = sorted(category_map.values(), key=lambda x: x['score'], reverse=True)
         return sorted_categories
 
-
+    @traceable(name="retrieval.retrieve_products", tags=["retrieval", "product", "milvus"], metadata={"version": "1.0"})
     async def retrieve_products(
             self,
             query: str,
@@ -149,6 +151,7 @@ class RetrievalService:
             traceback.print_exc()
             return []
 
+    @traceable(name="retrieval.retrieve_knowledge_base", tags=["retrieval", "knowledge_base", "milvus"], metadata={"version": "1.0"})
     async def retrieve_knowledge_base(
             self,
             query: str,
@@ -181,7 +184,8 @@ class RetrievalService:
         except Exception as e:
             logger.error(f"Error in retrieve_knowledge_base: {e}")
             return []
-    
+
+    @traceable(name="retrieval.hybrid_search", tags=["retrieval", "product", "milvus"], metadata={"version": "1.0"})
     async def hybrid_search(
         self,
         query: str,

@@ -1,5 +1,6 @@
 import asyncio
 import traceback
+from langsmith import traceable
 import tiktoken
 from openai import AzureOpenAI
 from shopassist_api.application.settings.config import settings
@@ -49,6 +50,7 @@ class OpenAIEmbeddingService(EmbeddingServiceInterface):
         """Count tokens in text"""
         return len(self.encoding.encode(text))
     
+    @traceable(name="llm.generate_embedding", tags=["embedding", "openai", "azure"], metadata={"version": "1.0"})    
     def generate_embedding(self, input_text: str) -> list[float]:
         """Generate embedding for the given input text."""
         try:
@@ -62,7 +64,8 @@ class OpenAIEmbeddingService(EmbeddingServiceInterface):
             logger.error(f"Error generating embedding: {e}")
             traceback.print_exc()
             return []
-        
+    
+    @traceable(name="llm.generate_embedding_batch", tags=["embedding", "openai", "azure"], metadata={"version": "1.0"})
     def generate_embedding_batch(self, input_texts: list[str], batch_size: int = 100) -> list[dict]:
         """Generate embeddings for a list of input texts."""
         all_embeddings = []

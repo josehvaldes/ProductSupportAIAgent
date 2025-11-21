@@ -1,4 +1,5 @@
 from typing import List, Dict
+from langsmith import traceable
 import tiktoken
 from shopassist_api.logging_config import get_logger
 import traceback
@@ -13,6 +14,7 @@ class ContextBuilder:
         self.max_tokens = max_tokens
         self.encoding = tiktoken.encoding_for_model("gpt-4")
 
+    @traceable(name="context.build_product_context", tags=["context"], metadata={"version": "1.0"})
     def build_product_context(self, products: List[Dict]) -> str:
         """
         Build context string from product results
@@ -48,6 +50,7 @@ class ContextBuilder:
         context = "\n\n".join(context_parts)
         return context
     
+    @traceable(name="context.build_knowledge_base_context", tags=["context"], metadata={"version": "1.0"})
     def build_knowledge_base_context(self, chunks: List[Dict]) -> str:
         """
         Build context string from KB results
