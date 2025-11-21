@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     # API Configuration
     api_title: str = "Shop Assistant API"
     api_description: str = "AI-Powered Product Knowledge & Support Agent"
-    api_version: str = "1.0"
+    api_version: str = "2.0"
     debug: bool = False
 
     use_dumb_service: bool = False
@@ -80,6 +80,10 @@ class Settings(BaseSettings):
     threshold_knowledge_base_similarity: float = 0.75
     threshold_category_similarity: float = 0.8
 
+    langchain_tracing_v2: bool = True
+    langchain_project: str = "ShopAssistAPI"
+    langsmith_api_key: Optional[str] = None    
+    
     # class Config:
     #     env_file = ".env"
     #     case_sensitive = False

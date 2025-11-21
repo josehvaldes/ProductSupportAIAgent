@@ -1,6 +1,8 @@
 """
 FastAPI main application entry point for Shop Assistant API.
 """
+import os
+from dotenv import load_dotenv 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from shopassist_api.application.settings.config import settings
@@ -9,6 +11,8 @@ from shopassist_api.logging_config import setup_logging
 from .logging_config import get_logger
 from contextlib import asynccontextmanager
 import time
+
+load_dotenv()
 
 setup_logging(
         log_level=settings.log_level,
@@ -23,6 +27,8 @@ async def lifespan(app: FastAPI):
     # Startup
     
     logger.info("Starting ShopAssist API...")
+    logger.info(f"API Title: {settings.api_title} Version: {settings.api_version}")
+
     yield
     # Shutdown
     logger.info("Shutting down ShopAssist API...")

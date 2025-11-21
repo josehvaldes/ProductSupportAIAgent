@@ -191,7 +191,7 @@ class RAGService:
             product_sources = FormatterUtils.build_product_sources(llm_query_type,results)
 
             # Step 6: Save user and assistant messages
-            self.session_manager.add_message(
+            await self.session_manager.add_message(
                 session_id=session_id,
                 user_id=user_id,
                 role="user",
@@ -207,7 +207,7 @@ class RAGService:
                     "turn_index": len(history) + 1 if history else 1
                 }
             
-            self.session_manager.add_message(
+            await self.session_manager.add_message(
                 session_id=session_id,
                 user_id=user_id,
                 role="assistant",
@@ -216,11 +216,16 @@ class RAGService:
             )
 
             total_time = time.time() - start_time
-            run.add_metadata({
-                "total_latency_ms": total_time * 1000,
-                "intent": llm_query_type,
-                "docs_used": len(results)
-            })
+            logger.info(f"RAG pipeline completed in {total_time*1000:.2f} ms for session: [{session_id}]")
+            if run:
+                run.add_metadata({
+                    "total_latency_ms": total_time * 1000,
+                    "intent": llm_query_type,
+                    "docs_used": len(results)
+                })
+            else:
+                logger.warning("No active LangSmith run found to add metadata.")
+
             # return
             return {
                 "response": llm_response['response'],
