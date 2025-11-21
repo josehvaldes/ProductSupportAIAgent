@@ -1,11 +1,11 @@
 from datetime import datetime, timezone
-from mailbox import Message
 import re
 from typing import List
 import uuid
 from langsmith import traceable
 from shopassist_api.application.interfaces.service_interfaces import CacheServiceInterface, RepositoryServiceInterface
 from shopassist_api.domain.models.session_context import SessionContext
+from shopassist_api.domain.models.message import Message
 from shopassist_api.domain.models.user_preferences import UserPreferences
 
 class SessionManager:

@@ -84,9 +84,6 @@ class Settings(BaseSettings):
     langchain_project: str = "ShopAssistAPI"
     langsmith_api_key: Optional[str] = None    
     
-    # class Config:
-    #     env_file = ".env"
-    #     case_sensitive = False
     model_config = ConfigDict(
         str_max_length=100,
         env_file=".env",

@@ -181,7 +181,7 @@ class CosmosProductService(RepositoryServiceInterface):
             container = self.database.get_container_client(self.messages_container)
             
             query = """
-            SELECT c.role, c.content, c.timestamp, c.metadata
+            SELECT c.role, c.content, c.timestamp, c.metadata, c.id, c.user_id, c.session_id
             FROM c
             WHERE c.session_id = @session_id
             ORDER BY c.timestamp ASC

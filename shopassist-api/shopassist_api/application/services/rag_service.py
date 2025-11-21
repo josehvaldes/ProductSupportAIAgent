@@ -23,7 +23,7 @@ class RAGService:
     """
     
     TOP_K_PRODUCTS = 3
-    TOP_K_KB_ARTICLES = 3
+    TOP_K_KB_ARTICLES = 2
     TOP_K_CATEGORIES = 3
 
     def __init__(self,
