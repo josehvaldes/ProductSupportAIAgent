@@ -275,22 +275,22 @@ class RetrievalService:
         """
         enriched = []
         logger.info(f"Enriching {len(products)} products with full data from Cosmos DB")
-
-        for product in products:
-            try:
-                # Get full product from Cosmos
-                logger.info(f"Fetching product ID: {product['product_id']}")
-                full_product = await self.cosmos.get_product_by_id(product['product_id'])
-                if full_product:
+        product_ids = [product['product_id'] for product in products]
+        try:
+            full_products = await self.cosmos.get_products_by_ids(product_ids)
+            for full_product in full_products:
+                product = next((p for p in products if p['product_id'] == full_product['id']), None)
+                if product:
                     enriched.append({
                         **full_product,
                         "relevance_score": product['distance'],
                         "matched_text": product['text'][:200]  # Preview
                     })
-            except Exception as e:
-                logger.error(f"Error enriching product {product['product_id']}: {e}")
-                traceback.print_exc()
-                continue
+                else:
+                    logger.warning(f"Product ID {full_product['id']} not found in Milvus-Cosmos results")
+        except Exception as e:
+            logger.error(f"Error enriching product {full_product['product_id']}: {e}")
+            traceback.print_exc()
 
         return enriched
     

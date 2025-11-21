@@ -4,6 +4,7 @@ from typing import List, Dict
 import uuid
 from azure.cosmos import CosmosClient
 from azure.cosmos.exceptions import CosmosResourceNotFoundError
+from langsmith import traceable
 from shopassist_api.application.settings.config import settings
 from shopassist_api.application.interfaces.service_interfaces import RepositoryServiceInterface
 from shopassist_api.domain.models.message import Message
@@ -45,6 +46,7 @@ class CosmosProductService(RepositoryServiceInterface):
         else:
             self.client = None
 
+    @traceable(name="cosmos.get_product_by_id", tags=["cosmos", "product", "azure"], metadata={"version": "1.0"})
     async def get_product_by_id(self, product_id: str)-> dict[str, any]:
         """Retrieve a product by its ID from CosmosDB."""
         if not self.client or not self.database_name:
@@ -66,7 +68,8 @@ class CosmosProductService(RepositoryServiceInterface):
             logger.error(f"Error retrieving product by ID: {e}")
             traceback.print_exc()
             return None
-
+    
+    @traceable(name="cosmos.get_products_by_ids", tags=["cosmos", "product", "azure"], metadata={"version": "1.0"})
     async def get_products_by_ids(self, product_ids: List[str]) -> list[dict[str, any]]:
         """Retrieve multiple products by their IDs from CosmosDB."""
         if not self.client or not self.database_name:
@@ -89,6 +92,7 @@ class CosmosProductService(RepositoryServiceInterface):
             traceback.print_exc()
             return []
 
+    @traceable(name="cosmos.search_products_by_category", tags=["cosmos", "product", "azure"], metadata={"version": "1.0"})
     async def search_products_by_category(self, category: str)-> list[dict[str, any]]:
         """Search products by category from CosmosDB."""
         if not self.client or not self.database:
@@ -128,7 +132,8 @@ class CosmosProductService(RepositoryServiceInterface):
             logger.error(f"Error searching products by price range: {e}")
             traceback.print_exc()
             return []
-
+    
+    @traceable(name="cosmos.search_products_by_text", tags=["cosmos", "product", "azure"], metadata={"version": "1.0"})
     async def search_products_by_text(self, text: str) -> list[dict[str, any]]:
         """Search products by text from CosmosDB."""
         if not self.client or not self.database_name:
@@ -150,6 +155,7 @@ class CosmosProductService(RepositoryServiceInterface):
             traceback.print_exc()
             return []
     
+    @traceable(name="cosmos.search_products_by_name", tags=["cosmos", "product", "azure"], metadata={"version": "1.0"})
     async def search_products_by_name(self, name: str) -> list[dict[str, any]]:
         """Search products by name from CosmosDB."""
         if not self.client or not self.database_name:
@@ -173,7 +179,7 @@ class CosmosProductService(RepositoryServiceInterface):
             return []
         
 
-
+    @traceable(name="cosmos.get_conversation_history", tags=["cosmos", "history", "azure"], metadata={"version": "1.0"})
     async def get_conversation_history(self, session_id: str) -> List[Dict]:
         """Get conversation history for a session"""
         try:
@@ -199,6 +205,7 @@ class CosmosProductService(RepositoryServiceInterface):
             logger.error(f"Error getting conversation history: {e}")
             return []
 
+    @traceable(name="cosmos.save_message", tags=["cosmos", "message", "azure"], metadata={"version": "1.0"})
     async def save_message(
         self,
         session_id: str,
