@@ -18,7 +18,7 @@ class OpenAIEmbeddingService(EmbeddingServiceInterface):
     _client_lock = RLock()
     
     def __init__(self, model_name: str = None):
-        self.model_name = model_name or settings.embedding_model or "text-embedding-3-small"
+        self.model_name = model_name or settings.azure_openai_embedding_model or "text-embedding-3-small"
         self.DIMENSION = 1536
         self.encoding = tiktoken.encoding_for_model(self.model_name)
         

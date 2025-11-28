@@ -26,7 +26,7 @@ class RetrievalService:
         return dot(a, b) / (norm(a) * norm(b))
 
     @traceable(name="retrieval.retrieve_top_categories", tags=["retrieval", "category", "milvus"], metadata={"version": "1.0"})
-    async def retrieve_top_categories(self, query:str, top_k=5) -> List[Dict]:
+    async def retrieve_top_categories(self, query:str, top_k=3) -> List[Dict]:
         """Retrieve product categories"""
         try:
             logger.info(f"Generating embedding for query: {query}")
@@ -120,12 +120,12 @@ class RetrievalService:
         """
         try:
             # Generate query embedding
-            logger.info(f"Generating embedding for query: {query}")
-            query_embedding = self.embedder.generate_embedding(query)
             
+            query_embedding = self.embedder.generate_embedding(query)
             # Build filter expression for Milvus
             filter_expr = self._build_filter_expression(filters)
-            logger.info(f"Filter expression sent to Milvus: {filter_expr}")
+            
+            logger.info(f"Retrieve products for {query} and filters: {filter_expr}")
             # Search in Milvus
             results = self.milvus.search_products(
                 query_embedding=query_embedding,
@@ -134,7 +134,6 @@ class RetrievalService:
             )            
             # Deduplicate by product_id and aggregate scores
             products = self._deduplicate_and_aggregate(results)
-            logger.info(f"Retrieved {len(products)} unique products from Milvus")
             
             results_to_return = []
             # Enrich with full product data from Cosmos DB

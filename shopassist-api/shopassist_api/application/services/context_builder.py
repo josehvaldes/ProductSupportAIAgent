@@ -59,7 +59,7 @@ class ContextBuilder:
         total_tokens = 0
         
         for i, chunk in enumerate(chunks, 1):
-            chunk_text = f"Source {i} [{chunk['doc_type']}]:\n{chunk['text']}"
+            chunk_text = f"Source {i} [{chunk['doc_id']}]:\n{chunk['text']}"
             tokens = len(self.encoding.encode(chunk_text))
             
             if total_tokens + tokens > self.max_tokens:

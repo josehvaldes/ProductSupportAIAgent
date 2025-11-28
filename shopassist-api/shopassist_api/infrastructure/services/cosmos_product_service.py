@@ -205,7 +205,6 @@ class CosmosProductService(RepositoryServiceInterface):
             logger.error(f"Error getting conversation history: {e}")
             return []
 
-    @traceable(name="cosmos.save_message", tags=["cosmos", "message", "azure"], metadata={"version": "1.0"})
     async def save_message(
         self,
         session_id: str,

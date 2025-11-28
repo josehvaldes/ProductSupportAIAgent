@@ -26,7 +26,7 @@ class Settings(BaseSettings):
 
     # Azure Configuration
     azure_openai_endpoint: Optional[str] = None
-    azure_openai_api_version: str = "2024-02-15-preview"
+    azure_openai_api_version: str = "2024-08-01-preview" #"2024-02-15-preview"
 
     azure_openai_embedding_model: Optional[str] = None
     azure_openai_embedding_model_deployment: Optional[str] = None
@@ -61,7 +61,7 @@ class Settings(BaseSettings):
     cosmosdb_session_container: str = "sessions"
 
     # Cache Configuration
-    redis_endpoint: str = "redis://localhost:6379"
+    redis_url: str = "redis://localhost:6379"
     redis_password: Optional[str] = None
         
     #Logging Configuration
@@ -75,10 +75,14 @@ class Settings(BaseSettings):
     milvus_product_collection: str = "products_collection"
     milvus_knowledge_base_collection: str = "knowledge_base_collection"
 
-    # Similarity Thresholds
-    threshold_product_similarity: float = 0.8
+    # Similarity Thresholds for category searchs
+    threshold_category_similarity: float = 0.78
+    TOP_K_CATEGORIES: int = 3
+
+    # Similarity Thresholds. Not used currently
+    threshold_product_similarity: float = 0.78
     threshold_knowledge_base_similarity: float = 0.75
-    threshold_category_similarity: float = 0.8
+    
 
     langchain_tracing_v2: bool = True
     langchain_project: str = "ShopAssistAPI"

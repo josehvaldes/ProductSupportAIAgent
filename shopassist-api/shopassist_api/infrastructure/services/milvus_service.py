@@ -12,7 +12,6 @@ class MilvusService(VectorServiceInterface):
     def __init__(self, host: str = None, port: str = None):
         self.host = host or settings.milvus_host
         self.port = port or settings.milvus_port
-        logger.info(f"Connecting to Milvus at {self.host}:{self.port}")
         self.connected = False
         self._connect()
 

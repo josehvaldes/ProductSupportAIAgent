@@ -68,7 +68,7 @@ test_queries = [
 ]
 
 print("Running LangSmith POC...")
-print("Check your traces at: https://smith.langchain.com/\n")
+print("Check traces at: https://smith.langchain.com/\n")
 
 # for query in test_queries:
 #     print(f"Query: {query}")
@@ -79,11 +79,11 @@ print("Check your traces at: https://smith.langchain.com/\n")
 
 
 print("2. Testing embed_query()...")
-query = "headphones for samsung z flip?"
-query_vector = embeddings.embed_query(query)  # For Milvus search
+# query = "headphones for samsung z flip?"
+# query_vector = embeddings.embed_query(query)  # For Milvus search
 
-print(f"Vector dimension: {len(query_vector)}")
-print(f"First 5 values: {query_vector[:5]}\n")
+# print(f"Vector dimension: {len(query_vector)}")
+# print(f"First 5 values: {query_vector[:5]}\n")
 
 # # Test 3: Batch embeddings (check LangSmith for this)
 # print("3. Testing embed_documents()...")
@@ -94,8 +94,8 @@ print(f"First 5 values: {query_vector[:5]}\n")
 
 # # Test 4: Manual embedding trace
 # print("4. Testing manual embedding trace...")
-# print("LANGCHAIN_TRACING_V2:", os.getenv("LANGCHAIN_TRACING_V2"))
-# print("LANGCHAIN_PROJECT:", os.getenv("LANGCHAIN_PROJECT"))
-# print("LANGCHAIN_API_KEY:", "set" if os.getenv("LANGCHAIN_API_KEY") else "NOT SET")
-# vector = get_embedding("smartphone with good camera")
-# print(f"Manual embedding trace vector dimension: {len(vector)}")
+print("LANGCHAIN_TRACING_V2:", os.getenv("LANGCHAIN_TRACING_V2"))
+print("LANGCHAIN_PROJECT:", os.getenv("LANGCHAIN_PROJECT"))
+print("LANGCHAIN_API_KEY:", "set" if os.getenv("LANGSMITH_API_KEY") else "NOT SET")
+vector = get_embedding("smartphone with good camera")
+print(f"Manual embedding trace vector dimension: {len(vector)}")

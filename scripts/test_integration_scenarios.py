@@ -9,7 +9,6 @@ import sys
 import argparse
 from pathlib import Path
 from dotenv import load_dotenv
-from typing import Dict, List
 
 sys.path.append('../shopassist-api')
 # Load .env file from the correct location
