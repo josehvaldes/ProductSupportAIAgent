@@ -14,10 +14,8 @@ class AgentResponse(BaseModel):
     message: str
     confidence: float = 0.0
     metadata: Metadata = None
-
-class ProductSearchResponse(AgentResponse):
-    """Structured response from ProductSearchAgent"""
     sources: list[dict] = []
+
 
 class PolicyResponse(AgentResponse):
     """Structured policy agent response"""

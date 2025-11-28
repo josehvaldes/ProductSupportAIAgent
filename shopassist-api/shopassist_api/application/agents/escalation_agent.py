@@ -8,8 +8,10 @@ logger = get_logger(__name__)
 class EscalationAgent:
     """No tools needed - just returns escalation message"""
     
-    async def ainvoke(self, input: dict) -> EscalationResponse:
+    async def ainvoke(self, state: dict) -> EscalationResponse:
         """Escalate the issue to human support"""
+        
+        #execute escalation logic here (e.g., create support ticket, notify human agent, etc.)
 
         logger.info("EscalationAgent: Escalating issue to human support.")
         return EscalationResponse(

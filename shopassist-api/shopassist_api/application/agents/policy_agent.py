@@ -3,8 +3,7 @@ import json
 import operator
 import time
 
-from typing import Any, Optional, TypedDict, Annotated
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+from typing import Optional, TypedDict, Annotated
 
 from langchain_openai import AzureChatOpenAI
 from langchain.agents import create_agent
@@ -18,6 +17,7 @@ from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langgraph.checkpoint.redis import RedisSaver, RunnableConfig, CheckpointTuple
 from langgraph.checkpoint.redis.aio import AsyncRedisSaver
 
+from shopassist_api.application.agents.agent_utils import AgentTools
 from shopassist_api.application.agents.base import Metadata, PolicyResponse
 from shopassist_api.application.settings.config import settings
 from shopassist_api.infrastructure.services.azure_credential_manager import get_credential_manager
@@ -175,47 +175,15 @@ class PolicyAgent:
             )
         )
 
-
-    async def get_history(self, session_id: str) -> list[dict]:
-        config:RunnableConfig = {
-            "configurable": {
-            "thread_id": session_id,
-            }
-        }
-        
-        if self.agent is None:
-            self.agent = await self._get_agent()
-
-        state = await self.agent.aget_state(config)         
-        messages = state.values.get("messages", [])
-        response = []
-        metadata = None
-        for msg in messages:
-            if isinstance(msg, HumanMessage):
-                role = "user"
-            elif isinstance(msg, AIMessage):
-                role = "assistant"
-                if isinstance(msg, AIMessage):
-                    if msg.usage_metadata:
-                        metadata = {
-                            "input_tokens": msg.usage_metadata.get("input_tokens"),
-                            "output_tokens": msg.usage_metadata.get("output_tokens"),
-                            "total_tokens": msg.usage_metadata.get("total_tokens")
-                        }
-            elif isinstance(msg, ToolMessage):
-                role = "tool"
-            else:
-                role = type(msg).__name__.lower()
-            
-            response.append({
-                "role": role,
-                "content": msg.content,
-                "metadata": metadata
-            })
-        return response
-    
     def get_agent(self):
         return self.agent
+
+    async def get_history(self, session_id: str) -> list[dict]:
+        """Retrieve the message history for a given session ID."""
+        if self.agent is None:
+            self.agent = await self._get_agent()
+        return await AgentTools.get_history(self.agent, session_id)
+    
 #endregion
 
 #region Helper functions for testing

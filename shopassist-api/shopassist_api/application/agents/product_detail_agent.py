@@ -10,10 +10,10 @@ from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
 
 from shopassist_api.application.agents.agent_utils import AgentTools
-from shopassist_api.application.agents.base import Metadata, AgentResponse
+from shopassist_api.application.agents.base import AgentResponse, Metadata
 from shopassist_api.application.settings.config import settings
 from shopassist_api.infrastructure.services.azure_credential_manager import get_credential_manager
-from shopassist_api.application.prompts.agent_templates import ProductComparisonTemplates
+from shopassist_api.application.prompts.agent_templates import ProductDetailTemplates
 from shopassist_api.application.services.context_builder import ContextBuilder
 from shopassist_api.application.interfaces.di_container import get_retrieval_service
 
@@ -21,38 +21,39 @@ from shopassist_api.application.interfaces.di_container import get_retrieval_ser
 from shopassist_api.logging_config import get_logger
 logger = get_logger(__name__)
 
-class ProductComparisonAgentState(TypedDict):
-    """State schema for ProductComparisonAgent"""
+
+#region ProductDetailAgent
+class ProductDetailAgentState(TypedDict):
+
+    """State schema for ProductDetailAgent"""
     messages: Annotated[list, operator.add]
-    product_names: Optional[list[str]] = None
+    product_name: Optional[str] = None
 
 @tool
-async def search_product(state:ProductComparisonAgentState) -> dict:
-    """ Tool to search products based on product names.
+async def search_product(state:ProductDetailAgentState) -> dict:
+    """Tool to search products based on user query.
     Args:
-        state (ProductComparisonAgentState): The current state of the agent.
+        state (ProductDetailAgentState): The current state of the agent.
         state includes:
-            - product_names: The names of the products to get details for.            
+            - product_name: The name of the product to get details for.
+            - top_k: Number of top products to retrieve.
     Returns:
         dict: A dictionary containing the search results and context.
     """
-    product_names = state.get("product_names", [])
-    logger.info(f"Getting details for products: {product_names}")
+
+    query = state.get("product_name", "")
+
+    logger.info(f"Getting details for product: [{query}]")
 
     retrieval = get_retrieval_service()
-    products = []
-
-    for name in product_names:
-        query = name
-        product = await retrieval.retrieve_products(query,
-                enriched=True,
-                top_k=1)
-        products.extend(product)
+    products = await retrieval.retrieve_products(query,
+            enriched=True,
+            top_k=1)
 
     if not products or len(products) == 0:
         return {
             "products": [],
-            "context": "No products found matching the input."
+            "context": "No products found matching your query."
         }
     
     context_builder = ContextBuilder()
@@ -68,9 +69,10 @@ async def search_product(state:ProductComparisonAgentState) -> dict:
         "products": formatted_products
     }
 
-class ProductComparisonAgent:
-    
-    cache_checkpointer = None   
+
+class ProductDetailAgent:
+
+    cache_checkpointer = None
 
     def __init__(self):
         credential_manager = get_credential_manager()
@@ -85,22 +87,21 @@ class ProductComparisonAgent:
         self.agent = None
 
     async def _get_agent(self):
-        if ProductComparisonAgent.cache_checkpointer is None:
-            logger.info(f"Initializing Redis Checkpointer for ProductComparisonAgent: {settings.redis_url}")
+        if ProductDetailAgent.cache_checkpointer is None:
+            logger.info(f"Initializing Redis Checkpointer for ProductDetailAgent: {settings.redis_url}")
             async with AsyncRedisSaver.from_conn_string(settings.redis_url) as checkpointer:
                 await checkpointer.asetup()
-                ProductComparisonAgent.cache_checkpointer = checkpointer
+                ProductDetailAgent.cache_checkpointer = checkpointer
 
         agent = create_agent(
                 model=self.llm,
                 tools=[search_product],
-                checkpointer= ProductComparisonAgent.cache_checkpointer,  
-                system_prompt= ProductComparisonTemplates.SYSTEM_PROMPT,
-                state_schema=ProductComparisonAgentState,
+                checkpointer= ProductDetailAgent.cache_checkpointer,  
+                system_prompt= ProductDetailTemplates.SYSTEM_PROMPT,
+                state_schema=ProductDetailAgentState,
             )
         return agent
-    
-
+        
     async def ainvoke(self, state: dict) -> AgentResponse:
         """Det products based on user query and product IDs."""
         user_query: str = state.get("user_query", "")
@@ -147,7 +148,7 @@ class ProductComparisonAgent:
         return AgentResponse(
             message=response,
             sources=sources,
-            agent_name="product_comparison",
+            agent_name="product_detail",
             metadata=Metadata(
                 input_token=sum_input_tokens,
                 output_token=sum_output_tokens,
@@ -159,4 +160,3 @@ class ProductComparisonAgent:
         if self.agent is None:
             self.agent = await self._get_agent()
         return await AgentTools.get_history(self.agent, session_id)
-    

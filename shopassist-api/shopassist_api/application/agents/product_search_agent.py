@@ -1,16 +1,16 @@
 import json
 import operator
-from typing import Annotated, Any, Optional, TypedDict
+from typing import Annotated, Optional, TypedDict
 import uuid
 from langchain_openai import AzureChatOpenAI
-from langgraph.checkpoint.redis import RunnableConfig
 from langgraph.checkpoint.redis.aio import AsyncRedisSaver
 from langchain.agents import create_agent
 from langchain.tools import tool
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
 from pydantic import BaseModel, Field
-from shopassist_api.application.agents.base import Metadata, ProductSearchResponse
+from shopassist_api.application.agents.agent_utils import AgentTools
+from shopassist_api.application.agents.base import AgentResponse, Metadata
 from shopassist_api.application.settings.config import settings
 from shopassist_api.infrastructure.services.azure_credential_manager import get_credential_manager
 from shopassist_api.application.prompts.agent_templates import ProductSearchTemplates
@@ -60,9 +60,7 @@ async def search_products(state:ProductSearchAgentState) -> dict:
         if price_filter.max_price is not None:
             filters['max_price'] = price_filter.max_price
 
-    context_builder = ContextBuilder()
-    
-    logger.info(f"ProductSearchAgent: Searching products for query: [{query}] with top_k={top_k}, filters={filters}")
+    logger.info(f"Searching products for query: [{query}] with top_k={top_k}, filters={filters}")
     # Identify categories first
     retrieval = get_retrieval_service()
     categories = await retrieval.retrieve_top_categories(query, top_k=settings.TOP_K_CATEGORIES)
@@ -74,7 +72,7 @@ async def search_products(state:ProductSearchAgentState) -> dict:
                 category_names.append(cat['name'])
         filters = {**filters, **{'categories': category_names}}
 
-    logger.info(f"ProductSearchAgent: Identified filters: {filters} for query: [{query}]")
+    logger.info(f"Identified filters: {filters} for query: [{query}]")
     products = await retrieval.retrieve_products(query,
                 enriched=True,
                 top_k=top_k, 
@@ -85,14 +83,15 @@ async def search_products(state:ProductSearchAgentState) -> dict:
             "products": [],
             "context": "No products found matching your query."
         }
-
+    
+    context_builder = ContextBuilder()
     context = context_builder.build_product_context(products)
     formatted_products = [ {
         "id": prod['id'],
         "name": prod['name'],
         "relevance_score": prod.get('relevance_score', 0)
     } for prod in products ]
-    logger.info(f"ProductSearchAgent: Retrieved {formatted_products} products for query: [{query}]")
+    logger.info(f"Retrieved {formatted_products} products for query: [{query}]")
     return {
         "context": context,
         "products": formatted_products
@@ -132,10 +131,10 @@ class ProductSearchAgent:
             )
         return agent
 
-    async def ainvoke(self, input: dict) -> ProductSearchResponse:
+    async def ainvoke(self, state: dict) -> AgentResponse:
         
-        user_query: str = input.get("user_query", "")
-        session_Id: Optional[str] = input.get("session_Id", None)
+        user_query: str = state.get("user_query", "")
+        session_Id: Optional[str] = state.get("session_Id", None)
         
         if user_query is None or user_query.strip() == "":
             raise ValueError("user_query cannot be empty.")
@@ -175,7 +174,7 @@ class ProductSearchAgent:
                     sum_total_tokens += metadata.get("total_tokens") or 0
 
         
-        return ProductSearchResponse (
+        return AgentResponse (
             message=response, 
             sources=sources, 
             agent_name="product_search",
@@ -188,43 +187,9 @@ class ProductSearchAgent:
 
     async def get_history(self, session_id: str) -> list[dict]:
         """Retrieve the message history for a given session ID."""
-        config:RunnableConfig = {
-            "configurable": {
-            "thread_id": session_id,
-            }
-        }
-
         if self.agent is None:
             self.agent = await self._get_agent()
-        
-        state = await self.agent.aget_state(config)         
-        messages = state.values.get("messages", [])
-        response = []
-        for msg in messages:
-            metadata = None
-            if isinstance(msg, HumanMessage):
-                role = "user"
-            elif isinstance(msg, AIMessage):
-                role = "assistant"
-                if isinstance(msg, AIMessage):
-                    if msg.usage_metadata:
-                        metadata = {
-                            "input_tokens": msg.usage_metadata.get("input_tokens"),
-                            "output_tokens": msg.usage_metadata.get("output_tokens"),
-                            "total_tokens": msg.usage_metadata.get("total_tokens")
-                        }
-            elif isinstance(msg, ToolMessage):
-                role = "tool"
-            else:
-                role = type(msg).__name__.lower()
-            
-            response.append({
-                "role": role,
-                "content": msg.content,
-                "metadata": metadata
-            })
-        
-        return response
+        return await AgentTools.get_history(self.agent, session_id)
     
 #endregion ProductSearchAgent
 

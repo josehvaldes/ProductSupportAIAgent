@@ -9,6 +9,8 @@ import operator
 from shopassist_api.application.agents.base import Metadata
 from shopassist_api.application.agents.escalation_agent import EscalationAgent
 from shopassist_api.application.agents.policy_agent import PolicyAgent
+from shopassist_api.application.agents.product_comparison_agent import ProductComparisonAgent
+from shopassist_api.application.agents.product_detail_agent import ProductDetailAgent
 from shopassist_api.application.agents.product_search_agent import ProductSearchAgent
 from shopassist_api.application.agents.supervisor_agent import SupervisorAgent
 
@@ -34,8 +36,8 @@ class AgentOrchestrator:
         self.supervisor = SupervisorAgent()
         self.policy_agent = PolicyAgent()
         self.product_search_agent = ProductSearchAgent()
-        #self.product_detail_agent = None
-        #self.product_comparison_agent = None
+        self.product_detail_agent = ProductDetailAgent()
+        self.product_comparison_agent = ProductComparisonAgent()
         self.escalation_agent = EscalationAgent()
 
         self.graph = self._build_graph()
@@ -48,6 +50,8 @@ class AgentOrchestrator:
         workflow.add_node("supervisor", self._supervisor_node)
         workflow.add_node("policy", self._policy_node)
         workflow.add_node("product_search", self._product_search_node)
+        workflow.add_node("product_detail", self._product_detail_node)
+        workflow.add_node("product_comparison", self._product_comparison_node)
         workflow.add_node("escalation", self._escalation_node)
 
         #entry point
@@ -60,12 +64,17 @@ class AgentOrchestrator:
             {
                 "policy": "policy",
                 "product_search": "product_search",
+                "product_detail": "product_detail",
+                "comparison":"product_comparison",
+                "escalation": "escalation",
                 "END": END
             }
         )
 
         workflow.add_edge("policy", END)
         workflow.add_edge("product_search", END)
+        workflow.add_edge("product_detail", END)
+        workflow.add_edge("product_comparison", END)
         workflow.add_edge("escalation", END)
 
         return workflow.compile()
@@ -100,10 +109,7 @@ class AgentOrchestrator:
     async def _product_search_node(self, state: OrchestratorState):
         """Execute product discovery agent"""
         logger.info("Orchestrator invoking ProductSearchAgent. User Query: %s, Session: %s ", state["user_query"], state["session_Id"])
-        result = await self.product_search_agent.ainvoke(input={
-            "user_query": state["user_query"],
-            "session_Id": state["session_Id"]
-        })
+        result = await self.product_search_agent.ainvoke(state=state)
         state["response"] = result.message
         state["sources"] = result.sources
         metadatalist = state.get("metadatas", [])
@@ -113,13 +119,38 @@ class AgentOrchestrator:
             state["metadatas"] = metadatalist
         return state
 
+    async def _product_detail_node(self, state: OrchestratorState):
+        """Execute product detail agent"""
+        
+        logger.info("Orchestrator invoking ProductDetailAgent. User Query: %s, Session: %s ", state["user_query"], state["session_Id"])
+        result = await self.product_detail_agent.ainvoke(state=state)
+        state["response"] = result.message
+        state["sources"] = result.sources
+        metadatalist = state.get("metadatas", [])
+        if result.metadata:
+            result.metadata.id = "product_detail_agent"
+            metadatalist.append(result.metadata)
+            state["metadatas"] = metadatalist
+        return state
+    
+    async def _product_comparison_node(self, state: OrchestratorState):
+        """Execute product comparison agent"""
+        
+        logger.info("Orchestrator invoking ProductComparisonAgent. User Query: %s, Session: %s ", state["user_query"], state["session_Id"])
+        result = await self.product_comparison_agent.ainvoke(state=state)
+        state["response"] = result.message
+        state["sources"] = result.sources
+        metadatalist = state.get("metadatas", [])
+        if result.metadata:
+            result.metadata.id = "product_comparison_agent"
+            metadatalist.append(result.metadata)
+            state["metadatas"] = metadatalist
+        return state
+
     async def _escalation_node(self, state: OrchestratorState):
         """Execute escalation agent"""
         logger.info("Orchestrator invoking EscalationAgent. User Query: %s, Session: %s ", state["user_query"], state["session_Id"])
-        result = await self.escalation_agent.ainvoke(input={
-            "user_query": state["user_query"],
-            "session_Id": state["session_Id"]
-        })
+        result = await self.escalation_agent.ainvoke(state=state)
         print("EscalationAgent result:", result)
         state["response"] = result.message
 

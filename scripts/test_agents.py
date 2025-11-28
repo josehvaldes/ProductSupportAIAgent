@@ -1,13 +1,12 @@
 import traceback
+from typing import Any
 import uuid
 import sys
 import argparse
 import asyncio
 import sys
-
 from pathlib import Path
 from dotenv import load_dotenv
-
 sys.path.append('../shopassist-api')
 # Load .env file from the correct location
 script_dir = Path(__file__).parent
@@ -16,8 +15,9 @@ load_dotenv(dotenv_path=env_path)
 from shopassist_api.application.agents.base import Metadata
 from shopassist_api.application.agents.escalation_agent import EscalationAgent
 from shopassist_api.application.settings.config import settings
-
+from shopassist_api.application.agents.product_detail_agent import ProductDetailAgent
 from shopassist_api.application.agents.product_search_agent import ProductSearchAgent
+from shopassist_api.application.agents.product_comparison_agent import ProductComparisonAgent
 from shopassist_api.application.agents.policy_agent import PolicyAgent
 from shopassist_api.application.agents.supervisor_agent import SupervisorAgent
 from shopassist_api.logging_config import setup_logging
@@ -61,14 +61,6 @@ async def test_policy_agent():
             logger.error(f"Error invoking policy agent: {e}")
             traceback.print_exc()
     return session_Id
-
-async def test_history_agent(session_id:str):
-    policy_agent = PolicyAgent()
-    history = await policy_agent.get_history(session_id=session_id)
-    print(f"history for {session_id}:")
-    for entry in history:
-        print(f"{entry.get('role',"").upper()}: {entry.get('content')[0:300]}...\n")
-        print(f"Metadata: {entry.get('metadata')}\n")
 
 async def test_supervisor_agent():
     
@@ -141,9 +133,9 @@ async def test_product_search_agent():
     # for entry in history:
     #     print(f"{entry.get('role',"").upper()}: {entry.get('content')[0:300]}...\n")
 
-async def test_history_product_agent(session_id:str):
-    policy_agent = ProductSearchAgent()
-    history = await policy_agent.get_history(session_id=session_id)
+async def test_history_agent(session_id:str, agent:PolicyAgent|ProductSearchAgent|ProductDetailAgent):
+    #agent = ProductSearchAgent()
+    history = await agent.get_history(session_id=session_id)
     print(f"product history for {session_id}:")
     for entry in history:
         print(f"{entry.get('role',"").upper()}: {entry.get('content')[0:300]}...\n")
@@ -170,6 +162,56 @@ async def test_escalation_agent():
             logger.error(f"Error invoking escalation agent: {e}")
             traceback.print_exc()
 
+async def test_product_detail_agent():
+    print("Testing Product Detail Agent")
+    product_detail_agent = ProductDetailAgent()
+    test_queries = [
+        "What are the specifications of the Canon PIXMA E477?",
+    ]
+    session_id = uuid.uuid4().hex[:12]
+    for query in test_queries:
+        print(f"\nUser Query: {query}")
+        try:
+            response = await product_detail_agent.ainvoke({
+                "user_query": query,                
+                "session_Id": session_id
+            })
+            print(f"Agent Response: {response.message}...") 
+            print(f"Product Details: {response.sources}")
+            #print metadata
+            if response.metadata:
+                print(f"Metadata:\n  Input Tokens={response.metadata.input_token},\n  Output Tokens={response.metadata.output_token},\n  Total Tokens={response.metadata.total_token}")
+
+        except Exception as e:
+            logger.error(f"Error invoking product detail agent: {e}")
+            traceback.print_exc()
+
+
+async def test_product_comparison_agent():
+    print("Testing Product Comparison Agent")
+    product_comparison_agent = ProductComparisonAgent()
+    test_queries = [
+        #OnePlus 10R5G vs Samsung Galaxy M13 5G
+        "Compare the features of the Samsung Galaxy M13 and OnePlus 10R. Which is better for photography",
+    ]
+    session_id = uuid.uuid4().hex[:12]
+    for query in test_queries:
+        print(f"\nUser Query: {query}")
+        try:
+            response = await product_comparison_agent.ainvoke({
+                "user_query": query,                
+                "session_Id": session_id
+            })
+            print(f"Agent Response: {response.message}...") 
+            print(f"Comparison Details: {response.sources}")
+            #print metadata
+            if response.metadata:
+                print(f"Metadata:\n  Input Tokens={response.metadata.input_token},\n  Output Tokens={response.metadata.output_token},\n  Total Tokens={response.metadata.total_token}")
+
+        except Exception as e:
+            logger.error(f"Error invoking product comparison agent: {e}")
+            traceback.print_exc()
+
 async def main(arg:str):
     if arg == "supervisor":
         await test_supervisor_agent()        
@@ -177,16 +219,26 @@ async def main(arg:str):
         await test_policy_agent()
     elif arg == "policy_history":
         session_id = "71d191aee33e" # "245c93fe0679"
-        await test_history_agent(session_id)
+        await test_history_agent(session_id, PolicyAgent())
     elif arg == "product":
         await test_product_search_agent()
     elif arg == "product_history":
         session_id = "ad8370c90393" #"3404bdb0b7de"
-        await test_history_product_agent(session_id)
+        await test_history_agent(session_id, ProductSearchAgent())
     elif arg == "escalation":
         await test_escalation_agent()
+    elif arg == "product_detail":
+        await test_product_detail_agent()
+    elif arg == "product_detail_history":
+        session_id = "579dabb70417"
+        await test_history_agent(session_id, ProductDetailAgent())
+    elif arg == "product_comparison":
+        await test_product_comparison_agent()
+    elif arg == "product_comparison_history":
+        session_id = ""
+        await test_history_agent(session_id, ProductComparisonAgent())
     else:
-        print("Unknown agent type. Use 'policy' or 'supervisor' or 'product'.")
+        print("Unknown agent type. Use 'policy' or 'supervisor' or 'product' or 'product_comparison'.")
 
 if __name__ == "__main__":
     

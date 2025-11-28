@@ -142,6 +142,7 @@ class RetrievalService:
             else:
                 results_to_return = products
 
+            results_to_return.sort(key=lambda x: x['relevance_score'], reverse=True)
             # Limit to top_k
             return results_to_return[:top_k]
             
@@ -264,7 +265,6 @@ class RetrievalService:
         
         # Sort by score
         products = list(product_map.values())
-        products.sort(key=lambda x: x['distance'], reverse=True)
         
         return products
     
