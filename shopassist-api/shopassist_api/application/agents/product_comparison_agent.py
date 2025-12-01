@@ -62,7 +62,13 @@ async def search_product(state:ProductComparisonAgentState) -> dict:
     formatted_products = [ {
         "id": prod['id'],
         "name": prod['name'],
-        "relevance_score": prod.get('relevance_score', 0)
+        "relevance_score": prod.get('relevance_score', 0),
+        "category": prod['category'],
+        "price": prod['price'],
+        "brand": prod['brand'],
+        "availability": prod['availability'],
+        "image_url": prod['image_url'],
+        "product_url": prod['product_url']
     } for prod in products ]
     logger.info(f"Retrieved {formatted_products} products for query: [{query}]")
     return {

@@ -47,7 +47,6 @@ export function ChatMessage({ message, sources, query_type }: ChatMessageProps) 
         <ProductGrid products={sources.map(source => ({
             id: source.id,
             name: source.name,
-            description: source.description,
             category: source.category,
             brand: source.brand,
             image_url: source.image_url,
@@ -65,7 +64,6 @@ export function ChatMessage({ message, sources, query_type }: ChatMessageProps) 
           <ProductComparison products={sources.map(source => ({
               id: source.id,
               name: source.name,
-              description: source.description,
               category: source.category,
               brand: source.brand,
               image_url: source.image_url,

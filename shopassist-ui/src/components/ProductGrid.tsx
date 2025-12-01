@@ -36,9 +36,6 @@ export function ProductGrid({products } :ProductGridProps) {
               <Badge color="red">{product.availability}</Badge>  
             </Stack>
           </Group>
-          <Text size="sm" c="dimmed">
-            {product.description.substring(0, 60)}...
-          </Text>
           <Button 
             fullWidth 
               mt="md" 

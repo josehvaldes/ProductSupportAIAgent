@@ -91,14 +91,12 @@ async def search_products(state:ProductSearchAgentState) -> dict:
     formatted_products = [ {
         "id": prod['id'],
         "name": prod['name'],
-        "description": prod['description'],
         "category": prod['category'],
         "price": prod['price'],
         "brand": prod['brand'],
         "availability": prod['availability'],
         "image_url": prod['image_url'],
         "product_url": prod['product_url'],
-        "relevance_score": prod.get('relevance_score', 0)
     } for prod in products ]
     logger.info(f"Retrieved {formatted_products} products for query: [{query}]")
     return {
