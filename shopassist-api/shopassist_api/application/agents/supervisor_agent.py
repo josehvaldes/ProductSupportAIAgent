@@ -4,6 +4,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from contextlib import contextmanager
 from langchain_community.callbacks import get_openai_callback
 
+from langsmith import traceable
 from shopassist_api.application.agents.base import Metadata, RouteDecision, RouteDecisionResponse
 from shopassist_api.application.settings.config import settings
 from shopassist_api.infrastructure.services.azure_credential_manager import get_credential_manager
@@ -43,7 +44,8 @@ class SupervisorAgent:
             ("system", RouteTemplates.SYSTEM_PROMPT_SHORT),
             ("human", "Query: {query}\n\nContext: {context}")
             ])
-
+    
+    @traceable(name="supervisor_agent.route", tags=["supervisor","intent", "agent"], metadata={"version": "2.0"})
     async def route(self, user_query: str, context:dict= None) -> RouteDecisionResponse:
         """Decide which agent to route the query to."""
 

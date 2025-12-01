@@ -17,6 +17,7 @@ from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langgraph.checkpoint.redis import RedisSaver, RunnableConfig, CheckpointTuple
 from langgraph.checkpoint.redis.aio import AsyncRedisSaver
 
+from langsmith import traceable
 from shopassist_api.application.agents.agent_utils import AgentTools
 from shopassist_api.application.agents.base import Metadata, PolicyResponse
 from shopassist_api.application.settings.config import settings
@@ -34,6 +35,7 @@ class PolicyAgentState(TypedDict):
     top_k: int = 2
 
 @tool
+@traceable(name="policy_agent.search_knowledge_base", tags=["policy", "agent_tool"], metadata={"version": "2.0"})
 async def search_knowledge_base(state: PolicyAgentState) -> dict:
     """Tool to search knowledge base in Milvus and return context and IDs of the sources.
         the results include information about Return Policy, Shipping Information, Warranty Details, etc.
@@ -121,6 +123,7 @@ class PolicyAgent:
             )
         return agent
 
+    @traceable(name="policy_agent.ainvoke", tags=["policy", "agent"], metadata={"version": "2.0"})
     async def ainvoke(self, input: dict) -> PolicyResponse:
         
         user_query: str = input.get("user_query", "")

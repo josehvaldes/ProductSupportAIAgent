@@ -9,6 +9,7 @@ from langchain.tools import tool
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
 
+from langsmith import traceable
 from shopassist_api.application.agents.agent_utils import AgentTools
 from shopassist_api.application.agents.base import Metadata, AgentResponse
 from shopassist_api.application.settings.config import settings
@@ -27,6 +28,7 @@ class ProductComparisonAgentState(TypedDict):
     product_names: Optional[list[str]] = None
 
 @tool
+@traceable(name="comparison_agent.search_product", tags=["comparison", "agent_tool"], metadata={"version": "2.0"})
 async def search_product(state:ProductComparisonAgentState) -> dict:
     """ Tool to search products based on product names.
     Args:
@@ -100,7 +102,7 @@ class ProductComparisonAgent:
             )
         return agent
     
-
+    @traceable(name="comparison_agent.ainvoke", tags=["comparison", "ainvoke"], metadata={"version": "2.0"})
     async def ainvoke(self, state: dict) -> AgentResponse:
         """Det products based on user query and product IDs."""
         user_query: str = state.get("user_query", "")

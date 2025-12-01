@@ -1,6 +1,7 @@
 
 from typing import Any
 
+from langsmith import traceable
 from shopassist_api.application.agents.base import EscalationResponse, Metadata
 from shopassist_api.logging_config import get_logger
 logger = get_logger(__name__)
@@ -8,6 +9,7 @@ logger = get_logger(__name__)
 class EscalationAgent:
     """No tools needed - just returns escalation message"""
     
+    @traceable(name="escalation_agent.ainvoke", tags=["escalation", "ainvoke"], metadata={"version": "2.0"})
     async def ainvoke(self, state: dict) -> EscalationResponse:
         """Escalate the issue to human support"""
         

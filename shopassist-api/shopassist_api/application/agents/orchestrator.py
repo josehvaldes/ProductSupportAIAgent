@@ -6,6 +6,7 @@ from typing import Annotated, TypedDict
 from langchain.messages import AnyMessage
 import operator
 
+from langsmith import traceable
 from shopassist_api.application.agents.base import Metadata
 from shopassist_api.application.agents.escalation_agent import EscalationAgent
 from shopassist_api.application.agents.policy_agent import PolicyAgent
@@ -168,6 +169,7 @@ class AgentOrchestrator:
         return state["current_agent"]
     
 
+    @traceable(name="orchestrator.ainvoke", tags=["orchestration","entry-point"], metadata={"version": "2.0"})
     async def ainvoke(self, input: dict):
         """Orchestrate the agents based on user query
         input: dict

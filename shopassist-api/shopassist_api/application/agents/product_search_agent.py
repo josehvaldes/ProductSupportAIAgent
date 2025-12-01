@@ -8,6 +8,7 @@ from langchain.agents import create_agent
 from langchain.tools import tool
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
+from langsmith import traceable
 from pydantic import BaseModel, Field
 from shopassist_api.application.agents.agent_utils import AgentTools
 from shopassist_api.application.agents.base import AgentResponse, Metadata
@@ -36,6 +37,7 @@ class ProductSearchAgentState(TypedDict):
 
 
 @tool
+@traceable(name="search_agent.search_product", tags=["search", "agent_tool","products"], metadata={"version": "2.0"})
 async def search_products(state:ProductSearchAgentState) -> dict:
     """Tool to search products based on user query.
     Args:
@@ -89,6 +91,13 @@ async def search_products(state:ProductSearchAgentState) -> dict:
     formatted_products = [ {
         "id": prod['id'],
         "name": prod['name'],
+        "description": prod['description'],
+        "category": prod['category'],
+        "price": prod['price'],
+        "brand": prod['brand'],
+        "availability": prod['availability'],
+        "image_url": prod['image_url'],
+        "product_url": prod['product_url'],
         "relevance_score": prod.get('relevance_score', 0)
     } for prod in products ]
     logger.info(f"Retrieved {formatted_products} products for query: [{query}]")
@@ -131,6 +140,7 @@ class ProductSearchAgent:
             )
         return agent
 
+    @traceable(name="search_agent.ainvoke", tags=["search", "ainvoke","products"], metadata={"version": "2.0"})
     async def ainvoke(self, state: dict) -> AgentResponse:
         
         user_query: str = state.get("user_query", "")

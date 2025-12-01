@@ -9,6 +9,7 @@ from langchain.tools import tool
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
 
+from langsmith import traceable
 from shopassist_api.application.agents.agent_utils import AgentTools
 from shopassist_api.application.agents.base import AgentResponse, Metadata
 from shopassist_api.application.settings.config import settings
@@ -30,6 +31,7 @@ class ProductDetailAgentState(TypedDict):
     product_name: Optional[str] = None
 
 @tool
+@traceable(name="detail_agent.search_product", tags=["details", "agent_tool"], metadata={"version": "2.0"})
 async def search_product(state:ProductDetailAgentState) -> dict:
     """Tool to search products based on user query.
     Args:
@@ -101,7 +103,8 @@ class ProductDetailAgent:
                 state_schema=ProductDetailAgentState,
             )
         return agent
-        
+    
+    @traceable(name="detail_agent.ainvoke", tags=["details", "ainvoke"], metadata={"version": "2.0"})
     async def ainvoke(self, state: dict) -> AgentResponse:
         """Det products based on user query and product IDs."""
         user_query: str = state.get("user_query", "")

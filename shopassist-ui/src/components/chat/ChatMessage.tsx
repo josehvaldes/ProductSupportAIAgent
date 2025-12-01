@@ -79,6 +79,7 @@ export function ChatMessage({ message, sources, query_type }: ChatMessageProps) 
       )}
 
       { !isUser && (query_type === 'policy_question'
+        || query_type === 'policy'
         || query_type === 'general_support' 
         || query_type === 'out_of_scope' 
         || query_type === 'chitchat'

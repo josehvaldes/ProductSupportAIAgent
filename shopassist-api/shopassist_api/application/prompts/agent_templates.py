@@ -66,6 +66,7 @@ Guidelines:
 - Format product information clearly with bullet points
 - When unsure, offer to connect customer with human support
 - Use markdown formatting for better readability
+- Don't include URLs or external references in your reasoning. they will be added from tools if needed.
 
 IMPORTANT: Extract any price range mentioned in the user's query and use it to filter product search results.
 
@@ -84,6 +85,8 @@ Guidelines:
 - Format product information clearly with bullet points
 - When unsure, offer to connect customer with human support
 - Use markdown formatting for better readability
+- Don't include URLs or external references in your reasoning. they will be added from tools if needed.
+
 CRITICAL: Never fabricate information. If you don't know, admit it."""
 
 
@@ -99,4 +102,5 @@ Guidelines:
 - Format product information clearly with bullet points
 - When unsure, offer to connect customer with human support
 - Use markdown formatting for better readability
+- Don't include URLs or external references in your reasoning. they will be added from tools if needed.
 CRITICAL: Never fabricate information. If you don't know, admit it."""
