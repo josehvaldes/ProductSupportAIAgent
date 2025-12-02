@@ -21,35 +21,76 @@ from shopassist_api.infrastructure.services.cosmos_product_service import Cosmos
 
 # Test queries with expected results
 TEST_QUERIES = [
+    # {
+    #     "query": "laptop for video editing",
+    #     "type": "product_search",
+    #     "expected_category": "Laptops",
+    #     "expected_keywords": ["video", "editing", "performance"]
+    # },
+    # {
+    #     "query": "wireless headphones under $100",
+    #     "type": "product_search",
+    #     "expected_category": "Headphones",
+    #     "max_price": 100
+    # },
+    # {
+    #     "query": "what is your return policy",
+    #     "type": "policy",
+    #     "expected_doc_type": "policies"
+    # },
     {
-        "query": "laptop for video editing",
+        "query": "MacBook Air M2",
+        "type": "product_search",
         "expected_category": "Laptops",
-        "expected_keywords": ["video", "editing", "performance"]
-    },
-    {
-        "query": "wireless headphones under $100",
-        "expected_category": "Headphones",
-        "max_price": 100
-    },
-    {
-        "query": "what is your return policy",
-        "query_type": "policy",
-        "expected_doc_type": "policies"
-    },
+    }
     # Add more test queries...
 ]
 
 # Instantiate services
 vector_service = MilvusService()
 embedding_service = TransformersEmbeddingService(model_name=settings.transformers_embedding_model)
+category_embedder_service = TransformersEmbeddingService(model_name=settings.transformers_category_embedding_model)
 product_service = CosmosProductService()
 
 # Create retrieval service with injected dependencies
 retrieval_service = RetrievalService(
-    vector_service=vector_service,
+    vector_service = vector_service,
     embedding_service=embedding_service,
+    category_embedder_service=category_embedder_service,
     repository_service=product_service
+    
 )
+
+
+async def evaluate_retrieval_adaptative():
+    """
+    Evaluate retrieval quality with adaptative radius
+    """
+    queries = [
+        # {
+        #     "query": "MacBook Air M2",
+        # },
+        # {
+        #     "query": "Samsung Galaxy S21",
+        # },
+        # {
+        #     "query": "bluetooth headphones",
+        # },
+        {
+            "query": "boAt BassHeads",
+        },
+    ]
+    for test in queries:
+        query = test['query']
+        print(f"\n📝 Testing: '{query}'")
+        
+        retrieved = await retrieval_service.retrieve_products_adaptative(query, top_k=1, 
+                                                                  enriched=True)
+
+        print(f"   Retrieved {len(retrieved)} results")
+        for res in retrieved:
+            print(f"   Retrieved: {res}")        
+
 
 async def evaluate_retrieval():
     """
@@ -71,7 +112,7 @@ async def evaluate_retrieval():
         print(f"\n📝 Testing: '{query}'")
         
         # Classify
-        query_type = "product_search" # "policy_question"
+        query_type = test["type"]
         cleaned_query, extracted_filters = processor.process_query(query)
         print(f"   🔍 Classified as: {query_type}")
         print(f"   🧹 Cleaned query: {cleaned_query}")
@@ -129,4 +170,4 @@ async def evaluate_retrieval():
     print("\n✅ Results saved to retrieval_evaluation.json")
 
 if __name__ == "__main__":
-    asyncio.run(evaluate_retrieval())
+    asyncio.run(evaluate_retrieval_adaptative())

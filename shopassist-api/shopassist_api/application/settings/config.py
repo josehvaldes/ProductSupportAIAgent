@@ -80,7 +80,8 @@ class Settings(BaseSettings):
     TOP_K_CATEGORIES: int = 3
 
     # Similarity Thresholds. Not used currently
-    threshold_product_similarity: float = 0.78
+    threshold_product_similarity: float = 0.5
+
     threshold_knowledge_base_similarity: float = 0.75
     
 

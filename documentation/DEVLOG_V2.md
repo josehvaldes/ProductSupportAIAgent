@@ -108,7 +108,7 @@ EOF
 - Test complex multi-turn scenarios
 - Add LangSmith tracing in V2 agents
 - Compare V2 and V1 time response and token costs
-- 
+
 
 **Time Invested:** 26 hours
 
@@ -116,6 +116,22 @@ EOF
 
 
 ## Week 3: Testing and documentation
+- [X] Test complex multi-turn scenarios
+- [X] Add LangSmith tracing in V2 agents
+
+## V2 improvement results:
+Pros:
+- Response time reduced to 3-5 seconds compared to 7-8 in V1
+- Reduce RU in cosmoDB since history is on Redis Cache now
+- Improved accuracy since all history is locally available for the agent
+- Better debugging and tracing using LangSmith.
+- Cost predictability with more accurate tokens calculation
+- System prompts are smaller and can be better customized
+
+Cons:
+- Token usage increase from 1500 to tokens 2500-3000 tokens per call 
+- token usage increases by a factor of 3000*X after each call. mitigation Control redis memory usage.
+- less control of how the tools are used and how many times the are called.
 
 
 ## Week 4: Enhancements

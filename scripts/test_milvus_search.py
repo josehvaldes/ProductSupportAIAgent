@@ -1,3 +1,4 @@
+import asyncio
 import sys
 import time
 from pathlib import Path
@@ -12,7 +13,7 @@ from shopassist_api.application.settings.config import settings
 from shopassist_api.infrastructure.services.milvus_service import MilvusService
 from shopassist_api.infrastructure.services.transformers_embedding_service import TransformersEmbeddingService
 
-def test_search():
+async def test_search():
     print("🧪 Testing Milvus vector search...\n")
     
     # Initialize services
@@ -31,7 +32,7 @@ def test_search():
         print(f"\n🔍 Query: '{query}'")
         
         # Generate query embedding
-        query_embedding = embedder.generate_embedding(query)
+        query_embedding = await embedder.generate_embedding(query)
         
         # Determine collection
         is_policy_query = any(word in query.lower() for word in ['policy', 'return', 'shipping', 'warranty'])
@@ -61,4 +62,4 @@ def test_search():
     print("\n✅ Search tests complete!")
 
 if __name__ == "__main__":
-    test_search()
+    asyncio.run(test_search())

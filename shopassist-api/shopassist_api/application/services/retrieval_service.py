@@ -2,8 +2,10 @@ import json
 from typing import List, Dict, Optional
 from langsmith import traceable
 from shopassist_api.application.interfaces.service_interfaces import EmbeddingServiceInterface, RepositoryServiceInterface, VectorServiceInterface
+from shopassist_api.application.settings.config import settings
 from shopassist_api.logging_config import get_logger
 import traceback
+import numpy as np
 from numpy import dot
 from numpy.linalg import norm
 
@@ -30,7 +32,7 @@ class RetrievalService:
         """Retrieve product categories"""
         try:
             logger.info(f"Generating embedding for query: {query}")
-            query_embedding = self.category_embedder.generate_embedding(query)
+            query_embedding = await self.category_embedder.generate_embedding(query)
             categories = self.milvus.search_categories(
                 query_embedding=query_embedding,
                 field="embedding",
@@ -99,11 +101,85 @@ class RetrievalService:
         sorted_categories = sorted(category_map.values(), key=lambda x: x['score'], reverse=True)
         return sorted_categories
 
+    @traceable(name="retrieval.retrieve_products_adaptative", tags=["retrieval", "product", "milvus"], metadata={"version": "1.0"})
+    async def retrieve_products_adaptative(
+            self,
+            query: str,
+            top_k: int = 3,
+            filters: Optional[Dict] = None,
+            enriched: bool = True
+        ) -> List[Dict]:
+        """
+        Retrieve relevant products using vector search with adaptative thresholds
+        top_k: should be 2 or higher for adaptative filtering to work properly
+        """
+        try:
+            # Generate query embedding
+            query_embedding = await self.embedder.generate_embedding(query)
+            # Build filter expression for Milvus
+            filter_expr = self._build_filter_expression(filters)
+            
+            logger.info(f"Retrieve products for [{query}] and filters: {filter_expr}, Top_k:{top_k}, with adaptative filtering")
+            # Search in Milvus with initial radius
+            radius = settings.threshold_product_similarity
+            print("Initial radius:", radius)
+            results = []
+
+            #results with radius filtering
+            results = self.milvus.search_products(
+                    query_embedding=query_embedding,
+                    top_k=top_k,
+                    filters=filter_expr,
+                    radius=radius
+                )
+            
+            logger.info(f"Initial retrieved {len(results)} products for query: [{query}] with radius: {radius}")
+            if len(results) == 0:
+                # No results found. End
+                return []
+            
+            # Adaptative filtering based on score distribution
+            scores = [res['distance'] for res in results]
+            if len(scores) > 1 and (scores[0] - scores[1]) > 0.15:
+                results = results[:1]  # Keep only top 1 if big gap
+                products = self._process_products(enriched, results)
+                return products
+
+            if np.std(scores) < 0.05:
+                threshold = 0.15 + settings.threshold_product_similarity  # Stricter for uncertain cases
+            else:
+                threshold = 0.05 + settings.threshold_product_similarity  # Standard threshold.
+            filtered_results = [res for res in results if res['distance'] >= threshold]
+            if len(filtered_results) == 0:
+                return []
+
+            return await self._process_products(enriched, filtered_results)
+
+        except Exception as e:
+            logger.error(f"Error in retrieve_products: {e}")
+            traceback.print_exc()
+            return []
+
+    async def _process_products(self, enriched:bool, products: List[Dict]) -> List[Dict]:
+        """Placeholder for enriching products with full data"""
+        # Deduplicate by product_id and aggregate scores
+        products = self._deduplicate_and_aggregate(products)
+        results_to_return = []
+        # Enrich with full product data from Cosmos DB
+        if enriched:
+            results_to_return = await self._enrich_with_product_data(products)
+            results_to_return.sort(key=lambda x: x['relevance_score'], reverse=True)
+        else:
+            products.sort(key=lambda x: x['distance'], reverse=True)
+            results_to_return = products
+            
+        return results_to_return
+
     @traceable(name="retrieval.retrieve_products", tags=["retrieval", "product", "milvus"], metadata={"version": "1.0"})
     async def retrieve_products(
             self,
             query: str,
-            top_k: int = 5,
+            top_k: int = 3,
             filters: Optional[Dict] = None,
             enriched: bool = True
         ) -> List[Dict]:
@@ -121,7 +197,7 @@ class RetrievalService:
         try:
             # Generate query embedding
             
-            query_embedding = self.embedder.generate_embedding(query)
+            query_embedding = await self.embedder.generate_embedding(query)
             # Build filter expression for Milvus
             filter_expr = self._build_filter_expression(filters)
             
@@ -132,19 +208,12 @@ class RetrievalService:
                 top_k=top_k,
                 filters=filter_expr
             )            
-            # Deduplicate by product_id and aggregate scores
-            products = self._deduplicate_and_aggregate(results)
             
-            results_to_return = []
-            # Enrich with full product data from Cosmos DB
-            if enriched:
-                results_to_return = await self._enrich_with_product_data(products)
-            else:
-                results_to_return = products
-
-            results_to_return.sort(key=lambda x: x['relevance_score'], reverse=True)
-            # Limit to top_k
-            return results_to_return[:top_k]
+            if len(results) == 0:
+                # No results found
+                return []
+            
+            return await self._process_products(enriched, results)
             
         except Exception as e:
             logger.error(f"Error in retrieve_products: {e}")
@@ -171,7 +240,7 @@ class RetrievalService:
             logger.info(f"Retrieving KB for query: {query}")
             
             # Generate query embedding
-            query_embedding = self.embedder.generate_embedding(query)
+            query_embedding = await self.embedder.generate_embedding(query)
             
             # Search knowledge base
             results = self.milvus.search_knowledge_base(
@@ -272,8 +341,10 @@ class RetrievalService:
         """
         Fetch full product details from Cosmos DB
         """
-        enriched = []
         logger.info(f"Enriching {len(products)} products with full data from Cosmos DB")
+        enriched = []
+        if not products or len(products) == 0:
+            return enriched
         product_ids = [product['product_id'] for product in products]
         try:
             full_products = await self.cosmos.get_products_by_ids(product_ids)

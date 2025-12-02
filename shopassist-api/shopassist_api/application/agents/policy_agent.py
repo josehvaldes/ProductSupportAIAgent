@@ -53,7 +53,7 @@ async def search_knowledge_base(state: PolicyAgentState) -> dict:
     
     logger.info(f"PolicyAgent: Searching knowledge base with query: [{user_query}] Top K: {top_k}")
 
-    query_embedding = embedder.generate_embedding(user_query)
+    query_embedding = await embedder.generate_embedding(user_query)
     docs = milvus.search_knowledge_base(query_embedding= query_embedding, top_k=top_k)
     context_parts = []
     doc_names = []

@@ -65,12 +65,12 @@ async def test_policy_agent():
 async def test_supervisor_agent():
     
     print("Testing Supervisor Agent")
-    supervisor = SupervisorAgent()
+    supervisor = SupervisorAgent() # azure_openai_model_deployment
     test_queries = [
-        {
-            "query": "Can I return a product after 30 days?",
-            "expected": "policy"
-        },
+        # {
+        #     "query": "Can I return a product after 30 days?",
+        #     "expected": "policy"
+        # },
         # {
         #     "query": "Help me find a smartphone with a good camera for less than $600",
         #     "expected": "product_search"
@@ -87,6 +87,14 @@ async def test_supervisor_agent():
         #     "query": "I have an issue with my recent order #12345.",
         #     "expected": "escalation"
         # },
+        # {
+        #     "query": "which one has HDMI connector?",
+        #     "expected": "product_detail"
+        # },
+        {
+            "query": "I live in the same town as the main store, in how many days can I receive the tv?",
+            "expected": "policy"
+        },
     ]
     for item in test_queries:
         query = item["query"]
@@ -94,7 +102,7 @@ async def test_supervisor_agent():
         print(f"\nUser Query: {query}")
         try:
             decision = await supervisor.route(user_query=query)
-            print(f"Routing Decision: Agent={decision.agent}, Confidence={decision.confidence}, match={(excepted_agent==decision.agent)} Reasoning={decision.reasoning}")
+            print(f"Match={(excepted_agent==decision.agent)}, Routing Decision: Agent={decision.agent}, Confidence={decision.confidence}, Reasoning={decision.reasoning}")
             if decision.metadata:
                 metadata:Metadata = decision.metadata
                 print(f"Metadata:\n  Input Tokens={metadata.input_token},\n  Output Tokens={metadata.output_token},\n  Total Tokens={metadata.total_token}")
@@ -230,7 +238,7 @@ async def main(arg:str):
     elif arg == "product_detail":
         await test_product_detail_agent()
     elif arg == "product_detail_history":
-        session_id = "579dabb70417"
+        session_id = "9c02a9c07ada"
         await test_history_agent(session_id, ProductDetailAgent())
     elif arg == "product_comparison":
         await test_product_comparison_agent()

@@ -48,11 +48,12 @@ async def search_product(state:ProductDetailAgentState) -> dict:
     logger.info(f"Getting details for product: [{query}]")
 
     retrieval = get_retrieval_service()
-    products = await retrieval.retrieve_products(query,
+    products = await retrieval.retrieve_products_adaptative(query,
             enriched=True,
             top_k=1)
 
     if not products or len(products) == 0:
+        logger.info(f"No products found for query [{query}]")
         return {
             "products": [],
             "context": "No products found matching your query."

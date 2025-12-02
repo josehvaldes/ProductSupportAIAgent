@@ -99,7 +99,8 @@ class MilvusService(VectorServiceInterface):
         self,
         query_embedding: List[float],
         top_k: int = 5,
-        filters: Optional[str] = None
+        filters: Optional[str] = None,
+        radius: Optional[float] = None
     ) -> List[Dict]:
         """Search products by vector similarity"""
         collection = Collection("products_collection")
@@ -107,12 +108,15 @@ class MilvusService(VectorServiceInterface):
         
         search_params = {
             "metric_type": "COSINE",
-            "params": {"ef": 64}  # Search depth
+            "params": {"ef": 128, 
+                       "radius": radius if radius else settings.threshold_product_similarity
+                       }
         }
         
         results = collection.search(
             data=[query_embedding],
             anns_field="embedding",
+            
             param=search_params,
             limit=top_k,
             expr=filters,  # e.g., "price < 1000"
@@ -139,7 +143,8 @@ class MilvusService(VectorServiceInterface):
     def search_knowledge_base(
         self,
         query_embedding: List[float],
-        top_k: int = 3
+        top_k: int = 3,
+        radius: Optional[float] = None
     ) -> List[Dict]:
         """Search knowledge base by vector similarity"""
         collection = Collection("knowledge_base_collection")
@@ -147,7 +152,7 @@ class MilvusService(VectorServiceInterface):
         
         search_params = {
             "metric_type": "COSINE",
-            "params": {"ef": 64}
+            "params": {"ef": 64, "radius": radius if radius else settings.threshold_knowledge_base_similarity}
         }
         
         results = collection.search(

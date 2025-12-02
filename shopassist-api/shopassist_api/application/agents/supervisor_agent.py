@@ -22,9 +22,10 @@ def track_tokens():
 #region SupervisorAgent
 class SupervisorAgent:
     
-    def __init__(self):
+    def __init__(self, model_deployment:str = None):
         self.llm = None
         self.prompt = None
+        self.model_deployment = model_deployment or settings.azure_openai_model_deployment
         self._initialize_llm()
 
     def _initialize_llm(self):
@@ -35,7 +36,7 @@ class SupervisorAgent:
             self.llm = AzureChatOpenAI(
                 azure_endpoint=settings.azure_openai_endpoint,
                 api_version=settings.azure_openai_api_version,
-                deployment_name=settings.azure_openai_model_deployment,
+                deployment_name=self.model_deployment,
                 azure_ad_token_provider=token_provider,
                 temperature=0
             ).with_structured_output(RouteDecision)

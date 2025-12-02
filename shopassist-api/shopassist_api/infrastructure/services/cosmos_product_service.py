@@ -74,11 +74,12 @@ class CosmosProductService(RepositoryServiceInterface):
         """Retrieve multiple products by their IDs from CosmosDB."""
         if not self.client or not self.database_name:
             return []
-
+        
+        if not product_ids or len(product_ids) == 0:
+                return []
         try:
             # Get the product container
             container = self.database.get_container_client(self.product_container)
-
             # Query for products by IDs
             ids_string = ",".join([f"'{pid}'" for pid in product_ids])
             query = f"SELECT * FROM c WHERE c.id IN ({ids_string})"

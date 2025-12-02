@@ -27,16 +27,17 @@ class ProductComparisonAgentState(TypedDict):
     messages: Annotated[list, operator.add]
     product_names: Optional[list[str]] = None
 
+
 @tool
 @traceable(name="comparison_agent.search_product", tags=["comparison", "agent_tool"], metadata={"version": "2.0"})
 async def search_product(state:ProductComparisonAgentState) -> dict:
-    """ Tool to search products based on product names.
+    """ Tool to get product details based on product names.
     Args:
         state (ProductComparisonAgentState): The current state of the agent.
         state includes:
-            - product_names: The names of the products to get details for.            
+            - product_names: List of product names to get details for.
     Returns:
-        dict: A dictionary containing the search results and context.
+        dict: A dictionary containing the product details and context.
     """
     product_names = state.get("product_names", [])
     logger.info(f"Getting details for products: {product_names}")
@@ -46,12 +47,13 @@ async def search_product(state:ProductComparisonAgentState) -> dict:
 
     for name in product_names:
         query = name
-        product = await retrieval.retrieve_products(query,
+        product = await retrieval.retrieve_products_adaptative(query,
                 enriched=True,
                 top_k=1)
         products.extend(product)
 
     if not products or len(products) == 0:
+        logger.info(f"No products found for query [{query}]")
         return {
             "products": [],
             "context": "No products found matching the input."
@@ -70,10 +72,12 @@ async def search_product(state:ProductComparisonAgentState) -> dict:
         "image_url": prod['image_url'],
         "product_url": prod['product_url']
     } for prod in products ]
+    
     logger.info(f"Retrieved {formatted_products} products for query: [{query}]")
+    
     return {
-        "context": context,
-        "products": formatted_products
+        "products": formatted_products,
+        "context": context
     }
 
 class ProductComparisonAgent:

@@ -11,6 +11,12 @@ from shopassist_api.logging_config import setup_logging
 from .logging_config import get_logger
 from contextlib import asynccontextmanager
 import time
+from shopassist_api.application.interfaces.di_container import (
+    get_category_embedding_service,
+    get_embedding_service,
+    get_llm_service,
+    get_vector_service
+)
 
 load_dotenv()
 
@@ -22,14 +28,59 @@ setup_logging(
 
 logger = get_logger(__name__)
 
+async def warmup_services():
+    """Preload and warmup singleton services."""
+    logger.info(f"Warming up services... {settings.embedding_provider} embedding service")
+    
+    # Embedding Service
+    try:
+        embedding_service = get_embedding_service()
+        if hasattr(embedding_service, 'generate_embedding'):
+            # Generate a dummy embedding to load the model into memory
+            logger.info("Warming up embedding service model...")
+            await embedding_service.generate_embedding("initialization warmup")
+        
+        category_embedding = get_category_embedding_service()
+        if hasattr(category_embedding, 'generate_embedding'):
+            logger.info("Warming up category embedding service model...")
+            # Generate a dummy embedding to load the model into memory
+            await category_embedding.generate_embedding("initialization warmup")
+        
+        logger.info("✓ Embedding services ready")
+
+    except Exception as e:
+        logger.error(f"Failed to initialize embedding service: {e}")
+    
+    # LLM Service
+    try:
+        llm_service = get_llm_service()
+        logger.info("✓ LLM service ready")
+    except Exception as e:
+        logger.error(f"Failed to initialize LLM service: {e}")
+    
+    # Vector Service
+    try:
+        vector_service = get_vector_service()
+        # Optional: test connection
+        # await vector_service.health_check()
+        logger.info("✓ Vector service ready")
+    except Exception as e:
+        logger.error(f"Failed to initialize vector service: {e}")
+    
+    logger.info("Service warmup complete!")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    
     logger.info("Starting ShopAssist API...")
     logger.info(f"API Title: {settings.api_title} Version: {settings.api_version}")
-
+    
+    # Warmup services
+    await warmup_services()
+    
     yield
+    
     # Shutdown
     logger.info("Shutting down ShopAssist API...")
 
