@@ -99,7 +99,7 @@ class ProductDetailAgent:
     async def _get_agent(self):
         if ProductDetailAgent.cache_checkpointer is None:
             logger.info(f"Initializing Redis Checkpointer for ProductDetailAgent: {settings.redis_url}")
-            async with AsyncRedisSaver.from_conn_string(settings.redis_url) as checkpointer:
+            async with AsyncRedisSaver.from_conn_string(settings.redis_url, ttl={ "default_ttl":1440, "refresh_on_read": True }) as checkpointer:
                 await checkpointer.asetup()
                 ProductDetailAgent.cache_checkpointer = checkpointer
 

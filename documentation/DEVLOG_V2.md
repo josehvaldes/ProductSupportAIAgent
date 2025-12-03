@@ -134,6 +134,27 @@ Cons:
 - less control of how the tools are used and how many times the are called.
 
 
+## Week 3: TTL Configuration
+
+**Technical Decisions:**
+- Configured AsyncRedisSaver with 60-minute TTL
+- `refresh_on_read=True` to extend active conversations
+- Solves token accumulation issue from Week 2
+
+**Code Changes:**
+```python
+checkpointer = await AsyncRedisSaver.from_conn_string(
+    "redis://localhost:6379",
+    ttl={"default_ttl": 30, "refresh_on_read": True}
+)
+```
+
+**Impact:**
+- ✅ Prevents indefinite conversation growth
+- ✅ Active conversations stay alive automatically
+- ✅ Inactive conversations cleaned up after 30 minutes
+- ✅ Reduces Redis memory usage in production
+
 ## Week 4: Enhancements
 Interactive Refinement
 

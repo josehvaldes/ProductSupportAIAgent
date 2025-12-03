@@ -110,7 +110,7 @@ class PolicyAgent:
 
         if PolicyAgent.cache_checkpointer is None:
             logger.info(f"Initializing Redis Checkpointer for PolicyAgent: {settings.redis_url}")
-            async with AsyncRedisSaver.from_conn_string(settings.redis_url) as checkpointer:
+            async with AsyncRedisSaver.from_conn_string(settings.redis_url, ttl={ "default_ttl":1440, "refresh_on_read": True }) as checkpointer:
                 await checkpointer.asetup()
                 PolicyAgent.cache_checkpointer = checkpointer         
 

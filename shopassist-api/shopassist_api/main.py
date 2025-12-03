@@ -38,15 +38,15 @@ async def warmup_services():
         if hasattr(embedding_service, 'generate_embedding'):
             # Generate a dummy embedding to load the model into memory
             logger.info("Warming up embedding service model...")
-            await embedding_service.generate_embedding("initialization warmup")
+            response = await embedding_service.health_check()
         
         category_embedding = get_category_embedding_service()
         if hasattr(category_embedding, 'generate_embedding'):
             logger.info("Warming up category embedding service model...")
             # Generate a dummy embedding to load the model into memory
-            await category_embedding.generate_embedding("initialization warmup")
+            response_cat = await category_embedding.health_check()
         
-        logger.info("✓ Embedding services ready")
+        logger.info(f"✓ Embedding services ready: {response}, {response_cat}")
 
     except Exception as e:
         logger.error(f"Failed to initialize embedding service: {e}")
@@ -54,16 +54,16 @@ async def warmup_services():
     # LLM Service
     try:
         llm_service = get_llm_service()
-        logger.info("✓ LLM service ready")
+        response = await llm_service.health_check()
+        logger.info(f"✓ LLM service ready: {response}")
     except Exception as e:
         logger.error(f"Failed to initialize LLM service: {e}")
     
     # Vector Service
     try:
         vector_service = get_vector_service()
-        # Optional: test connection
-        # await vector_service.health_check()
-        logger.info("✓ Vector service ready")
+        response = await vector_service.health_check()
+        logger.info(f"✓ Vector service ready: {response}")
     except Exception as e:
         logger.error(f"Failed to initialize vector service: {e}")
     

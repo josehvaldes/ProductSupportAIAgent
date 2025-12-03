@@ -81,7 +81,7 @@ def get_vector_service() -> VectorServiceInterface:
     return _container.get_service(VectorServiceInterface)
 
 #TODO refactor and use self._services[''] mapping
-def get_llm_service():
+def get_llm_service()->LLMServiceInterface:
     """Dependency injection function for LLM service."""
     return _container.get_service(LLMServiceInterface)
 

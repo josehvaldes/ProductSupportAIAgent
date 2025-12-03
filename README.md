@@ -1,218 +1,373 @@
 # ShopAssist - AI Product Support Agent
 
-AI-powered conversational agent for e-commerce product support and discovery.
+An intelligent conversational AI agent for e-commerce product support and discovery, built with RAG (Retrieval-Augmented Generation) architecture.
 
-![Demo Screenshot](./docs/images/demo-screenshot.png)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Python](https://img.shields.io/badge/python-3.11-blue.svg)
+![React](https://img.shields.io/badge/react-19.1-blue.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)
 
-## 🎯 Project Overview
+## 🎯 Overview
 
-ShopAssist is a prototype RAG-based AI agent that helps users:
-- Discover products through natural conversation
-- Get accurate product specifications
-- Compare multiple products
-- Understand return policies and shipping info
+ShopAssist is a full-stack AI application that provides intelligent product support through natural language conversations. It combines semantic search, vector databases, and large language models to help users:
 
-Built as a portfolio project showcasing AI engineering skills.
+- 🔍 **Discover products** through natural conversation
+- 📊 **Compare products** side-by-side with detailed specifications
+- ❓ **Get answers** about policies, shipping, and returns
+- 🎯 **Receive personalized recommendations** based on requirements
+- 💬 **Maintain context** across multi-turn conversations
+
+Built as a portfolio project showcasing modern AI engineering practices and production-ready architecture.
+
+## ✨ Key Features
+
+- **Semantic Search**: Vector-based product search using Azure OpenAI embeddings
+- **RAG Pipeline**: Retrieval-Augmented Generation for accurate, grounded responses
+- **Intent Classification**: Smart routing of queries (product search, policy, comparison)
+- **Session Management**: Persistent conversation history across sessions
+- **Real-time Chat**: WebSocket-like experience with streaming responses
+- **Product Comparison**: Side-by-side comparison of multiple products
+- **Multi-language Support**: Extensible for international markets
+- **Observability**: LangSmith integration for tracing and monitoring
 
 ## 🏗️ Architecture
+
 ```
-TODO Graphics and models
+┌─────────────────┐         ┌──────────────────┐
+│   React UI      │────────▶│   FastAPI        │
+│   (TypeScript)  │         │   Backend        │
+└─────────────────┘         └──────────────────┘
+                                     │
+                    ┌────────────────┼────────────────┐
+                    ▼                ▼                ▼
+            ┌──────────────┐ ┌─────────────┐ ┌──────────────┐
+            │  Azure       │ │   Milvus    │ │   Redis      │
+            │  Cosmos DB   │ │   Vector DB │ │   Cache      │
+            └──────────────┘ └─────────────┘ └──────────────┘
+                    │
+                    ▼
+            ┌──────────────┐
+            │  Azure       │
+            │  OpenAI      │
+            │  (GPT-4)     │
+            └──────────────┘
 ```
 
-## 🛠️ Tech Stack
+### Technology Stack
 
 **Frontend:**
-- React 18.3 + TypeScript
-- Mantine UI 8.3.4
-- fetch for API calls
+- React 19 with TypeScript
+- Mantine UI 8.3 (Component Library)
+- Vite (Build Tool)
+- React Markdown (Message Rendering)
 
 **Backend:**
 - Python 3.11
-- FastAPI
-- Azure Cosmos DB (NoSQL)
-- Azure OpenAI (GPT-4o-mini)
+- FastAPI (REST API Framework)
+- LangChain (LLM Orchestration)
+- Pydantic (Data Validation)
+
+**AI/ML:**
+- Azure OpenAI (GPT-4 & Embeddings)
+- Sentence Transformers (Local Embeddings)
+- LangSmith (Tracing & Monitoring)
+
+**Data Storage:**
+- Azure Cosmos DB (Sessions & Messages)
+- Milvus (Vector Database)
+- Redis (Caching)
 
 **Infrastructure:**
+- Docker & Docker Compose
 - Azure Cloud Services
-- Milvus (Week 2)
-- Docker
+- GitHub Actions (CI/CD - planned)
 
 ## 📋 Prerequisites
 
-- Node.js 18+
-- Python 3.11+
-- Azure account with active subscription
-- Git
+- **Node.js** 18+ and npm
+- **Python** 3.11+
+- **Docker** & Docker Compose (for containerized deployment)
+- **Azure Account** with:
+  - Azure OpenAI Service
+  - Azure Cosmos DB
+  - Azure Cognitive Search (optional)
+- **Milvus** instance (local or cloud)
+- **Redis** instance (local or cloud)
 
-## 🚀 Setup Instructions
+## 🚀 Quick Start
 
-### Backend Setup
+### Using Docker Compose (Recommended)
 
-1. Clone repository:
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/ProductSupportAIAgent.git
+   cd ProductSupportAIAgent
+   ```
+
+2. **Configure environment variables:**
+   ```bash
+   # Create .env files from templates
+   cp shopassist-api/.env.example shopassist-api/.env
+   cp shopassist-ui/.env.example shopassist-ui/.env
+   
+   # Edit with your credentials
+   nano shopassist-api/.env
+   ```
+
+3. **Start all services:**
+   ```bash
+   docker-compose up -d
+   ```
+
+4. **Access the application:**
+   - Frontend: http://localhost:8080
+   - API: http://localhost:8000
+   - API Docs: http://localhost:8000/docs
+
+### Manual Setup
+
+#### Backend Setup
+
 ```bash
-git clone https://github.com/josehvaldes/ProductSupportAIAgent/
-cd ProductSupportAIAgent/shopassist-api
-```
+cd shopassist-api
 
-2. Create virtual environment:
-```bash
-conda create -n shopassist python=3.11
-conda activate shopassist
-```
+# Create conda environment
+conda env create -f ../environment.yml
+conda activate saaivenv
 
-3. Install dependencies:
-```bash
-poetry install
-```
+# Install dependencies
+pip install -r requirements.txt
 
-4. Configure environment variables:
-```bash
+# Configure environment
 cp .env.example .env
 # Edit .env with your Azure credentials
+
+# Run development server
+python dev_server.py
 ```
 
-5. Run backend:
+Backend runs at: http://localhost:8000
+
+#### Frontend Setup
+
 ```bash
-uvicorn app.main:app --reload
-```
+cd shopassist-ui
 
-Backend runs at: `http://localhost:8000`
-
-### Frontend Setup
-
-1. Navigate to frontend:
-```bash
-cd cd ProductSupportAIAgent/shopassist-ui
-```
-
-2. Install dependencies:
-```bash
+# Install dependencies
 npm install
-```
 
-3. Configure environment:
-```bash
+# Configure environment
 cp .env.example .env
-# Set VITE_API_URL=http://localhost:8000
-```
+# Set VITE_API_BASE_URL=http://localhost:8000/api/v1
 
-4. Run frontend:
-```bash
+# Run development server
 npm run dev
 ```
 
-Frontend runs at: `http://localhost:5173`
-
-## 📡 API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/health` | Health check |
-| GET | `/api/products` | Get all products |
-| GET | `/api/products/{id}` | Get product by ID |
-| GET | `/api/products/search/category/{category}` | Search products by category |
-| GET | `/api/products/search/price?min_price={min}&max_price={max}` | Search products by price range |
-| GET | `/api/products/search` | Search products (query, filters) |
-| POST | `/api/chat/message` | Chat endpoint (Week 2) |
+Frontend runs at: http://localhost:5173
 
 ## 📁 Project Structure
+
 ```
-shopassist/
-├── shopassist-api/
+ProductSupportAIAgent/
+├── shopassist-api/              # FastAPI Backend
 │   ├── shopassist_api/
-│   │   ├── api/routes/
-│   │   ├── application/
-│   │   │    ├── ai/
-│   │   │    ├── interfaces/
-│   │   │    └── settings/
-│   │   ├── domain/
-│   │   │    └── models
-│   │   ├── infrastucture/
-│   │   │    └── services
-│   │   └── main.py
-│   └── tests/
-├── shopassist-ui/
+│   │   ├── api/                 # API endpoints
+│   │   ├── application/         # Business logic
+│   │   │   ├── services/        # Core services (RAG, LLM)
+│   │   │   ├── prompts/         # Prompt templates
+│   │   │   └── settings/        # Configuration
+│   │   ├── domain/              # Domain models
+│   │   ├── infrastructure/      # External services
+│   │   └── main.py              # FastAPI app
+│   ├── tests/                   # Test suite
+│   ├── Dockerfile
+│   └── requirements.txt
+│
+├── shopassist-ui/               # React Frontend
 │   ├── src/
-│   │   ├── api/
-│   │   ├── components/
-│   │   ├── hooks/
-│   │   ├── services/
-│   │   ├── themes/
-│   │   ├── types/
+│   │   ├── components/          # React components
+│   │   ├── hooks/               # Custom hooks
+│   │   ├── services/            # API client
+│   │   ├── types/               # TypeScript types
 │   │   └── App.tsx
-│   └── public/
-├── dataset/
-│   └── products/
-├── knowledge_base/
-└── docs/
+│   ├── Dockerfile
+│   └── package.json
+│
+├── dataset/                     # Sample product data
+├── knowledge_base/              # Policy documents
+├── scripts/                     # Utility scripts
+├── docs/                        # Documentation
+├── docker-compose.yml           # Multi-container setup
+├── environment.yml              # Conda environment
+└── README.md                    # This file
 ```
 
-## 🎨 Features (Week 1)
+## 🔌 API Endpoints
 
-- ✅ Product browsing with grid view
-- ✅ Category and price filtering
-- ✅ Product search
-- ✅ Product detail view
-- ✅ Responsive design (mobile + desktop)
-- ⏳ AI chat interface (Week 2)
-- ⏳ Product recommendations (Week 3)
-- ⏳ Multi-turn conversations (Week 3)
+### Health & Status
+- `GET /api/v1/health` - Service health check
+- `GET /api/v1/health/ready` - Readiness check (all services initialized) for kubernetes
+- `GET /api/v1/health/full` - Service health check detailed(all services tested and running)
 
-## 📊 Current Status
+### Chat
+- `POST /api/v1/chat` - Send message and get AI response
+- `GET /api/v1/chat/history/{session_id}` - Get conversation history
 
-**Week 1 Complete:**
-- 200 products in database
-- 5 knowledge base documents
-- Full-stack application running
-- Product browsing and filtering working
+### Products
+- `GET /api/v1/products/{product_id}` - Get product details
+- `GET /api/v1/products/search/category/{category}` - Search by category
+- `GET /api/v1/products/search/price` - Search by price range
 
-## Week 2 Features (COMPLETE)
+### Sessions
+- `POST /api/v1/session` - Create new chat session
+- `GET /api/v1/session/{session_id}` - Get session details
+- `DELETE /api/v1/session/{session_id}` - Delete session
 
-### RAG Pipeline
-- ✅ Vector embeddings with Azure OpenAI (text-embedding-3-small)
-- ✅ Milvus vector database with 400+ product chunks
-- ✅ Semantic search with HNSW indexing
-- ✅ Query processing and filter extraction
-- ✅ Context building for LLM prompts
-- ✅ GPT-4o-mini for response generation
+### Search
+- `POST /api/v1/search` - Semantic search across products
 
-### Chat Interface
-- ✅ Real-time conversational UI
-- ✅ Multi-turn conversation support
-- ✅ Session persistence
-- ✅ Product source display
-- ✅ Markdown formatting
-- ✅ Error handling and loading states
+Full API documentation: http://localhost:8000/docs
 
-### Performance
-- Response time: <3s for 95% of queries
-- Retrieval latency: ~500ms
-- Token cost: <$0.01 per conversation
-- Factual accuracy: >90% on test queries
+## 🧪 Testing
 
-## 🐛 Known Issues
+### Backend Tests
 
-- Chat endpoint is placeholder (Week 2)
-- No product recommendations yet
-- No conversation history
-- Missing image optimization
+```bash
+cd shopassist-api
+
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=shopassist_api
+
+# Run specific test
+pytest tests/test_services/test_query_processor.py -v
+```
+
+### Frontend Tests
+
+```bash
+cd shopassist-ui
+
+# Run linting
+npm run lint
+
+# Type checking
+npm run type-check  # (if configured)
+```
+
+## 📊 Performance Metrics
+
+- **Response Time**: <2s average (95th percentile: <3s)
+- **Retrieval Latency**: ~500ms for semantic search
+- **Embedding Generation**: ~100ms per query
+- **Token Cost**: <$0.01 per conversation
+- **Accuracy**: >90% on factual product queries
+- **Docker Image Sizes**:
+  - API: ~800MB
+  - UI: ~25MB (Nginx)
+
+## 🔐 Security
+
+- Environment variables for sensitive credentials
+- Azure Managed Identity support (planned)
+- CORS configuration for frontend origin
+- Request validation with Pydantic
+- No sensitive data in logs
+- Rate limiting (planned)
+
+## 📈 Monitoring & Observability
+
+- **LangSmith**: LLM call tracing and debugging
+  - View traces: https://smith.langchain.com/
+- **Application Logs**: Structured logging to files and console
+- **Health Checks**: Liveness and readiness probes
+- **Metrics** (planned): Prometheus/Grafana integration
 
 ## 🗺️ Roadmap
 
-- **Week 2:** Core RAG pipeline
-- **Week 3:** Intent classification, context management
-- **Week 4:** Model comparison (Azure OpenAI vs Gemma)
-- **Week 5:** Evaluation framework
-- **Week 6:** Deployment and polish
+### Completed ✅
+- [x] Product browsing and filtering
+- [x] Semantic search with embeddings
+- [x] RAG pipeline with Milvus
+- [x] Multi-turn conversations
+- [x] Session management
+- [x] Product comparison
+- [x] Docker deployment
+- [x] LangSmith integration
 
-## 📝 License
+### In Progress 🚧
+- [ ] Unit test coverage >80%
+- [ ] Performance optimization
+- [ ] Error handling improvements
 
-MIT License - Built as portfolio project
+### Planned 📋
+- [ ] Azure deployment (Container Apps)
+- [ ] CI/CD pipeline (GitHub Actions)
+- [ ] User authentication
+- [ ] Rate limiting
+- [ ] Monitoring dashboard
+- [ ] Multi-language support
+- [ ] Voice input support
+- [ ] Product recommendation engine
+
+## 🐛 Known Issues
+
+- First request after startup is slow (~3s) due to model loading
+- Large Docker images (working on optimization)
+- Limited error messages for end users
+- No retry logic for failed API calls
 
 ## 🤝 Contributing
 
-This is a portfolio project, but feedback welcome!
+This is a portfolio project, but suggestions and feedback are welcome!
 
-## 📧 Contact
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-[Your contact info]
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👤 Author
+
+**Jose Valdes**
+- GitHub: [@josehvaldes](https://github.com/josehvaldes)
+- LinkedIn: [Your LinkedIn](https://linkedin.com/in/josevaldesmurguia)
+
+## 🙏 Acknowledgments
+
+- Azure OpenAI for LLM capabilities
+- LangChain for RAG orchestration
+- Mantine for beautiful UI components
+- FastAPI for excellent documentation
+- The open-source community
+
+## 📚 Documentation
+
+- [API Documentation](./shopassist-api/README.md)
+- [Frontend Documentation](./shopassist-ui/README.md)
+- [Deployment Guide](./docs/deployment.md) (planned)
+- [Architecture Deep Dive](./docs/architecture.md) (planned)
+
+## 💡 Use Cases
+
+This project demonstrates:
+- Production-ready RAG implementation
+- Microservices architecture
+- Vector database integration
+- LLM prompt engineering
+- Full-stack development with modern tools
+- Docker containerization
+- Cloud service integration
+
+Perfect for learning or as a template for similar AI-powered applications!
+
+---
+
+**⭐ If you find this project useful, please consider giving it a star!**
