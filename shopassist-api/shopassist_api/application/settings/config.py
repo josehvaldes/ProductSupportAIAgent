@@ -82,7 +82,7 @@ class Settings(BaseSettings):
     # Similarity Thresholds. Not used currently
     threshold_product_similarity: float = 0.5
 
-    threshold_knowledge_base_similarity: float = 0.75
+    threshold_knowledge_base_similarity: float = 0.5
     
 
     langchain_tracing_v2: bool = True
