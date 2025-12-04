@@ -155,6 +155,11 @@ checkpointer = await AsyncRedisSaver.from_conn_string(
 - ✅ Inactive conversations cleaned up after 30 minutes
 - ✅ Reduces Redis memory usage in production
 
+**Deployment changes**
+- Redis contaner moved to a different docker compose file.
+
+
+
 ## Week 4: Enhancements
 Interactive Refinement
 

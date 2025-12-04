@@ -76,7 +76,7 @@ class Settings(BaseSettings):
     milvus_knowledge_base_collection: str = "knowledge_base_collection"
 
     # Similarity Thresholds for category searchs
-    threshold_category_similarity: float = 0.78
+    threshold_category_similarity: float = 0.75
     TOP_K_CATEGORIES: int = 3
 
     # Similarity Thresholds. Not used currently

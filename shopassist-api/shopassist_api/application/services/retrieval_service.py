@@ -121,8 +121,6 @@ class RetrievalService:
             
             logger.info(f"Retrieve products for [{query}] and filters: {filter_expr}, Top_k:{top_k}, with adaptative filtering")
             # Search in Milvus with initial radius
-            radius = settings.threshold_product_similarity
-            print("Initial radius:", radius)
             results = []
 
             #results with radius filtering
@@ -130,7 +128,7 @@ class RetrievalService:
                     query_embedding=query_embedding,
                     top_k=top_k,
                     filters=filter_expr,
-                    radius=radius
+                    radius=settings.threshold_product_similarity
                 )
             
             logger.info(f"Initial retrieved {len(results)} products for query: [{query}] with radius: {radius}")

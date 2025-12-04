@@ -24,18 +24,29 @@
 **V1 Behavior:** 
 - Retrieved wrong categories
 - Returned irrelevant products
-- LangSmith trace: [link]
+- LangSmith trace Id: 1d0295bb789f
 
 **V2 Behavior:**
 - Supervisor agent correctly routes to comparison_agent
 - Multi-query retrieval finds both products
 - Accurate comparison generated
-- LangSmith trace: [link]
+- LangSmith trace id: cdc0248b2a6c 
 
 **Root Cause Fixed:** Better intent classification + specialized agents
+- the LLM removes noise and chitchat in the user input before the tool us called
+- LLM identifies and discards irrelevant products that were retrieved in milvus searches.
+- ratio usage in milvus reduces irrelevant products from the search results
+- easy to fine-tune ratio thresholds for products and knowledge base documents
+
+
 
 ### Issue 2: Multi-turn Context Loss
-[Document another fixed issue]
+ - Message history is stored in redis, so no need to use RU in cosmosDB
+ - Full context is used without custom code to recover it. LLM understands the context and previous messages and pronoums like "which of them", "do they work for" which refers to previous products
+ - CONS token usage increase.
+ 
+### Issue 3: token usage
+ - GPT-4 nano doesn't response well in Supervisor agent. 2 out of 10 test cases failed. Usage not recommended. 
 
 ## Outstanding Issues
 1. Token usage growth per conversation turn (mitigation: Redis TTL)

@@ -109,7 +109,7 @@ class MilvusService(VectorServiceInterface):
         search_params = {
             "metric_type": "COSINE",
             "params": {"ef": 128, 
-                       "radius": radius if radius else settings.threshold_product_similarity
+                       "radius": radius if radius else 0.0
                        }
         }
         
@@ -152,7 +152,7 @@ class MilvusService(VectorServiceInterface):
         
         search_params = {
             "metric_type": "COSINE",
-            "params": {"ef": 64, "radius": radius if radius else settings.threshold_knowledge_base_similarity}
+            "params": {"ef": 64, "radius": radius if radius else 0.0}
         }
         
         results = collection.search(
