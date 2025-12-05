@@ -64,7 +64,7 @@ async def search_product(state:ProductComparisonAgentState) -> dict:
     formatted_products = [ {
         "id": prod['id'],
         "name": prod['name'],
-        "relevance_score": prod.get('relevance_score', 0),
+        "distance": prod.get('distance', 0),
         "category": prod['category'],
         "price": prod['price'],
         "brand": prod['brand'],
@@ -159,8 +159,9 @@ class ProductComparisonAgent:
         return AgentResponse(
             message=response,
             sources=sources,
-            agent_name="product_comparison",
+            agent_name=f"product_comparison_{self.llm.deployment_name}",
             metadata=Metadata(
+                id="product_comparison_agent",
                 input_token=sum_input_tokens,
                 output_token=sum_output_tokens,
                 total_token=sum_total_tokens

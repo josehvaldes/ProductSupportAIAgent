@@ -1,7 +1,7 @@
 import json
 from langgraph.graph import StateGraph, END
 from langgraph.graph.state import CompiledStateGraph
-from typing import Annotated, TypedDict
+from typing import Annotated, Optional, TypedDict
 
 from langchain.messages import AnyMessage
 import operator
@@ -12,7 +12,8 @@ from shopassist_api.application.agents.escalation_agent import EscalationAgent
 from shopassist_api.application.agents.policy_agent import PolicyAgent
 from shopassist_api.application.agents.product_comparison_agent import ProductComparisonAgent
 from shopassist_api.application.agents.product_detail_agent import ProductDetailAgent
-from shopassist_api.application.agents.product_search_agent import ProductSearchAgent
+from shopassist_api.application.agents.product_search_expanded_agent import ProductSearchExpandedAgent
+from shopassist_api.application.agents.query_expansion_agent import QueryExpansionAgent
 from shopassist_api.application.agents.supervisor_agent import SupervisorAgent
 
 from shopassist_api.logging_config import get_logger
@@ -27,6 +28,8 @@ class OrchestratorState(TypedDict):
     current_agent: str
     response: str
     sources: list
+    expanded_queries: Optional[list[str]]
+    categories: Optional[list[str]]
     metadatas: list[Metadata]
 
 
@@ -36,7 +39,8 @@ class AgentOrchestrator:
         
         self.supervisor = SupervisorAgent()
         self.policy_agent = PolicyAgent()
-        self.product_search_agent = ProductSearchAgent()
+        self.query_expansion_agent = QueryExpansionAgent()
+        self.product_search_agent = ProductSearchExpandedAgent()
         self.product_detail_agent = ProductDetailAgent()
         self.product_comparison_agent = ProductComparisonAgent()
         self.escalation_agent = EscalationAgent()
@@ -50,6 +54,7 @@ class AgentOrchestrator:
         #nodes
         workflow.add_node("supervisor", self._supervisor_node)
         workflow.add_node("policy", self._policy_node)
+        workflow.add_node("query_expansion", self._query_expansion_node)
         workflow.add_node("product_search", self._product_search_node)
         workflow.add_node("product_detail", self._product_detail_node)
         workflow.add_node("product_comparison", self._product_comparison_node)
@@ -64,7 +69,7 @@ class AgentOrchestrator:
             self._route_to_agent,
             {
                 "policy": "policy",
-                "product_search": "product_search",
+                "product_search": "query_expansion",
                 "product_detail": "product_detail",
                 "comparison":"product_comparison",
                 "escalation": "escalation",
@@ -73,6 +78,7 @@ class AgentOrchestrator:
         )
 
         workflow.add_edge("policy", END)
+        workflow.add_edge("query_expansion", "product_search")
         workflow.add_edge("product_search", END)
         workflow.add_edge("product_detail", END)
         workflow.add_edge("product_comparison", END)
@@ -102,11 +108,29 @@ class AgentOrchestrator:
         state["sources"] = result.sources
         metadatalist = state.get("metadatas", [])
         if result.metadata:
-            result.metadata.id = "policy_agent"
             metadatalist.append(result.metadata)
             state["metadatas"] = metadatalist
         return state
     
+    async def _query_expansion_node(self, state: OrchestratorState):
+        """Execute query expansion agent"""
+        logger.info("Orchestrator invoking QueryExpansionAgent. User Query: %s, Session: %s ", state["user_query"], state["session_Id"])
+        result = await self.query_expansion_agent.ainvoke(state=state)
+
+        state["expanded_queries"] = result["expanded_queries"]
+
+        if not result["expanded_queries"]:
+            state["expanded_queries"] = [state["user_query"]]
+
+        state["categories"] = result["categories"]
+
+        metadatalist = state.get("metadatas", [])
+        if result["metadata"]:
+            metadatalist.append(result["metadata"])
+            state["metadatas"] = metadatalist
+        logger.info(f"Orchestrator obtained expanded queries: {state["expanded_queries"]}, categories {state["categories"]}")
+        return state
+
     async def _product_search_node(self, state: OrchestratorState):
         """Execute product discovery agent"""
         logger.info("Orchestrator invoking ProductSearchAgent. User Query: %s, Session: %s ", state["user_query"], state["session_Id"])
@@ -115,7 +139,6 @@ class AgentOrchestrator:
         state["sources"] = result.sources
         metadatalist = state.get("metadatas", [])
         if result.metadata:
-            result.metadata.id = "product_search_agent"
             metadatalist.append(result.metadata)
             state["metadatas"] = metadatalist
         return state
@@ -129,7 +152,6 @@ class AgentOrchestrator:
         state["sources"] = result.sources
         metadatalist = state.get("metadatas", [])
         if result.metadata:
-            result.metadata.id = "product_detail_agent"
             metadatalist.append(result.metadata)
             state["metadatas"] = metadatalist
         return state
@@ -143,7 +165,6 @@ class AgentOrchestrator:
         state["sources"] = result.sources
         metadatalist = state.get("metadatas", [])
         if result.metadata:
-            result.metadata.id = "product_comparison_agent"
             metadatalist.append(result.metadata)
             state["metadatas"] = metadatalist
         return state

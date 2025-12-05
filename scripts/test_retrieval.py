@@ -12,39 +12,20 @@ env_path = script_dir.parent / 'shopassist-api' / '.env'
 load_dotenv(dotenv_path=env_path)
 
 from shopassist_api.application.settings.config import settings
-
 from shopassist_api.application.services.retrieval_service import RetrievalService
 from shopassist_api.infrastructure.services.milvus_service import MilvusService
 from shopassist_api.infrastructure.services.transformers_embedding_service import TransformersEmbeddingService
-from shopassist_api.application.services.query_processor import QueryProcessor
 from shopassist_api.infrastructure.services.cosmos_product_service import CosmosProductService
 
-# Test queries with expected results
-TEST_QUERIES = [
-    # {
-    #     "query": "laptop for video editing",
-    #     "type": "product_search",
-    #     "expected_category": "Laptops",
-    #     "expected_keywords": ["video", "editing", "performance"]
-    # },
-    # {
-    #     "query": "wireless headphones under $100",
-    #     "type": "product_search",
-    #     "expected_category": "Headphones",
-    #     "max_price": 100
-    # },
-    # {
-    #     "query": "what is your return policy",
-    #     "type": "policy",
-    #     "expected_doc_type": "policies"
-    # },
-    {
-        "query": "MacBook Air M2",
-        "type": "product_search",
-        "expected_category": "Laptops",
-    }
-    # Add more test queries...
-]
+from shopassist_api.logging_config import setup_logging
+from shopassist_api.logging_config import get_logger
+
+setup_logging(
+        log_level=settings.log_level,
+        log_file=settings.log_file,
+        log_to_console=settings.log_to_console
+    )
+logger = get_logger(__name__)
 
 # Instantiate services
 vector_service = MilvusService()
@@ -97,9 +78,38 @@ async def evaluate_retrieval():
     Evaluate retrieval quality
     """
     print("🧪 Evaluating Retrieval Quality\n")
-    
-    processor = QueryProcessor()
-    
+    # Test queries with expected results
+    TEST_QUERIES = [
+        # {
+        #     "query": "laptop for video editing",
+        #     "type": "product_search",
+        #     "expected_category": "Laptops",
+        #     "expected_keywords": ["video", "editing", "performance"]
+        # },
+        # {
+        #     "query": "wireless headphones under $100",
+        #     "type": "product_search",
+        #     "expected_category": "Headphones",
+        #     "max_price": 100
+        # },
+        # {
+        #     "query": "what is your return policy",
+        #     "type": "policy",
+        #     "expected_doc_type": "policies"
+        # },
+        # {
+        #     "query": "MacBook Air M2",
+        #     "type": "product_search",
+        #     "expected_category": "Laptops",
+        # }
+        {
+            "query": "case for Samsung z flip",
+            "type": "product_search",
+            "filters": {'categories': ['LaptopSleeves&Slipcases', 'MicroSD']},
+        }
+        # Add more test queries...
+    ]
+
     results = {
         "total_queries": len(TEST_QUERIES),
         "successful": 0,
@@ -113,14 +123,11 @@ async def evaluate_retrieval():
         
         # Classify
         query_type = test["type"]
-        cleaned_query, extracted_filters = processor.process_query(query)
-        print(f"   🔍 Classified as: {query_type}")
-        print(f"   🧹 Cleaned query: {cleaned_query}")
-        print(f"   🛠️  Extracted filters: {extracted_filters}")
+        extracted_filters =  test['filters']
 
         # Retrieve
         if query_type == 'product_search':
-            retrieved = await retrieval_service.retrieve_products(cleaned_query, top_k=5, 
+            retrieved = await retrieval_service.retrieve_products(query, top_k=5, 
                                                                   filters=extracted_filters, 
                                                                   enriched=False)
         else:
@@ -129,20 +136,10 @@ async def evaluate_retrieval():
         # Evaluate
         success = len(retrieved) > 0
         print(f"   Retrieved {len(retrieved)} results")
-        print(f"   Top result: {retrieved[0] if retrieved else 'N/A'}") 
         if success:
             results["successful"] += 1
-            print(f"   ✅ Retrieved {len(retrieved)} results")
-            
-            # Check relevance
-            if 'expected_category' in test:
-                top_category = retrieved[0].get('category', '')
-                if test['expected_category'] in top_category:
-                    print(f"   ✅ Category match: {top_category}")
-                else:
-                    print(f"   ⚠️  Category mismatch: expected {test['expected_category']}, got {top_category}")
-            else:
-                print("   ℹ️  No expected category to verify")
+            for res in retrieved:
+                print(f"   Score: {res.get("distance", 0)} | {res.get("category","")} | {res.get("text", '')[:100]}...")
         else:
             results["failed"] += 1
             print("   ❌ No results retrieved")
@@ -151,7 +148,7 @@ async def evaluate_retrieval():
             "query": query,
             "success": success,
             "num_results": len(retrieved),
-            "top_score": retrieved[0].get('relevance_score', 0) if retrieved else 0
+            "top_score": retrieved[0].get('distance', 0) if retrieved else 0
         })
     
     # Summary
@@ -170,4 +167,5 @@ async def evaluate_retrieval():
     print("\n✅ Results saved to retrieval_evaluation.json")
 
 if __name__ == "__main__":
-    asyncio.run(evaluate_retrieval_adaptative())
+    #asyncio.run(evaluate_retrieval_adaptative())
+    asyncio.run(evaluate_retrieval())

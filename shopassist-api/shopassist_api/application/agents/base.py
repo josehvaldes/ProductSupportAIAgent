@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Literal, Optional
 
 class Metadata(BaseModel):
@@ -38,3 +38,14 @@ class EscalationResponse(AgentResponse):
     """Structured response from EscalationAgent"""
     ticket_id: str
     contact_info: str
+
+class AgentDecision(BaseModel):
+    """Structured output for query processing decision"""
+    results: Optional[list[str]] = None
+    reasoning: Optional[str] = None
+
+class PriceFilter(BaseModel):
+    """Extracted price range from user query"""
+    min_price: Optional[float] = Field(None, description="Minimum price in USD")
+    max_price: Optional[float] = Field(None, description="Maximum price in USD")
+    confidence: float = Field(description="Confidence in extraction (0-1)")

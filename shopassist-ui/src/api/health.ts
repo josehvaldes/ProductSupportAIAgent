@@ -6,7 +6,6 @@ export interface HealthCheckResponse {
   timestamp: string;
   service: string;
   version: string;
-  database: string;
 }
 
 
@@ -23,7 +22,7 @@ export const petshopApi = {
 
   // Get Health Check
   healthCheck: async (): Promise<HealthCheckResponse> => {
-    return apiRequest('/health');
+    return apiRequest('/health/ready');
   },
 
   // Example: Get pet information

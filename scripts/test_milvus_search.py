@@ -43,7 +43,7 @@ async def test_search():
         if is_policy_query:
             results = milvus.search_knowledge_base(query_embedding, top_k=3)
         else:
-            results = milvus.search_products(query_embedding, top_k=5)
+            results = milvus.search_products(query_embedding, top_k=5, radius=0.5)
         
         latency = (time.time() - start_time) * 1000  # ms
         

@@ -84,6 +84,9 @@ class Settings(BaseSettings):
 
     threshold_knowledge_base_similarity: float = 0.5
     
+    query_expansion_max_variations: int = 2
+    top_k_query_expansion_categories: int = 2
+
 
     langchain_tracing_v2: bool = True
     langchain_project: str = "ShopAssistAPI"

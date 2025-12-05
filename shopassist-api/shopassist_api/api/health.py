@@ -19,7 +19,9 @@ async def health_check_():
     """Basic health check - is service alive?"""
     return {
         "status": "healthy",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
+        "service": settings.api_title,
+        "version": settings.api_version
     }
 
 # Readiness: Check if dependencies are ready
@@ -64,8 +66,10 @@ async def readiness_check():
         status_code=status_code,
         content={
             "status": "ready" if all_ready else "not_ready",
+            "service": settings.api_title,
+            "version": settings.api_version,
+            "timestamp": datetime.now().isoformat(),
             "services": services_ready,
-            "timestamp": datetime.now().isoformat()
         }
     )
 

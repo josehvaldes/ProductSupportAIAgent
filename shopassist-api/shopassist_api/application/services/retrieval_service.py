@@ -95,7 +95,7 @@ class RetrievalService:
                 category_map[cat_id] = cat
             else:
                 # Keep the one with better score
-                if cat['distance'] > category_map[cat_id]['score']:
+                if cat['score'] > category_map[cat_id]['score']:
                     category_map[cat_id] = cat
         #sorted by distance
         sorted_categories = sorted(category_map.values(), key=lambda x: x['score'], reverse=True)
@@ -131,7 +131,7 @@ class RetrievalService:
                     radius=settings.threshold_product_similarity
                 )
             
-            logger.info(f"Initial retrieved {len(results)} products for query: [{query}] with radius: {radius}")
+            logger.info(f"Initial retrieved {len(results)} products for query: [{query}] with radius: {settings.threshold_product_similarity}")
             if len(results) == 0:
                 # No results found. End
                 return []
@@ -166,12 +166,47 @@ class RetrievalService:
         # Enrich with full product data from Cosmos DB
         if enriched:
             results_to_return = await self._enrich_with_product_data(products)
-            results_to_return.sort(key=lambda x: x['relevance_score'], reverse=True)
+            results_to_return.sort(key=lambda x: x['distance'], reverse=True)
         else:
             products.sort(key=lambda x: x['distance'], reverse=True)
+
             results_to_return = products
             
         return results_to_return
+
+    @traceable(name="retrieval.retrieve_products_query_list", tags=["retrieval", "product", "milvus"], metadata={"version": "1.0"})
+    async def retrieve_products_query_list(
+            self,
+            queries: list[str],
+            top_k: int = 3,
+            filters: Optional[Dict] = None,
+            enriched: bool = True
+        ) -> List[Dict]:
+        
+        filter_expr = self._build_filter_expression(filters)
+        all_products = []
+
+        try:
+            for query in queries:
+                #TODO optimize by batching embeddings
+                query_embedding = await self.embedder.generate_embedding(query)
+                results = self.milvus.search_products(
+                    query_embedding=query_embedding,
+                    top_k=top_k,
+                    filters=filter_expr,
+                    radius=settings.threshold_product_similarity
+                )
+                logger.info(f"Retrieved {len(results)} products for query: {query} with filters: {filter_expr}")
+                all_products.extend(results)
+            
+            if len(all_products) == 0:
+                return []
+
+            return await self._process_products(enriched, all_products)
+        except Exception as e:
+            logger.error(f"Error in retrieve_products_query_list: {e}")
+            traceback.print_exc()
+            return []
 
     @traceable(name="retrieval.retrieve_products", tags=["retrieval", "product", "milvus"], metadata={"version": "1.0"})
     async def retrieve_products(
@@ -199,12 +234,13 @@ class RetrievalService:
             # Build filter expression for Milvus
             filter_expr = self._build_filter_expression(filters)
             
-            logger.info(f"Retrieve products for {query} and filters: {filter_expr}")
+            logger.info(f"Retrieve products for [{query}] and filters: {filter_expr}, Top_k:{top_k}, radius:{settings.threshold_product_similarity}")
             # Search in Milvus
             results = self.milvus.search_products(
                 query_embedding=query_embedding,
                 top_k=top_k,
-                filters=filter_expr
+                filters=filter_expr,
+                radius=settings.threshold_product_similarity
             )            
             
             if len(results) == 0:
@@ -351,7 +387,7 @@ class RetrievalService:
                 if product:
                     enriched.append({
                         **full_product,
-                        "relevance_score": product['distance'],
+                        "distance": product['distance'],
                         "matched_text": product['text'][:200]  # Preview
                     })
                 else:

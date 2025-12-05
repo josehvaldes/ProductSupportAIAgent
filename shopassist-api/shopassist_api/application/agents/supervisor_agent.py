@@ -25,7 +25,7 @@ class SupervisorAgent:
     def __init__(self, model_deployment:str = None):
         self.llm = None
         self.prompt = None
-        self.model_deployment = model_deployment or settings.azure_openai_model_deployment
+        self.model_deployment = model_deployment or settings.azure_openai_nano_model_deployment
         self._initialize_llm()
 
     def _initialize_llm(self):
@@ -42,7 +42,7 @@ class SupervisorAgent:
             ).with_structured_output(RouteDecision)
         
         self.prompt = ChatPromptTemplate.from_messages([
-            ("system", RouteTemplates.SYSTEM_PROMPT_SHORT),
+            ("system", RouteTemplates.SYSTEM_PROMPT),
             ("human", "Query: {query}\n\nContext: {context}")
             ])
     
@@ -61,6 +61,7 @@ class SupervisorAgent:
             confidence=decision.confidence,
             reasoning=decision.reasoning,
             metadata=Metadata(
+                id="supervisor_agent",
                 input_token=token_tracker.prompt_tokens,
                 output_token=token_tracker.completion_tokens,
                 total_token=token_tracker.total_tokens)

@@ -78,4 +78,4 @@ class ContextBuilder:
                     Brand: {product.get('brand', 'N/A')}
                     Available: { product.get('availability', 'out_of_stock')}
                     Description: {product.get('description', product.get('matched_text', 'N/A'))}
-                    Relevance Score: {product.get('relevance_score', 0):.3f}"""
+                    Relevance Score: {product.get('distance', 0):.3f}"""
