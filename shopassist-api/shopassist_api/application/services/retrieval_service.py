@@ -28,7 +28,7 @@ class RetrievalService:
         return dot(a, b) / (norm(a) * norm(b))
 
     @traceable(name="retrieval.retrieve_top_categories", tags=["retrieval", "category", "milvus"], metadata={"version": "1.0"})
-    async def retrieve_top_categories(self, query:str, top_k=3) -> List[Dict]:
+    async def retrieve_top_categories(self, query:str, top_k=3, radius:int = None) -> List[Dict]:
         """Retrieve product categories"""
         try:
             logger.info(f"Generating embedding for query: {query}")
@@ -75,9 +75,16 @@ class RetrievalService:
 
             #merge and deduplicate categories
             categories = self.merge_deduplicate_categories(categories_sim, categories_sim_full)
+            selected_categories = []
+            for cat in categories:
+                if radius:
+                    if cat['score'] >= radius:
+                        selected_categories.append(cat)
+                else:
+                    selected_categories.append(cat)
 
             if categories:
-                return categories[:top_k]
+                return selected_categories[:top_k]
             else:
                 return {}
             

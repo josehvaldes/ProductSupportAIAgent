@@ -7,6 +7,7 @@ import asyncio
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
+
 sys.path.append('../shopassist-api')
 # Load .env file from the correct location
 script_dir = Path(__file__).parent
@@ -22,6 +23,7 @@ from shopassist_api.application.agents.policy_agent import PolicyAgent
 from shopassist_api.application.agents.supervisor_agent import SupervisorAgent
 from shopassist_api.application.agents.query_expansion_agent import QueryExpansionAgent
 from shopassist_api.application.agents.product_search_expanded_agent import ProductSearchExpandedAgent
+from shopassist_api.application.agents.product_discovery_agent import ProductDiscoveryAgent
 from shopassist_api.logging_config import setup_logging
 from shopassist_api.logging_config import get_logger
 
@@ -290,9 +292,39 @@ async def test_product_search_expanded_agent():
             logger.error(f"Error invoking product search expanded agent: {e}")
             traceback.print_exc()
 
+async def test_product_discovery_agent():
+    print("Testing Product Discovery Agent")
+    product_search_ext_agent = ProductDiscoveryAgent()
+    test_queries = [
+        #"Please, show me some smartphones with good cameras under $700.",        
+        #"I need a case for my Samsung z flip. Do you have any?",
+        "Show me smart Televisions under 800"
+    ]
+
+    session_id = uuid.uuid4().hex[:12]
+    for query in test_queries:
+        print(f"\nUser Query: {query}")
+        try:
+            response = await product_search_ext_agent.ainvoke({
+                "user_query": query,                
+                "session_Id": session_id,
+            })
+            print(f"Agent Response: {response.message}\n[end]") 
+            print(f"Products Found: {response.sources}")
+            #print metadata
+            if response.metadata:
+                print(f"Metadata:\n  Input Tokens={response.metadata.input_token},\n  Output Tokens={response.metadata.output_token},\n  Total Tokens={response.metadata.total_token}")
+
+        except Exception as e:
+            logger.error(f"Error invoking product search expanded agent: {e}")
+            traceback.print_exc()
+
+
 async def main(arg:str):
     if arg == "supervisor":
         await test_supervisor_agent()
+    elif arg == "product_discovery":
+        await test_product_discovery_agent()
     elif arg == "query_expansion":
         await test_query_expansion_agent()
     elif arg == "product_search_expanded":

@@ -143,10 +143,24 @@ class ProductDetailAgent:
         sum_total_tokens = 0
 
         for msg in messages:
-            if isinstance(msg, ToolMessage) and msg.name == "search_product":
-                jsonobj = json.loads(msg.content)
-                products = jsonobj.get("products", [])
-                sources.extend(products)
+            if isinstance(msg, ToolMessage):
+                if msg.name == "search_products":
+                    if not msg.content or not isinstance(msg.content, str):
+                        logger.warning(f"Invalid tool message content: {msg.content}")
+                        continue
+                    
+                    content = msg.content.strip()
+                    try:
+                        if not content:
+                            logger.warning("Tool message content is empty.")
+                            continue
+                        jsonobj = json.loads(content)
+                        products = jsonobj.get("products", [])
+                        sources.extend(products)
+                    except json.JSONDecodeError as e:
+                        logger.error(f"JSON decode error while parsing tool message content: {e}")
+                        logger.error(f"Content was: {content} \n end")  # Log first 200 chars of content
+                        continue
             
             if isinstance(msg, AIMessage):
                 metadata = msg.usage_metadata

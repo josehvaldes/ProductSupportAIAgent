@@ -60,7 +60,7 @@ async def search_products(state:ProductSearchAgentState) -> dict:
     logger.info(f"Searching products for query: [{query}] with top_k={top_k}, filters={filters}")
     # Identify categories first
     retrieval = get_retrieval_service()
-    categories = await retrieval.retrieve_top_categories(query, top_k=settings.TOP_K_CATEGORIES)
+    categories = await retrieval.retrieve_top_categories(query, top_k=settings.top_k_categories)
 
     if categories and len(categories) > 0:
         category_names = []
@@ -150,7 +150,7 @@ class ProductSearchAgent:
         if self.agent is None:
             self.agent = await self._get_agent()
 
-        logger.info(f"Invoking ProductSearchAgent with session_Id: {session_Id} and user_query: {user_query}")
+        logger.info(f"Invoking with session_Id: {session_Id} and user_query: {user_query}")
         result = await self.agent.ainvoke(
             {"messages": [ HumanMessage(content=user_query) ],},
             {"configurable": {"thread_id": session_Id}}
@@ -166,10 +166,24 @@ class ProductSearchAgent:
         sum_total_tokens = 0
 
         for msg in messages:
-            if isinstance(msg, ToolMessage) and msg.name == "search_products":
-                jsonobj = json.loads(msg.content)
-                products = jsonobj.get("products", [])
-                sources.extend(products)
+            if isinstance(msg, ToolMessage):
+                if msg.name == "search_products":
+                    if not msg.content or not isinstance(msg.content, str):
+                        logger.warning(f"Invalid tool message content: {msg.content}")
+                        continue
+                    
+                    content = msg.content.strip()
+                    try:
+                        if not content:
+                            logger.warning("Tool message content is empty.")
+                            continue
+                        jsonobj = json.loads(content)
+                        products = jsonobj.get("products", [])
+                        sources.extend(products)
+                    except json.JSONDecodeError as e:
+                        logger.error(f"JSON decode error while parsing tool message content: {e}")
+                        logger.error(f"Content was: {content} \n end")  # Log first 200 chars of content
+                        continue
             
             if isinstance(msg, AIMessage):
                 metadata = msg.usage_metadata

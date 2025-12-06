@@ -27,7 +27,7 @@ async def get_categories_for_queries(queries:list[str]) -> list[str]:
     retrieval = get_retrieval_service()
     for query in queries:
         #TODO send batch requests to improve performance
-        categories = await retrieval.retrieve_top_categories(query, top_k=settings.TOP_K_CATEGORIES)
+        categories = await retrieval.retrieve_top_categories(query, top_k=settings.top_k_categories, radius=settings.threshold_category_similarity)
         cat_names = [ cat["name"] for cat in categories ]
         all_categories.update(cat_names)
     

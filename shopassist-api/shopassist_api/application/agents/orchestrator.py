@@ -13,6 +13,8 @@ from shopassist_api.application.agents.policy_agent import PolicyAgent
 from shopassist_api.application.agents.product_comparison_agent import ProductComparisonAgent
 from shopassist_api.application.agents.product_detail_agent import ProductDetailAgent
 from shopassist_api.application.agents.product_search_expanded_agent import ProductSearchExpandedAgent
+from shopassist_api.application.agents.product_discovery_agent import ProductDiscoveryAgent
+
 from shopassist_api.application.agents.query_expansion_agent import QueryExpansionAgent
 from shopassist_api.application.agents.supervisor_agent import SupervisorAgent
 
@@ -40,7 +42,11 @@ class AgentOrchestrator:
         self.supervisor = SupervisorAgent()
         self.policy_agent = PolicyAgent()
         self.query_expansion_agent = QueryExpansionAgent()
-        self.product_search_agent = ProductSearchExpandedAgent()
+        
+        #disable for now
+        # self.product_search_agent = ProductSearchExpandedAgent()
+
+        self.product_discovery_agent = ProductDiscoveryAgent()
         self.product_detail_agent = ProductDetailAgent()
         self.product_comparison_agent = ProductComparisonAgent()
         self.escalation_agent = EscalationAgent()
@@ -54,7 +60,7 @@ class AgentOrchestrator:
         #nodes
         workflow.add_node("supervisor", self._supervisor_node)
         workflow.add_node("policy", self._policy_node)
-        workflow.add_node("query_expansion", self._query_expansion_node)
+        #workflow.add_node("query_expansion", self._query_expansion_node)
         workflow.add_node("product_search", self._product_search_node)
         workflow.add_node("product_detail", self._product_detail_node)
         workflow.add_node("product_comparison", self._product_comparison_node)
@@ -69,7 +75,7 @@ class AgentOrchestrator:
             self._route_to_agent,
             {
                 "policy": "policy",
-                "product_search": "query_expansion",
+                "product_search": "product_search",
                 "product_detail": "product_detail",
                 "comparison":"product_comparison",
                 "escalation": "escalation",
@@ -78,7 +84,7 @@ class AgentOrchestrator:
         )
 
         workflow.add_edge("policy", END)
-        workflow.add_edge("query_expansion", "product_search")
+        #workflow.add_edge("query_expansion", "product_search")
         workflow.add_edge("product_search", END)
         workflow.add_edge("product_detail", END)
         workflow.add_edge("product_comparison", END)
@@ -134,7 +140,7 @@ class AgentOrchestrator:
     async def _product_search_node(self, state: OrchestratorState):
         """Execute product discovery agent"""
         logger.info("Orchestrator invoking ProductSearchAgent. User Query: %s, Session: %s ", state["user_query"], state["session_Id"])
-        result = await self.product_search_agent.ainvoke(state=state)
+        result = await self.product_discovery_agent.ainvoke(state=state)
         state["response"] = result.message
         state["sources"] = result.sources
         metadatalist = state.get("metadatas", [])

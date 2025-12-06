@@ -77,7 +77,7 @@ class Settings(BaseSettings):
 
     # Similarity Thresholds for category searchs
     threshold_category_similarity: float = 0.75
-    TOP_K_CATEGORIES: int = 3
+    top_k_categories: int = 3
 
     # Similarity Thresholds. Not used currently
     threshold_product_similarity: float = 0.5

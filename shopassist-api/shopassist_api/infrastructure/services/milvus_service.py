@@ -181,13 +181,14 @@ class MilvusService(VectorServiceInterface):
         self,
         query_embedding: List[float],
         field: str = "embedding",
-        top_k: int = 5) -> List[Dict]:
+        top_k: int = 5,
+        radius:int = None) -> List[Dict]:
         """Search categories by vector similarity"""
         collection = Collection("categories_collection")
         collection.load()
         search_params = {
             "metric_type": "COSINE",
-            "params": {"ef": 64}
+            "params": {"ef": 64, "radius": radius if radius else 0.0}
         }
         results = collection.search(
             data=[query_embedding],
