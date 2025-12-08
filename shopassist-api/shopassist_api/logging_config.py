@@ -35,6 +35,7 @@ def setup_logging(
     logging.getLogger("azure").setLevel(logging.WARNING)
     logging.getLogger("sentence_transformers").setLevel(logging.WARNING)
     logging.getLogger("redisvl").setLevel(logging.WARNING)
+    logging.getLogger("httpx").setLevel(logging.WARNING)
     
     # Remove existing handlers
     root_logger.handlers.clear()

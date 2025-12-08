@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from langchain_community.callbacks import get_openai_callback
 
 from langsmith import traceable
-from shopassist_api.application.agents.base import Metadata, RouteDecision, RouteDecisionResponse
+from shopassist_api.application.agents.base import Metadata, RouteDecision, RouteDecisionResponse, RouteRequest
 from shopassist_api.application.settings.config import settings
 from shopassist_api.infrastructure.services.azure_credential_manager import get_credential_manager
 from shopassist_api.application.prompts.agent_templates import RouteTemplates
@@ -39,10 +39,10 @@ class SupervisorAgent:
                 deployment_name=self.model_deployment,
                 azure_ad_token_provider=token_provider,
                 temperature=0
-            ).with_structured_output(RouteDecision)
+            ).with_structured_output(RouteRequest)
         
         self.prompt = ChatPromptTemplate.from_messages([
-            ("system", RouteTemplates.SYSTEM_PROMPT),
+            ("system", RouteTemplates.SYSTEM_PROMPT_ROUTER),
             ("human", "Query: {query}\n\nContext: {context}")
             ])
     
@@ -55,10 +55,10 @@ class SupervisorAgent:
         with track_tokens() as token_tracker:
             decision = await self.llm.ainvoke(messages)
         
-        logger.info(f"SupervisorAgent: Routing decision: {decision}")
+        logger.info(f"Routing decision: total routes:{len(decision.routes)}: {decision}")
         return RouteDecisionResponse(
-            agent=decision.agent,
-            confidence=decision.confidence,
+            agent=f"supervisor_agent_{self.model_deployment}",
+            routes=decision.routes,
             reasoning=decision.reasoning,
             metadata=Metadata(
                 id="supervisor_agent",

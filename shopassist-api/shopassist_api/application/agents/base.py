@@ -24,14 +24,28 @@ class PolicyResponse(AgentResponse):
 
 class RouteDecision(BaseModel):
     """Structured output for routing"""
-    agent: Literal["policy", "product_search", "product_detail", "comparison", "escalation"]
-    confidence: float
-    reasoning: str
+    query: str = Field(
+        description="The cleaned, specific sub-query to execute"
+    )
+    
+    intent: Literal["policy", "product_search", "product_detail", "comparison", "escalation"] = Field(
+        description="The intent category for this sub-query"
+    )
+
+class RouteRequest(BaseModel):
+    """Complete routing decision with reasoning"""
+    reasoning: str =  Field(
+        description="Brief explanation of how the query was analyzed and decomposed"
+    )
+    routes: list[RouteDecision] =  Field(
+        description="List of sub-queries to execute (1 for single-intent, 2+ for multi-intent)"
+    )
+
 
 class RouteDecisionResponse(BaseModel):
     agent: str
-    confidence: float
     reasoning: str
+    routes : list[RouteDecision]
     metadata:Optional[Metadata] = None
 
 class EscalationResponse(AgentResponse):

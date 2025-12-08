@@ -95,18 +95,31 @@ async def test_supervisor_agent():
         #     "query": "which one has HDMI connector?",
         #     "expected": "product_detail"
         # },
+        # {
+        #     "query": "I live in the same town as the main store, in how many days can I receive the tv?",
+        #     "expected": "policy"
+        # },
+        #multi-intent
+        # {
+        #     "query": "I need a laptop with 16GB RAM and 512GB SSD. Also, what is your return policy?",
+        #     "expected": "product_search"
+        # },
         {
-            "query": "I live in the same town as the main store, in how many days can I receive the tv?",
-            "expected": "policy"
+            "query": "Compare the features of the Samsung Galaxy M13 and OnePlus 10R. Which is better for photography",
+            "expected": "comparison"
         },
     ]
     for item in test_queries:
         query = item["query"]
         excepted_agent = item["expected"]
-        print(f"\nUser Query: {query}")
+        print(f"\nUser Query: {query}\n")
         try:
             decision = await supervisor.route(user_query=query)
-            print(f"Match={(excepted_agent==decision.agent)}, Routing Decision: Agent={decision.agent}, Confidence={decision.confidence}, Reasoning={decision.reasoning}")
+            print("\n")
+            print(f" Routing Decision: Agent={decision.agent}, Reasoning={decision.reasoning}")
+            for route in decision.routes:
+                print(f"  - Sub-query: {route.query}, Intent: {route.intent} (Expected: {excepted_agent})")
+            
             if decision.metadata:
                 metadata:Metadata = decision.metadata
                 print(f"Metadata:\n  Input Tokens={metadata.input_token},\n  Output Tokens={metadata.output_token},\n  Total Tokens={metadata.total_token}")

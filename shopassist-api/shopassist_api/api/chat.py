@@ -80,7 +80,7 @@ async def chat_orchestrator(request: ChatRequest):
     return ChatResponse(
         session_id=session_id,
         response=result['response'],
-        sources=result['sources'],
+        sources=result['response_sources'] if 'response_sources' in result else [],
         query_type=result['current_agent'],
         metadata = {
             "tokens": {
@@ -89,7 +89,7 @@ async def chat_orchestrator(request: ChatRequest):
                 "total_tokens": total_total_tokens
             },
             "cost": 0.0,
-            "num_sources": len(result['sources']),
+            "num_sources": len(result['response_sources']) if 'response_sources' in result else 0,
         }
     )
 
