@@ -171,7 +171,6 @@ class AgentOrchestrator:
         })
         state["response"] = result.message
         state["route_responses"].append(result.message)
-        state["response_sources"].append(result.sources)
         
         # Move to next route
         state["current_route_index"] += 1

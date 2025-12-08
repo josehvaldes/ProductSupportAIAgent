@@ -49,7 +49,7 @@ async def search_knowledge_base(state: PolicyAgentState) -> dict:
     embedder = TransformersEmbeddingService(settings.transformers_embedding_model)
 
     user_query = state.get("user_query", "")
-    top_k = state.get("top_k", 2)
+    top_k =2 # state.get("top_k", 2)
     
     logger.info(f"PolicyAgent: Searching knowledge base with query: [{user_query}] Top K: {top_k}")
 
