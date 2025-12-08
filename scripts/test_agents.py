@@ -299,6 +299,7 @@ async def test_product_discovery_agent():
         #"Please, show me some smartphones with good cameras under $700.",        
         #"I need a case for my Samsung z flip. Do you have any?",
         "Show me smart Televisions under 800"
+        #"I need a case for my Samsung z flip. Do you have any?"
     ]
 
     session_id = uuid.uuid4().hex[:12]

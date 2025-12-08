@@ -67,6 +67,7 @@ async def search_products(state:ProductDiscoveryAgentState) -> dict:
     price_filter = state.get("price_filter", None)
 
     filters = {}
+
     if price_filter:
         if price_filter.min_price is not None:
             filters['min_price'] = price_filter.min_price
@@ -78,17 +79,27 @@ async def search_products(state:ProductDiscoveryAgentState) -> dict:
     retrieval = get_retrieval_service()
 
     categories = state.get("categories", [])
+    print(f"Categories from state: {categories}")
+    products = []
+    if categories and len(categories) > 0:
+        # Use categories to filter products
+        cat_filters = {**filters, **{'categories': categories}}
+        logger.info(f"Identified filters with categories: {cat_filters} for query: [{query}]")
+        products = await retrieval.retrieve_products(query,
+                    enriched=True,
+                    top_k=top_k, 
+                    filters=cat_filters)
 
-    if len(categories) > 0:
-        filters = {**filters, **{'categories': categories}}
-
-    logger.info(f"Identified filters: {filters} for query: [{query}]")
-    products = await retrieval.retrieve_products(query,
-                enriched=True,
-                top_k=top_k, 
-                filters=filters)
-
+    # If no products found with categories, do a general search 
     if not products or len(products) == 0:
+        logger.info(f"No products found with categories [{categories}]. Performing general search for query: [{query}]")
+        products = await retrieval.retrieve_products(query,
+                    enriched=True,
+                    top_k=top_k, 
+                    filters=filters)
+    
+    if not products or len(products) == 0:
+        logger.info(f"No products found for query: [{query}] with filters: {filters}")
         return {
             "products": [],
             "context": "No products found matching your query."
