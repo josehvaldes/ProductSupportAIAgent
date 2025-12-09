@@ -1,4 +1,5 @@
 from typing import List, Dict, Optional
+from langsmith import traceable
 from pymilvus import connections, Collection
 from shopassist_api.application.interfaces.service_interfaces import VectorServiceInterface
 from shopassist_api.logging_config import get_logger
@@ -11,7 +12,6 @@ class MilvusService(VectorServiceInterface):
     def __init__(self, host: str = None, port: str = None):
         self.host = host or settings.milvus_host
         self.port = port or settings.milvus_port
-        logger.info(f"Connecting to Milvus at {self.host}:{self.port}")
         self.connected = False
         self._connect()
 
@@ -94,11 +94,13 @@ class MilvusService(VectorServiceInterface):
         logger.info(f"Inserted {len(categories)} categories")
         return mr.insert_count
 
+    @traceable(name="milvus.search_products", tags=["retrieval", "products", "embedding", "milvus"], metadata={"version": "1.0"})
     def search_products(
         self,
         query_embedding: List[float],
         top_k: int = 5,
-        filters: Optional[str] = None
+        filters: Optional[str] = None,
+        radius: Optional[float] = None
     ) -> List[Dict]:
         """Search products by vector similarity"""
         collection = Collection("products_collection")
@@ -106,12 +108,15 @@ class MilvusService(VectorServiceInterface):
         
         search_params = {
             "metric_type": "COSINE",
-            "params": {"ef": 64}  # Search depth
+            "params": {"ef": 128, 
+                       "radius": radius if radius else 0.0
+                       }
         }
         
         results = collection.search(
             data=[query_embedding],
             anns_field="embedding",
+            
             param=search_params,
             limit=top_k,
             expr=filters,  # e.g., "price < 1000"
@@ -133,11 +138,13 @@ class MilvusService(VectorServiceInterface):
                 })
         
         return formatted
-    
+
+    @traceable(name="milvus.search_knowledge_base", tags=["retrieval", "knowledge_base", "embedding", "milvus"], metadata={"version": "1.0"})
     def search_knowledge_base(
         self,
         query_embedding: List[float],
-        top_k: int = 3
+        top_k: int = 3,
+        radius: Optional[float] = None
     ) -> List[Dict]:
         """Search knowledge base by vector similarity"""
         collection = Collection("knowledge_base_collection")
@@ -145,7 +152,7 @@ class MilvusService(VectorServiceInterface):
         
         search_params = {
             "metric_type": "COSINE",
-            "params": {"ef": 64}
+            "params": {"ef": 64, "radius": radius if radius else 0.0}
         }
         
         results = collection.search(
@@ -168,18 +175,20 @@ class MilvusService(VectorServiceInterface):
                 })
         
         return formatted
-    
+
+    @traceable(name="milvus.search_categories", tags=["retrieval", "categories", "embedding", "milvus"], metadata={"version": "1.0"})
     def search_categories(
         self,
         query_embedding: List[float],
         field: str = "embedding",
-        top_k: int = 5) -> List[Dict]:
+        top_k: int = 5,
+        radius:int = None) -> List[Dict]:
         """Search categories by vector similarity"""
         collection = Collection("categories_collection")
         collection.load()
         search_params = {
             "metric_type": "COSINE",
-            "params": {"ef": 64}
+            "params": {"ef": 64, "radius": radius if radius else 0.0}
         }
         results = collection.search(
             data=[query_embedding],

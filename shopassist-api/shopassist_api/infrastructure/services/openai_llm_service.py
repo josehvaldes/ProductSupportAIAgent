@@ -1,4 +1,5 @@
 from typing import List, Dict, Generator
+from langsmith import traceable
 from openai import AsyncAzureOpenAI
 import tiktoken
 from shopassist_api.application.interfaces.service_interfaces import LLMServiceInterface
@@ -35,11 +36,9 @@ class OpenAILLMService(LLMServiceInterface):
         """Initialize the Azure OpenAI client as singleton."""
 
         if self.model_name == "gpt-4.1-mini":
-            logger.info("Configuring for gpt-4.1-mini pricing")
             self.input_cost = 0.40
             self.output_cost = 1.60
         elif self.model_name == "gpt-4.1-nano":
-            logger.info("Configuring for gpt-4.1-nano pricing")
             self.input_cost = 0.1
             self.output_cost = 0.4
 
@@ -47,12 +46,12 @@ class OpenAILLMService(LLMServiceInterface):
             with OpenAILLMService._client_lock:
                 # Double-check after acquiring lock
                 if OpenAILLMService._client is None:
-                    logger.info("Initializing singleton Azure OpenAI client")
+                    logger.info(f"Initializing singleton Azure OpenAI client: {settings.azure_openai_endpoint}")
                     
                     # Use shared credential manager
                     credential_manager = get_credential_manager()
                     token_provider = credential_manager.get_openai_token_provider()
-                    
+
                     OpenAILLMService._client = AsyncAzureOpenAI(
                         api_version=settings.azure_openai_api_version or "2024-02-01",
                         azure_endpoint=settings.azure_openai_endpoint,
@@ -61,7 +60,7 @@ class OpenAILLMService(LLMServiceInterface):
                 else:
                     logger.info("Using existing singleton Azure OpenAI client")
     
-   
+    @traceable(name="llm.generate_response", tags=["llm", "openai", "azure"], metadata={"version": "1.0"})
     async def generate_response(
         self,
         messages: List[Dict[str, str]],
@@ -139,7 +138,8 @@ class OpenAILLMService(LLMServiceInterface):
         except Exception as e:
             logger.error(f"Error generating response: {e}")
             raise
-    
+
+    @traceable(name="llm.streaming_response", tags=["llm", "openai", "azure"], metadata={"version": "1.0"})    
     def streaming_response(
         self,
         messages: List[Dict[str, str]],

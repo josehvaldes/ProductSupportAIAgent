@@ -1,4 +1,5 @@
 from typing import List, Dict
+from langsmith import traceable
 import tiktoken
 from shopassist_api.logging_config import get_logger
 import traceback
@@ -13,6 +14,7 @@ class ContextBuilder:
         self.max_tokens = max_tokens
         self.encoding = tiktoken.encoding_for_model("gpt-4")
 
+    @traceable(name="context.build_product_context", tags=["context"], metadata={"version": "1.0"})
     def build_product_context(self, products: List[Dict]) -> str:
         """
         Build context string from product results
@@ -48,6 +50,7 @@ class ContextBuilder:
         context = "\n\n".join(context_parts)
         return context
     
+    @traceable(name="context.build_knowledge_base_context", tags=["context"], metadata={"version": "1.0"})
     def build_knowledge_base_context(self, chunks: List[Dict]) -> str:
         """
         Build context string from KB results
@@ -56,7 +59,7 @@ class ContextBuilder:
         total_tokens = 0
         
         for i, chunk in enumerate(chunks, 1):
-            chunk_text = f"Source {i} [{chunk['doc_type']}]:\n{chunk['text']}"
+            chunk_text = f"Source {i} [{chunk['doc_id']}]:\n{chunk['text']}"
             tokens = len(self.encoding.encode(chunk_text))
             
             if total_tokens + tokens > self.max_tokens:
@@ -75,4 +78,4 @@ class ContextBuilder:
                     Brand: {product.get('brand', 'N/A')}
                     Available: { product.get('availability', 'out_of_stock')}
                     Description: {product.get('description', product.get('matched_text', 'N/A'))}
-                    Relevance Score: {product.get('relevance_score', 0):.3f}"""
+                    Relevance Score: {product.get('distance', 0):.3f}"""

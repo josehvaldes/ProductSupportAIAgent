@@ -1,0 +1,30 @@
+# docker-compose.yml
+services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379" # Access at http://localhost:6379
+    volumes:
+      - ./redis-data:/data
+    networks:
+      - redis-internal
+      - shopassist-network
+
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: redis-insight
+    ports:
+      - "5540:5540"  # Access at http://localhost:5540
+    volumes:
+      - ./redisinsight-data:/data
+    depends_on:
+      - redis
+    networks:
+      - redis-internal
+
+networks:
+  redis-internal:
+    driver: bridge
+  shopassist-network:
+    external: true

@@ -35,7 +35,8 @@ export function ChatContainerExt() {
     // Get session from localStorage or create new
     let storedSessionId = localStorage.getItem('chat_session_id');
     if (!storedSessionId) {
-      storedSessionId = uuidv4();
+      storedSessionId = uuidv4().slice(-12);
+      logger.info("Creating new session ID:", storedSessionId);
       localStorage.setItem('chat_session_id', storedSessionId);
       setSessionId(storedSessionId );   
     }
@@ -120,7 +121,9 @@ export function ChatContainerExt() {
 
 
   const handleNewConversation = () => {
-    const newSessionId = uuidv4();
+    //get last 12 chars of uuid
+    const newSessionId = uuidv4().slice(-12);
+    logger.info("Creating new session ID:", newSessionId);
     localStorage.setItem('chat_session_id', newSessionId);
     setSessionId(newSessionId);
     setMessages([]);
@@ -145,7 +148,7 @@ export function ChatContainerExt() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Container style={{ padding: 0, margin: 0 }}>
             <Text size="lg" >Chat Assistant</Text>
-            <Text>Session Id: {sessionId.substring(0,8)}</Text>
+            <Text>Session Id: {sessionId}</Text>
           </Container>
           
           <Text 

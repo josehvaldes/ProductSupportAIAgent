@@ -36,16 +36,6 @@ services:
     container_name: shopassist-ui
     image: shopassist-ui:latest
   
-  redis:
-    image: redis:alpine
-    container_name: shopassist-redis
-    ports:
-      - "6379:6379"
-    networks:
-      - shopassist-network
-    volumes:
-      - redis-data:/data
-
 networks:
   shopassist-network:
     external: true

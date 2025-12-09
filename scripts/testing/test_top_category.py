@@ -5,9 +5,9 @@ from tqdm import tqdm
 from pathlib import Path
 from dotenv import load_dotenv
 
-sys.path.append('../shopassist-api')
+sys.path.append('../../shopassist-api')
 # Load .env file from the correct location
-script_dir = Path(__file__).parent
+script_dir = Path(__file__).parent.parent
 env_path = script_dir.parent / 'shopassist-api' / '.env'
 load_dotenv(dotenv_path=env_path)
 
@@ -47,13 +47,14 @@ retrieval_service = RetrievalService(
 async def evaluate_retrieval():
 
     queries = [
-        "printer canon inkjet",
-        "smartphone with good camera",
-        "cellphones with good camera",
-        "I need an smarttv with at least 32 inches screen",
-        "I need an smart tv with at least 32 inches screen",
-        "I need an smart television with at least 32 inches screen",
-        "Find me a smartphone with a good camera and long battery life."
+        # "printer canon inkjet",
+        # "smartphone with good camera",
+        # "cellphones with good camera",
+        # "I need an smarttv with at least 32 inches screen",
+        # "I need an smart tv with at least 32 inches screen",
+        # "I need an smart television with at least 32 inches screen",
+        # "Find me a smartphone with a good camera and long battery life."
+        "case for Samsung z flip"
     ]
 
     for query in queries:
@@ -106,4 +107,5 @@ async def one_word_query_test():
 
 if __name__ == "__main__":
     #asyncio.run(evaluate_ambiguous_queries())
-    asyncio.run(one_word_query_test())
+    #asyncio.run(one_word_query_test())
+    asyncio.run(evaluate_retrieval())

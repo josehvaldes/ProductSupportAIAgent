@@ -1,3 +1,4 @@
+from langsmith import traceable
 from shopassist_api.application.interfaces.service_interfaces import LLMServiceInterface
 from shopassist_api.application.prompts.templates import ClassificationPrompts
 from shopassist_api.logging_config import get_logger
@@ -23,6 +24,7 @@ class IntentClassifier:
     def __init__(self, llm_service: LLMServiceInterface):
         self.llm_service = llm_service
 
+    @traceable(name="intent.classify", tags=["intent", "llm"], metadata={"version": "1.0"})
     async def classify(self, user_message: str) -> tuple[str, float]:
         # Placeholder implementation
 

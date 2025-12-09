@@ -1,5 +1,8 @@
 import traceback
 from typing import Dict, List, Optional
+from langsmith import traceable
+from langsmith.run_helpers import get_current_run_tree
+import time
 from shopassist_api.application.prompts.templates import PromptTemplates
 from shopassist_api.application.services.context_builder import ContextBuilder
 from shopassist_api.application.services.session_manager import SessionManager
@@ -20,7 +23,7 @@ class RAGService:
     """
     
     TOP_K_PRODUCTS = 3
-    TOP_K_KB_ARTICLES = 3
+    TOP_K_KB_ARTICLES = 2
     TOP_K_CATEGORIES = 3
 
     def __init__(self,
@@ -97,6 +100,7 @@ class RAGService:
                 }
             }
 
+    @traceable(name="rag.generate_answer", tags=["rag", "entry-point"], metadata={"version": "1.0"})
     async def generate_answer(
         self,
         user_id:str,
@@ -120,6 +124,8 @@ class RAGService:
         Returns:
             Dict with response, sources, metadata
         """
+        run = get_current_run_tree()
+        start_time = time.time()
         try:
             logger.info(f"Processing. Session: {session_id}, Query: {query}")
             
@@ -185,7 +191,7 @@ class RAGService:
             product_sources = FormatterUtils.build_product_sources(llm_query_type,results)
 
             # Step 6: Save user and assistant messages
-            self.session_manager.add_message(
+            await self.session_manager.add_message(
                 session_id=session_id,
                 user_id=user_id,
                 role="user",
@@ -201,13 +207,24 @@ class RAGService:
                     "turn_index": len(history) + 1 if history else 1
                 }
             
-            self.session_manager.add_message(
+            await self.session_manager.add_message(
                 session_id=session_id,
                 user_id=user_id,
                 role="assistant",
                 content=llm_response['response'],
                 metadata=metadata
             )
+
+            total_time = time.time() - start_time
+            logger.info(f"RAG pipeline completed in {total_time*1000:.2f} ms for session: [{session_id}]")
+            if run:
+                run.add_metadata({
+                    "total_latency_ms": total_time * 1000,
+                    "intent": llm_query_type,
+                    "docs_used": len(results)
+                })
+            else:
+                logger.warning("No active LangSmith run found to add metadata.")
 
             # return
             return {
@@ -224,6 +241,7 @@ class RAGService:
             traceback.print_exc()
             raise
     
+    @traceable(name="rag.handle_product_search", tags=["rag", "intent"], metadata={"version": "1.0"})
     async def handle_product_search(self, data:dict)-> tuple[List[Dict[str,str]], List[Dict]]:
         """ 
         Handle product search queries
@@ -282,6 +300,8 @@ class RAGService:
                     query, context, history)
         return messages, results
 
+
+    @traceable(name="rag.handle_policy_question", tags=["rag", "intent"], metadata={"version": "1.0"})
     async def handle_policy_question(self, data:dict) -> tuple[List[Dict[str,str]], List[Dict]]:
         """ 
         Handle policy question queries
@@ -319,6 +339,7 @@ class RAGService:
             
         return messages, results
 
+    @traceable(name="rag.handle_product_details", tags=["rag", "intent"], metadata={"version": "1.0"})
     async def handle_product_details(self, data:dict ) -> tuple[List[Dict[str,str]], List[Dict]]:
         """
         handle product details queries
@@ -366,6 +387,7 @@ class RAGService:
             
         return messages, results
 
+    @traceable(name="rag.handle_product_comparison", tags=["rag", "intent"], metadata={"version": "1.0"})
     async def handle_product_comparison(self, data:dict ) -> tuple[List[Dict[str,str]], List[Dict]]:
         """
         handle product comparison queries
@@ -411,7 +433,7 @@ class RAGService:
             
         return messages, results
 
-
+    @traceable(name="rag.handle_general_support", tags=["rag", "intent"], metadata={"version": "1.0"})
     async def handle_general_support(self, data:dict) -> tuple[List[Dict[str,str]], List[Dict]]:
         """
         handle general support queries
@@ -439,6 +461,7 @@ class RAGService:
         
         return messages, results
 
+    @traceable(name="rag.handle_chitchat", tags=["rag", "intent"], metadata={"version": "1.0"})
     async def handle_chitchat(self, data:dict) -> tuple[List[Dict[str,str]], List[Dict]]:
         """
         handle chitchat queries. No retrieval
@@ -452,6 +475,7 @@ class RAGService:
     
         return messages, results
 
+    @traceable(name="rag.handle_general_out_of_scope", tags=["rag", "intent"], metadata={"version": "1.0"})
     async def handle_general_out_of_scope(self, query:str, history:str) -> tuple[List[Dict[str,str]], List[Dict]]:
         # handle out_of_scope queries. No retrieval        
         results = []

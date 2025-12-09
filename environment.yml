@@ -4,17 +4,8 @@ channels:
   - defaults
 dependencies:
   - python=3.12
-  - pip
-  # Core web framework dependencies (conda when available)
-  - pydantic
-  - numpy
-  # ML/AI dependencies from conda-forge
-  - tiktoken 
-  - langchain
-  - openai
-  - pandas
   - redis-py
-  # Pip-only dependencies
+  - pip
   - pip:
     # FastAPI and web server
     - fastapi>=0.104.1
@@ -41,4 +32,22 @@ dependencies:
     - pymilvus
     - sentence_transformers
     - jsonlines
+    - langchain>=0.3.0
+    - langchain-openai>=0.2.0
+    - langchain-core>=0.3.0
+    - langchain-milvus>=0.1.0
+    - langchain-community>=0.1.0
+    - langchain-huggingface>=0.1.0
+    - langsmith>=0.1.0
+    - langgraph-checkpoint-redis>=0.1.0
+    - pandas    
+    - pydantic
+    - numpy
+    - tiktoken 
+    - openai
+    - six
+
+
+
+    
   

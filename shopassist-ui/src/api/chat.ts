@@ -17,6 +17,7 @@ export interface ChatMessage {
                 'product_details' | 
                 'product_comparison' |
                 'policy_question'|
+                'policy'|
                 'general_support' | 
                 'chitchat' | 
                 'out_of_scope';
@@ -44,6 +45,7 @@ export interface ChatResponse {
               'product_details' | 
               'product_comparison' |
               'policy_question'|
+              'policy'|
               'general_support' | 
               'chitchat' | 
               'out_of_scope';
@@ -76,7 +78,7 @@ export const chatApi = {
         sessionId?: string
       ): Promise<ChatResponse> => {
 
-      const response = await apiRequest<ChatResponse>('/chat/message', {
+      const response = await apiRequest<ChatResponse>('/chat/orchestrate', {
           method: 'POST',
           body: JSON.stringify({
           message,

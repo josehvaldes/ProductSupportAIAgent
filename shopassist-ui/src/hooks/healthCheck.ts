@@ -23,7 +23,7 @@ export function healthCheck(): HealthCheckState {
       log.info("Received response from API:", res);
       
       // Now you can access the properties directly
-      if (res.status !== 'healthy') {
+      if (res.status !== 'ready') {
         setError(`Service is not healthy. Status: ${res.status}`);
         return `Agent not healthy. V: ${res.version}`;
       }

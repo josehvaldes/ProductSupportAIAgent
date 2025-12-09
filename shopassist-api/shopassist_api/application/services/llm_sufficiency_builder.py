@@ -1,3 +1,4 @@
+from langsmith import traceable
 from shopassist_api.application.interfaces.service_interfaces import LLMServiceInterface
 from shopassist_api.application.prompts.templates import ContextAnalysisPrompts
 from shopassist_api.logging_config import get_logger
@@ -10,6 +11,7 @@ class LLMSufficiencyBuilder:
     def __init__(self, llm_service):
         self.llm_service:LLMServiceInterface = llm_service
     
+    @traceable(name="sufficiency.analyze_sufficiency", tags=["sufficiency", "llm"], metadata={"version": "1.0"})
     async def analyze_sufficiency(self, query: str, history:str) -> dict:
         """
         Use LLM to analyze context sufficiency for the query.

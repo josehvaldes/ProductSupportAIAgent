@@ -28,9 +28,9 @@ class RedisCacheService(CacheServiceInterface):
             with RedisCacheService._client_lock:
                 # Double-check after acquiring lock
                 if RedisCacheService._client is None:
-                    logger.info(f"Initializing singleton Redis client [{settings.redis_endpoint}]")
+                    logger.info(f"Initializing singleton Redis client [{settings.redis_url}]")
                     RedisCacheService._client = aioredis.from_url(
-                        settings.redis_endpoint,
+                        settings.redis_url,
                         password=settings.redis_password,
                         decode_responses=True
                     )
@@ -55,11 +55,9 @@ class RedisCacheService(CacheServiceInterface):
     async def health_check(self) -> bool:
         """Ping the Redis service to check connectivity"""
         try:
-            logger.info("Performing Redis health check")
             if not self.client:
                 return False
             pong = await self.client.ping()
-            logger.info(f"Redis health check pong response: {pong}")
             return pong
         except Exception:
             trace = traceback.format_exc()

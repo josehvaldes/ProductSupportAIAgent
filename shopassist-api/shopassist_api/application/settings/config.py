@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     # API Configuration
     api_title: str = "Shop Assistant API"
     api_description: str = "AI-Powered Product Knowledge & Support Agent"
-    api_version: str = "1.0"
+    api_version: str = "2.0"
     debug: bool = False
 
     use_dumb_service: bool = False
@@ -26,7 +26,7 @@ class Settings(BaseSettings):
 
     # Azure Configuration
     azure_openai_endpoint: Optional[str] = None
-    azure_openai_api_version: str = "2024-02-15-preview"
+    azure_openai_api_version: str = "2024-08-01-preview" #"2024-02-15-preview"
 
     azure_openai_embedding_model: Optional[str] = None
     azure_openai_embedding_model_deployment: Optional[str] = None
@@ -61,7 +61,7 @@ class Settings(BaseSettings):
     cosmosdb_session_container: str = "sessions"
 
     # Cache Configuration
-    redis_endpoint: str = "redis://localhost:6379"
+    redis_url: str = "redis://localhost:6379"
     redis_password: Optional[str] = None
         
     #Logging Configuration
@@ -75,15 +75,30 @@ class Settings(BaseSettings):
     milvus_product_collection: str = "products_collection"
     milvus_knowledge_base_collection: str = "knowledge_base_collection"
 
-    # Similarity Thresholds
-    threshold_product_similarity: float = 0.8
-    threshold_knowledge_base_similarity: float = 0.75
-    threshold_category_similarity: float = 0.8
+    # Similarity Thresholds for category searchs
+    threshold_category_similarity: float = 0.75
+    top_k_categories: int = 3
 
-    # class Config:
-    #     env_file = ".env"
-    #     case_sensitive = False
-    model_config = ConfigDict(str_max_length=100)
+    # Similarity Thresholds. Not used currently
+    threshold_product_similarity: float = 0.5
+
+    threshold_knowledge_base_similarity: float = 0.5
+    
+    query_expansion_max_variations: int = 2
+    top_k_query_expansion_categories: int = 2
+
+
+    langchain_tracing_v2: bool = True
+    langchain_project: str = "ShopAssistAPI"
+    langsmith_api_key: Optional[str] = None    
+    
+    model_config = ConfigDict(
+        str_max_length=100,
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore"
+        )
 
 
 settings = Settings()

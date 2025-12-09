@@ -1,18 +1,19 @@
+import asyncio
 import sys
 import time
 from pathlib import Path
 from dotenv import load_dotenv
 
-sys.path.append('../shopassist-api')
+sys.path.append('../../shopassist-api')
 # Load .env file from the correct location
-script_dir = Path(__file__).parent
+script_dir = Path(__file__).parent.parent
 env_path = script_dir.parent / 'shopassist-api' / '.env'
 load_dotenv(dotenv_path=env_path)
 from shopassist_api.application.settings.config import settings
 from shopassist_api.infrastructure.services.milvus_service import MilvusService
 from shopassist_api.infrastructure.services.transformers_embedding_service import TransformersEmbeddingService
 
-def test_search():
+async def test_search():
     print("🧪 Testing Milvus vector search...\n")
     
     # Initialize services
@@ -31,7 +32,7 @@ def test_search():
         print(f"\n🔍 Query: '{query}'")
         
         # Generate query embedding
-        query_embedding = embedder.generate_embedding(query)
+        query_embedding = await embedder.generate_embedding(query)
         
         # Determine collection
         is_policy_query = any(word in query.lower() for word in ['policy', 'return', 'shipping', 'warranty'])
@@ -42,7 +43,7 @@ def test_search():
         if is_policy_query:
             results = milvus.search_knowledge_base(query_embedding, top_k=3)
         else:
-            results = milvus.search_products(query_embedding, top_k=5)
+            results = milvus.search_products(query_embedding, top_k=5, radius=0.5)
         
         latency = (time.time() - start_time) * 1000  # ms
         
@@ -61,4 +62,4 @@ def test_search():
     print("\n✅ Search tests complete!")
 
 if __name__ == "__main__":
-    test_search()
+    asyncio.run(test_search())

@@ -1,10 +1,11 @@
 from datetime import datetime, timezone
-from mailbox import Message
 import re
 from typing import List
 import uuid
+from langsmith import traceable
 from shopassist_api.application.interfaces.service_interfaces import CacheServiceInterface, RepositoryServiceInterface
 from shopassist_api.domain.models.session_context import SessionContext
+from shopassist_api.domain.models.message import Message
 from shopassist_api.domain.models.user_preferences import UserPreferences
 
 class SessionManager:
@@ -41,7 +42,8 @@ class SessionManager:
         session_id = await self.repository.create_session(data=session_context)
 
         return session_id
-        
+
+    @traceable(name="session.get_session", tags=["session", "cache"], metadata={"version": "1.0"})
     async def get_session(self, session_id: str) -> SessionContext:
         """Load full session context"""
         if self.cache:

@@ -1,5 +1,6 @@
 import re
 from typing import Dict, Tuple
+from langsmith import traceable
 from shopassist_api.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -29,6 +30,7 @@ class QueryProcessor:
         r'within \$?(\d+)',
     ]
     
+    @traceable(name="query.process_query", tags=["query", "preprocessing"], metadata={"version": "1.0"})
     def process_query(self, query: str) -> Tuple[str, Dict]:
         """
         Process query and extract filters

@@ -9,11 +9,10 @@ import sys
 import argparse
 from pathlib import Path
 from dotenv import load_dotenv
-from typing import Dict, List
 
-sys.path.append('../shopassist-api')
+sys.path.append('../../shopassist-api')
 # Load .env file from the correct location
-script_dir = Path(__file__).parent
+script_dir = Path(__file__).parent.parent
 env_path = script_dir.parent / 'shopassist-api' / '.env'
 load_dotenv(dotenv_path=env_path)
 from shopassist_api.application.settings.config import settings
@@ -21,8 +20,7 @@ from shopassist_api.application.settings.config import settings
 
 BASE_URL = "http://localhost:8000"
 
-class IntentTester:
-    """Class to test integration scenarios for intent handling."""
+class ScenarioTester:
     def __init__(self):
         self.results = []
 
@@ -43,7 +41,7 @@ class IntentTester:
                     "message": query,
                     "session_id": session_id
                 },
-                timeout=30
+                timeout=45
             )
             
             elapsed = (time.time() - start_time) * 1000  # ms
@@ -70,7 +68,7 @@ class IntentTester:
                 print(f"   Sources: {data['metadata']['num_sources']}")
                 print(f"   Tokens: {data['metadata']['tokens']['total']}")
                 print(f"   Cost: ${data['metadata']['cost']:.6f}")
-                print(f"\n   Response preview:\n   {data['response']}")
+                print(f"\n   Response preview:\n   {data['response']}<end>")
                 
             else:
                 result = {
@@ -93,6 +91,9 @@ class IntentTester:
             }
             print(f"❌ ERROR: {e}")
             self.results.append(result)
+    
+    def run_all_scenarios(self):
+        pass
 
     def run_scenario(self, scenario: int):
         """Run all 7 scenarios"""
@@ -101,7 +102,7 @@ class IntentTester:
             # Scenario 1: Product Discovery
             session_id = str(uuid.uuid4())
             self.test_scenario(
-                "Product search",
+                "Product Discovery",
                 "I need a smartphone for video editing under $500",
                 session_id
             )
@@ -109,8 +110,8 @@ class IntentTester:
             session_id = str(uuid.uuid4())
             # Scenario 2: Specification Query
             self.test_scenario(
-                "Product Details",
-                "what characteristics have the MacBook Air M2?",
+                "Specification Query",
+                "Does the MacBook Air M2 have 16GB RAM?",
                 session_id
             )
         elif scenario == 3:
@@ -129,29 +130,44 @@ class IntentTester:
                 "What's your return policy?",
                 session_id
             )
-        elif scenario == 5:
+        elif scenario == 5:       
             session_id = str(uuid.uuid4())
-            # Scenario 5: general_support Troubleshooting
-            self.test_scenario(
-                "Troubleshooting",
-                "My headphones are not charging, what can I do?",
+            # Scenario 5: Out of Stock (use real product)
+            self.test_scenario(                
+                "Product Availability",
+                "Do you have Sony WH-1000XM5 headphones?",
                 session_id
             )
         elif scenario == 6:
             session_id = str(uuid.uuid4())
-            # Scenario 6: Chitchat
+            # Scenario 6: Multi-turn Context (Turn 1)
             self.test_scenario(
-                "Chitchat",
-                "Tell me a joke about computers",
+                "Multi-turn: Initial Query",
+                "Show me smart Televisions",
+                session_id
+            )            
+            # Scenario 6: Multi-turn Context (Turn 2)
+            self.test_scenario(
+                "Multi-turn: Follow-up",
+                "Which one has WIFI connectivity?",
                 session_id
             )
+        
         elif scenario == 7:
+            # Scenario 7: Escalation
             session_id = str(uuid.uuid4())
-            # Scenario 7: out of scope
             self.test_scenario(
-                "Out of Scope",
-                "What's the weather like today in New York?",
-                session_id
+                "Escalation Scenario",
+                "I want to cancel my order #12345",
+                session_id                
+            )
+        elif scenario == 8:
+            # Scenario 8: No product found 
+            session_id = str(uuid.uuid4())
+            self.test_scenario(
+                name= "Query with No Results",
+                query = "I need a printer under 500 USD",
+                session_id = session_id
             )
     
     def generate_report(self):
@@ -188,12 +204,14 @@ class IntentTester:
 
 if __name__ == "__main__":
     
-    tester = IntentTester()
+    tester = ScenarioTester()
     parser = argparse.ArgumentParser(description="Integration Test Scenarios")
     parser.add_argument("scenario", type=str, help="scenario to run: all or comma-separated list of scenario numbers (1-7)")
     args = parser.parse_args()
     if args.scenario == "all":
         print("Running all scenarios is not implemented yet.")
+        tester.run_all_scenarios()
+        
     else:
         scenarios = args.scenario.split(",")
         for arg in scenarios:
