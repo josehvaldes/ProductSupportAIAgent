@@ -6,6 +6,7 @@ from langchain_community.callbacks import get_openai_callback
 
 from langsmith import traceable
 from shopassist_api.application.agents.base import Metadata, RouteDecision, RouteDecisionResponse, RouteRequest
+from shopassist_api.application.agents.token_monitor import token_monitor_dec
 from shopassist_api.application.settings.config import settings
 from shopassist_api.infrastructure.services.azure_credential_manager import get_credential_manager
 from shopassist_api.application.prompts.agent_templates import RouteTemplates
@@ -46,6 +47,7 @@ class SupervisorAgent:
             ("human", "Query: {query}\n\nContext: {context}")
             ])
     
+    @token_monitor_dec
     @traceable(name="supervisor_agent.route", tags=["supervisor","intent", "agent"], metadata={"version": "2.0"})
     async def route(self, user_query: str, context:dict= None) -> RouteDecisionResponse:
         """Decide which agent to route the query to."""
@@ -57,7 +59,8 @@ class SupervisorAgent:
         
         logger.info(f"Routing decision: total routes:{len(decision.routes)}: {decision}")
         return RouteDecisionResponse(
-            agent=f"supervisor_agent_{self.model_deployment}",
+            agent_name=f"supervisor_agent",
+            model=self.model_deployment,
             routes=decision.routes,
             reasoning=decision.reasoning,
             metadata=Metadata(

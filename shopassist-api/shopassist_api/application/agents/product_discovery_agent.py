@@ -12,6 +12,7 @@ from langsmith import traceable
 from pydantic import BaseModel, Field
 from shopassist_api.application.agents.agent_utils import AgentTools
 from shopassist_api.application.agents.base import AgentResponse, Metadata, PriceFilter
+from shopassist_api.application.agents.token_monitor import token_monitor_dec
 from shopassist_api.application.settings.config import settings
 from shopassist_api.infrastructure.services.azure_credential_manager import get_credential_manager
 from shopassist_api.application.prompts.agent_templates import ProductSearchTemplates
@@ -159,6 +160,7 @@ class ProductDiscoveryAgent:
             )
         return agent
 
+    @token_monitor_dec
     @traceable(name="product_discovery_agent.ainvoke", tags=["search", "ainvoke","products"], metadata={"version": "2.0"})
     async def ainvoke(self, state: dict) -> AgentResponse:
         
@@ -220,7 +222,8 @@ class ProductDiscoveryAgent:
         return AgentResponse (
             message=response, 
             sources=sources, 
-            agent_name=f"product_discovery_agent_{self.model_deployment}",
+            agent_name=f"product_discovery_agent",
+            model=self.model_deployment,
             metadata= Metadata(
                 id=f"product_discovery_agent",
                 input_token=sum_input_tokens,

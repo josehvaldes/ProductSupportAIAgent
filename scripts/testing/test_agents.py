@@ -116,7 +116,7 @@ async def test_supervisor_agent():
         try:
             decision = await supervisor.route(user_query=query)
             print("\n")
-            print(f" Routing Decision: Agent={decision.agent}, Reasoning={decision.reasoning}")
+            print(f" Routing Decision: Agent={decision.agent_name}, Reasoning={decision.reasoning}")
             for route in decision.routes:
                 print(f"  - Sub-query: {route.query}, Intent: {route.intent} (Expected: {excepted_agent})")
             

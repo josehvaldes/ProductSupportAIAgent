@@ -20,6 +20,7 @@ from langgraph.checkpoint.redis.aio import AsyncRedisSaver
 from langsmith import traceable
 from shopassist_api.application.agents.agent_utils import AgentTools
 from shopassist_api.application.agents.base import Metadata, PolicyResponse
+from shopassist_api.application.agents.token_monitor import token_monitor_dec
 from shopassist_api.application.settings.config import settings
 from shopassist_api.infrastructure.services.azure_credential_manager import get_credential_manager
 from shopassist_api.infrastructure.services.transformers_embedding_service import TransformersEmbeddingService
@@ -114,6 +115,7 @@ class PolicyAgent:
             )
         return agent
 
+    @token_monitor_dec
     @traceable(name="policy_agent.ainvoke", tags=["policy", "agent"], metadata={"version": "2.0"})
     async def ainvoke(self, input: dict) -> PolicyResponse:
         
@@ -161,7 +163,8 @@ class PolicyAgent:
             message=response,
             sources=doc_ids,
             needs_escalation=False,
-            agent_name=f"policy_{self.deployment_name}",
+            agent_name=f"policy_agent",
+            model=self.deployment_name,
             metadata= Metadata(
                 input_token=sum_input_tokens,
                 output_token=sum_output_tokens,

@@ -21,7 +21,6 @@ from shopassist_api.logging_config import get_logger
 logger = get_logger(__name__)
 
 class OrchestratorState(TypedDict):
-    messages: list
     messages: Annotated[list[AnyMessage], operator.add]
     user_query: str
     session_Id: str

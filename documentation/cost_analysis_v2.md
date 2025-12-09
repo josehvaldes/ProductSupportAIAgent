@@ -550,10 +550,16 @@ GPT-4.1-nano:
 
 #### GPT-4.1-nano (Potential Cost Savings)
 **Use for**:
-- ✅ Simple product searches ("show me laptops")
-- ✅ Policy questions (fact retrieval)
-- ✅ Follow-up questions ("what about the first one?")
-- ✅ Chitchat/greetings
+- ✅ Intent classification (structured output)
+- ✅ Category classification (JSON response)
+- ✅ Query complexity detection (simple classification)
+- ✅ Data extraction tasks (structured fields)
+- ✅ Simple follow-ups ("what about the first one?")
+
+**Avoid for**:
+- ❌ Policy questions (too formal/bureaucratic)
+- ❌ Customer-facing natural language responses
+- ❌ Complex reasoning or comparisons
 
 **Why**: 
 - 72% cheaper
@@ -563,6 +569,8 @@ GPT-4.1-nano:
 **Caution**: 
 - Your Week 3 testing showed nano failed 2/10 supervisor routing cases
 - Risk: More escalations to human support
+- **Production Finding**: Nano produces overly formal, bureaucratic responses for policy questions
+- Better suited for structured outputs (JSON, classifications) than natural conversation
 
 ** workaround implemented for Nano **
 - Improve the System Prompt and add explicit request and cases.
@@ -571,29 +579,47 @@ GPT-4.1-nano:
 ### Hybrid Approach (Recommended)
 
 ```python
-def select_model(query: str, intent: str):
-    """Route to appropriate model"""
+def select_model(query: str, intent: str, task_type: str = "conversational"):
+    """Route to appropriate model based on task type"""
     
+    # Use nano ONLY for structured/classification tasks
+    if task_type == "classification":
+        return "gpt-4.1-nano"  # Intent detection, category matching
+    
+    if task_type == "extraction":
+        return "gpt-4.1-nano"  # Extract filters, product IDs
+    
+    # Use mini for ALL customer-facing responses
+    if task_type == "conversational":
+        return "gpt-4.1-mini"  # Natural, friendly responses
+    
+    # Complex reasoning always uses mini
     if intent in ["comparison", "multi_intent"]:
-        return "gpt-4.1-mini"  # Complex reasoning
+        return "gpt-4.1-mini"
     
-    elif intent in ["policy_question", "product_detail"]:
-        return "gpt-4.1-nano"  # Simple retrieval
-    
-    elif intent == "product_search":
-        if is_complex_search(query):
-            return "gpt-4.1-mini"  # "laptop for AI development"
-        else:
-            return "gpt-4.1-nano"  # "show me laptops"
-    
-    return "gpt-4.1-mini"  # Default to safer choice
+    return "gpt-4.1-mini"  # Default to quality
 ```
 
-**Estimated Savings**:
-- 30% of queries use nano (simple cases)
-- 70% use mini (complex/default)
-- Monthly cost reduction: ~25%
-- $59.40 → $44.55 per month (1,000 queries/day)
+**Revised Savings Estimate**:
+- 15-20% of queries use nano (backend classification only)
+- 80-85% use mini (all customer-facing text)
+- Monthly cost reduction: ~12-15%
+- $59.40 → $50-52 per month (1,000 queries/day)
+
+**Example Usage**:
+```python
+# ❌ DON'T: Use nano for policy responses
+policy_response = nano.invoke("Explain return policy")
+# Result: "Pursuant to company policy 4.2.1..."
+
+# ✅ DO: Use nano for classification
+intent = nano.invoke("Classify query intent: {...}")  
+# Result: {"intent": "policy_question", "confidence": 0.95}
+
+# ✅ DO: Use mini for customer response
+policy_response = mini.invoke("Explain return policy")
+# Result: "You can return most items within 30 days..."
+```
 
 ---
 
@@ -656,23 +682,25 @@ LLM Contribution: 82% of total cost
 
 ### Future Optimizations (Week 6+)
 
-4. **Implement Selective Context Inclusion** 🔄 High Impact
+4. **Implement Selective Context Inclusion** ? High Impact
    - Use embeddings to find relevant history
    - Reduce input tokens by 50% in long conversations
 
-5. **Agent-Specific Memory** 🔄 Medium Impact
+5. **Agent-Specific Memory** ? Medium Impact
    - Policy agent doesn't need product search history
    - Save 30-40% on multi-intent queries
+   **DONE**
 
-6. **Caching Popular Queries** 🔄 Medium Impact
+6. **Caching Popular Queries** ? Medium Impact
    - Cache responses for common questions
    - "What's your return policy?" → serve from cache
    - Save $5-10/month
 
-7. **A/B Test GPT-4-nano for Simple Tasks** 🔄 High Value
+7. **A/B Test GPT-4-nano for Simple Tasks** ? High Value
    - Run 10% of simple queries through nano
    - Measure accuracy vs cost savings
    - Scale if quality acceptable
+   **DONE: nano is already Implemented in Supervisor Agent.**
 
 ---
 
@@ -744,10 +772,25 @@ After:    $400-420/month (30% savings)
 
 ### Next Steps
 
-1. **Week 5**: Implement history truncation
+1. **Week 5**: Implement history truncation. 
+* history truncation discarded since the state["message"] can't be manipulated in nodes or agents. Further research is needed.
+ 
 2. **Week 5**: Add token usage monitoring
+* token_monitor implemented to intercept the metadata's returned by every agent. The metadata will be sent to an external repository where queries can be done.
+* Token metadata handling options: 
+   1. API decorator -> Azure storage queue -> CosmosDB
+   2. API decorator -> CosmosDB
+   3. API decorator -> local database
+* From the external repository, aggregated queries will be easier to do: daily token used, tokens used by agent, by model or accumulated reports
+* This is out of the scope of V2 agent
+
 3. **Week 6**: Test hybrid mini/nano approach
+* Hybrid approach already implemented: 
+  - Supervisor agent: GPT-4.1 Nano
+  - Policy, Discovery, Comparison, Details agents: GPT-4.1 Mini
+
 4. **Week 6**: Build cost analytics dashboard
+* Pending to review.
 
 ---
 

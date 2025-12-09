@@ -11,6 +11,7 @@ class Metadata(BaseModel):
 class AgentResponse(BaseModel):
     """Base class for all agent responses"""
     agent_name: str
+    model: str
     message: str
     confidence: float = 0.0
     metadata: Metadata = None
@@ -43,7 +44,8 @@ class RouteRequest(BaseModel):
 
 
 class RouteDecisionResponse(BaseModel):
-    agent: str
+    agent_name: str
+    model: str
     reasoning: str
     routes : list[RouteDecision]
     metadata:Optional[Metadata] = None
