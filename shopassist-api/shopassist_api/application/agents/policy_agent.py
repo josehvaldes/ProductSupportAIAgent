@@ -90,34 +90,25 @@ async def trim_message_history(state: PolicyAgentState, runtime:Runtime) -> Poli
 #region PolicyAgent wrapper class
 class PolicyAgent:
 
-    cache_checkpointer = None
-
     def __init__(self):
         
         credential_manager = get_credential_manager()
         token_provider = credential_manager.get_openai_token_provider()
+        self.deployment_name = settings.azure_openai_model_deployment
         self.llm = AzureChatOpenAI(
             azure_endpoint=settings.azure_openai_endpoint,
             api_version=settings.azure_openai_api_version,
-            deployment_name=settings.azure_openai_model_deployment,
+            deployment_name=self.deployment_name,
             azure_ad_token_provider=token_provider,
             temperature=0.3
         )
-        #.with_structured_output(PolicyAgentState)
         self.agent = None
         
     async def _get_agent(self):
 
-        if PolicyAgent.cache_checkpointer is None:
-            logger.info(f"Initializing Redis Checkpointer for PolicyAgent: {settings.redis_url}")
-            async with AsyncRedisSaver.from_conn_string(settings.redis_url, ttl={ "default_ttl":1440, "refresh_on_read": True }) as checkpointer:
-                await checkpointer.asetup()
-                PolicyAgent.cache_checkpointer = checkpointer         
-
         agent = create_agent (
                 model=self.llm,
                 tools=[search_knowledge_base],
-                checkpointer= PolicyAgent.cache_checkpointer,  
                 system_prompt= PolicyTemplates.SYSTEM_PROMPT,
                 state_schema=PolicyAgentState,
             )
@@ -127,13 +118,13 @@ class PolicyAgent:
     async def ainvoke(self, input: dict) -> PolicyResponse:
         
         user_query: str = input.get("user_query", "")
-        session_Id: Optional[str] = input.get("session_Id", None)
+
         
         if user_query is None or user_query.strip() == "":
             raise ValueError("user_query cannot be empty.")
 
-        if session_Id is  None:
-            session_Id = uuid.uuid4().hex[:12]
+        #policy agent doesn't need session id from outside, generate a new one
+        #this is to ensure each invocation is stateless from outside and save tokens
 
         if self.agent is None:
             self.agent = await self._get_agent()
@@ -142,7 +133,7 @@ class PolicyAgent:
                 { 
                 "messages": [ HumanMessage(content=user_query) ],
                 },
-                {"configurable": {"thread_id": session_Id}}
+                
             )
 
         response = "__No AI Message__"
@@ -170,7 +161,7 @@ class PolicyAgent:
             message=response,
             sources=doc_ids,
             needs_escalation=False,
-            agent_name="policy",
+            agent_name=f"policy_{self.deployment_name}",
             metadata= Metadata(
                 input_token=sum_input_tokens,
                 output_token=sum_output_tokens,
@@ -250,7 +241,6 @@ def invoke_policy_agent_test(user_query: str):
                 # for testing purposes use in-memory checkpointer. trim_message_history for in-memory only
                 checkpointer=InMemorySaver(), 
                 middleware=[trim_message_history],
-                #checkpointer= PolicyAgent.cache_checkpointer
                 system_prompt= PolicyTemplates.SYSTEM_PROMPT,
                 state_schema=PolicyAgentState,
             )

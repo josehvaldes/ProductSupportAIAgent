@@ -5,9 +5,9 @@ from tqdm import tqdm
 from pathlib import Path
 from dotenv import load_dotenv
 
-sys.path.append('../shopassist-api')
+sys.path.append('../../shopassist-api')
 # Load .env file from the correct location
-script_dir = Path(__file__).parent
+script_dir = Path(__file__).parent.parent
 env_path = script_dir.parent / 'shopassist-api' / '.env'
 load_dotenv(dotenv_path=env_path)
 
